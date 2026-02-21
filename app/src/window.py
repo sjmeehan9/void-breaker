@@ -3,6 +3,8 @@
 from typing import Final
 
 import arcade
+from asterax.app.src.input.input_manager import InputManager
+from asterax.app.src.persistence.persistence_manager import PersistenceManager
 from asterax.app.src.states.main_menu import MainMenuState
 from asterax.app.src.states.state_machine import StateMachine
 
@@ -22,6 +24,11 @@ class VoidBreakerWindow(arcade.Window):
         """Initialize the game window and fixed-step timing state."""
         super().__init__(width=width, height=height, title=title, resizable=False)
         self.accumulator: float = 0.0
+
+        self.persistence = PersistenceManager()
+        settings = self.persistence.load_settings()
+        self.input_manager = InputManager(settings)
+
         self.state_machine = StateMachine()
         self.state_machine.switch_state(MainMenuState(self.state_machine))
         self.set_update_rate(PHYSICS_DT)
@@ -46,8 +53,10 @@ class VoidBreakerWindow(arcade.Window):
 
     def on_key_press(self, key: int, modifiers: int) -> None:
         """Handle key press events."""
+        self.input_manager.on_key_press(key, modifiers)
         self.state_machine.on_key_press(key, modifiers)
 
     def on_key_release(self, key: int, modifiers: int) -> None:
         """Handle key release events."""
+        self.input_manager.on_key_release(key, modifiers)
         self.state_machine.on_key_release(key, modifiers)
