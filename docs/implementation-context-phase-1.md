@@ -13,3 +13,12 @@
 - **Design decisions**: Kept `main.py` minimal (window construction + `arcade.run()` only) and isolated timing logic in `window.py`. Added a lightweight AST-based `scripts/evals.py` check for public docstrings plus TODO/FIXME detection to satisfy phase quality gates early.
 - **Verification**: Programmatic checks passed for formatting, focused tests (`tests/test_main.py`, `tests/test_window.py`), and evals. Manual visual validation was performed via virtual display screenshot capture, confirming the required black frame render.
 - **Deviations**: None from the component spec.
+
+## Component 1.3: State Machine
+- **Status**: Completed
+- **What was built**: Implemented the Phase 1 state-machine shell with a protocol contract, stack-based transition manager (`switch`, `push`, `pop`), and all nine stub states required by the phase plan (Main Menu, Game Init, Combat, Shop, Game Over, Pause overlay, How To Play, High Scores, Settings). Wired the window loop to delegate update/draw/input through the state machine and start in Main Menu.
+- **Key files created**: `app/src/states/base_state.py`, `app/src/states/state_machine.py`, `app/src/states/main_menu.py`, `app/src/states/game_init.py`, `app/src/states/combat.py`, `app/src/states/shop.py`, `app/src/states/game_over.py`, `app/src/states/pause.py`, `app/src/states/how_to_play.py`, `app/src/states/high_scores.py`, `app/src/states/settings_screen.py`, `tests/test_state_machine.py`.
+- **Key files modified**: `app/src/states/__init__.py`, `app/src/window.py`, `tests/test_window.py`.
+- **Design decisions**: Kept transition imports local inside handlers to avoid circular import issues between concrete states. Implemented pause as a pushed overlay that dims the full window while preserving underlying draw order via stack draw bottom-to-top. Kept GameInit as an immediate handoff to Combat to match the placeholder flow expected for Phase 1.
+- **Verification**: Added focused unit coverage for transition ordering, stack behavior, delegation rules, and empty-stack no-op behavior. Added window-level tests to verify state machine bootstrap and delegation hooks.
+- **Deviations**: None from the component spec.

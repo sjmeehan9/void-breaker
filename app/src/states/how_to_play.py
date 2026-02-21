@@ -1,0 +1,32 @@
+"""How-to-play stub state."""
+
+import arcade
+from asterax.app.src.states.base_state import BaseState
+
+
+class HowToPlayState(BaseState):
+    """Placeholder how-to-play instructions screen."""
+
+    def on_draw(self) -> None:
+        """Render controls/instructions placeholder text."""
+        window = arcade.get_window()
+        arcade.draw_text(
+            "How To Play (stub)\nArrow keys/WASD to move, Space to fire\nESC/Backspace: Main Menu",
+            window.width / 2,
+            window.height / 2,
+            arcade.color.WHITE,
+            24,
+            anchor_x="center",
+            multiline=True,
+            width=800,
+            align="center",
+        )
+
+    def on_key_press(self, key: int, modifiers: int) -> None:
+        """Return to main menu."""
+        del modifiers
+
+        from asterax.app.src.states.main_menu import MainMenuState
+
+        if key in (arcade.key.ESCAPE, arcade.key.BACKSPACE):
+            self.state_machine.switch_state(MainMenuState(self.state_machine))
