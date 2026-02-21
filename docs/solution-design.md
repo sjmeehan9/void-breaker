@@ -835,7 +835,7 @@ For v1.0, distribution is via a **DMG disk image** containing `VoidBreaker.app` 
 
 ```
 asterax-tribute/
-  asterax/
+  void-breaker/
     app/
       src/
         __init__.py
@@ -1005,7 +1005,7 @@ Per copilot.instructions.md, the project targets **30% code coverage minimum** u
 - Tests use `pytest` with fixtures for common setup (game state, entity manager, physics engine).
 - Rendering is not tested directly; tests operate on game logic objects without an Arcade window.
 - A `conftest.py` provides shared fixtures and mock objects.
-- Tests are located in `asterax/tests/` and run with `pytest -q --cov=asterax/app/src --cov-report=term-missing`.
+- Tests are located in `void-breaker/tests/` and run with `pytest -q --cov=void-breaker/app/src --cov-report=term-missing`.
 
 ---
 

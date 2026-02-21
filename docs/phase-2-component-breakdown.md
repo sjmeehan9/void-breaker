@@ -14,11 +14,11 @@ Phase 2 delivers the minimum playable game: a ship with inertial physics, astero
 **Dependencies**: Phase 1 complete (state machine, persistence, input, config, window).
 
 **Cross-Phase Serialisation Constraints**:
-- `asterax/app/src/config/game_config.py` -- created by Phase 1 with base config dataclass. Phase 2 **extends** this file by adding physics constants and difficulty parameters. This is a serialisation constraint: Phase 1 must create the file before Phase 2 modifies it.
-- `asterax/app/src/managers/entity_manager.py` -- created by Phase 2. Phase 3 will extend it with enemy and buff pickup SpriteLists.
-- `asterax/app/src/physics/collisions.py` -- created by Phase 2. Phase 3 will extend it with enemy collision pairs.
-- `asterax/app/src/managers/spawn_manager.py` -- created by Phase 2. Phase 3 will extend it for enemy spawning.
-- `asterax/app/src/config/difficulty_tables.py` -- created by Phase 1 with stub. Phase 2 populates it with asteroid-only difficulty parameters. Phase 3 extends with enemy parameters.
+- `void-breaker/app/src/config/game_config.py` -- created by Phase 1 with base config dataclass. Phase 2 **extends** this file by adding physics constants and difficulty parameters. This is a serialisation constraint: Phase 1 must create the file before Phase 2 modifies it.
+- `void-breaker/app/src/managers/entity_manager.py` -- created by Phase 2. Phase 3 will extend it with enemy and buff pickup SpriteLists.
+- `void-breaker/app/src/physics/collisions.py` -- created by Phase 2. Phase 3 will extend it with enemy collision pairs.
+- `void-breaker/app/src/managers/spawn_manager.py` -- created by Phase 2. Phase 3 will extend it for enemy spawning.
+- `void-breaker/app/src/config/difficulty_tables.py` -- created by Phase 1 with stub. Phase 2 populates it with asteroid-only difficulty parameters. Phase 3 extends with enemy parameters.
 
 ---
 
@@ -31,7 +31,7 @@ Phase 2 delivers the minimum playable game: a ship with inertial physics, astero
 **Owner**: Human
 
 **Dependencies**:
-- Phase 1 complete: directory structure under `asterax/assets/sprites/` and `asterax/assets/sounds/` must exist
+- Phase 1 complete: directory structure under `void-breaker/assets/sprites/` and `void-breaker/assets/sounds/` must exist
 
 **Features**:
 - Create placeholder ship sprite -- Human
@@ -46,32 +46,32 @@ Phase 2 delivers the minimum playable game: a ship with inertial physics, astero
 Create all placeholder visual and audio assets needed for Phase 2 gameplay. These are geometric shape sprites (triangles, circles, diamonds) and silent or simple-tone .wav stubs. The purpose is to unblock all AI Agent components (2.2-2.8) from depending on real art or audio. Final assets replace these in Phase 5.
 
 **Acceptance Criteria**:
-- [ ] Ship sprite exists at `asterax/assets/sprites/ship.png` (triangle or arrow shape, ~32x32px, white or bright colour on transparent background)
-- [ ] Asteroid sprites exist at `asterax/assets/sprites/asteroid_large.png`, `asteroid_medium.png`, `asteroid_small.png` (rough circles, proportional sizes: ~64px, ~40px, ~20px diameter)
-- [ ] Projectile sprite exists at `asterax/assets/sprites/projectile_player.png` (small dot or short line, ~8x8px)
-- [ ] Currency pickup sprite exists at `asterax/assets/sprites/currency_pickup.png` (diamond or hexagon, ~16x16px, gold/yellow colour)
-- [ ] Explosion sprite(s) exist at `asterax/assets/sprites/explosion_particle.png` (small bright dot, ~4x4px to ~8x8px)
-- [ ] Sound stubs exist: `asterax/assets/sounds/fire.wav`, `explode_small.wav`, `explode_medium.wav`, `explode_large.wav`, `hit.wav`, `pickup_currency.wav`, `level_clear.wav`, `game_over.wav` (16-bit PCM mono WAV, can be silent or simple tones)
+- [ ] Ship sprite exists at `void-breaker/assets/sprites/ship.png` (triangle or arrow shape, ~32x32px, white or bright colour on transparent background)
+- [ ] Asteroid sprites exist at `void-breaker/assets/sprites/asteroid_large.png`, `asteroid_medium.png`, `asteroid_small.png` (rough circles, proportional sizes: ~64px, ~40px, ~20px diameter)
+- [ ] Projectile sprite exists at `void-breaker/assets/sprites/projectile_player.png` (small dot or short line, ~8x8px)
+- [ ] Currency pickup sprite exists at `void-breaker/assets/sprites/currency_pickup.png` (diamond or hexagon, ~16x16px, gold/yellow colour)
+- [ ] Explosion sprite(s) exist at `void-breaker/assets/sprites/explosion_particle.png` (small bright dot, ~4x4px to ~8x8px)
+- [ ] Sound stubs exist: `void-breaker/assets/sounds/fire.wav`, `explode_small.wav`, `explode_medium.wav`, `explode_large.wav`, `hit.wav`, `pickup_currency.wav`, `level_clear.wav`, `game_over.wav` (16-bit PCM mono WAV, can be silent or simple tones)
 - [ ] All sprites are PNG with transparency (RGBA)
 - [ ] All assets are original (no copied art from any existing game)
 
 **Technical Details**:
 - **Files to Create**:
-  - `asterax/assets/sprites/ship.png`
-  - `asterax/assets/sprites/asteroid_large.png`
-  - `asterax/assets/sprites/asteroid_medium.png`
-  - `asterax/assets/sprites/asteroid_small.png`
-  - `asterax/assets/sprites/projectile_player.png`
-  - `asterax/assets/sprites/currency_pickup.png`
-  - `asterax/assets/sprites/explosion_particle.png`
-  - `asterax/assets/sounds/fire.wav`
-  - `asterax/assets/sounds/explode_small.wav`
-  - `asterax/assets/sounds/explode_medium.wav`
-  - `asterax/assets/sounds/explode_large.wav`
-  - `asterax/assets/sounds/hit.wav`
-  - `asterax/assets/sounds/pickup_currency.wav`
-  - `asterax/assets/sounds/level_clear.wav`
-  - `asterax/assets/sounds/game_over.wav`
+  - `void-breaker/assets/sprites/ship.png`
+  - `void-breaker/assets/sprites/asteroid_large.png`
+  - `void-breaker/assets/sprites/asteroid_medium.png`
+  - `void-breaker/assets/sprites/asteroid_small.png`
+  - `void-breaker/assets/sprites/projectile_player.png`
+  - `void-breaker/assets/sprites/currency_pickup.png`
+  - `void-breaker/assets/sprites/explosion_particle.png`
+  - `void-breaker/assets/sounds/fire.wav`
+  - `void-breaker/assets/sounds/explode_small.wav`
+  - `void-breaker/assets/sounds/explode_medium.wav`
+  - `void-breaker/assets/sounds/explode_large.wav`
+  - `void-breaker/assets/sounds/hit.wav`
+  - `void-breaker/assets/sounds/pickup_currency.wav`
+  - `void-breaker/assets/sounds/level_clear.wav`
+  - `void-breaker/assets/sounds/game_over.wav`
 - **Human/AI Agent**: All Human. These are binary asset files that cannot be generated by code agents.
 - **Dependencies**: None (standard image/audio creation tools)
 
@@ -106,9 +106,9 @@ Create all placeholder visual and audio assets needed for Phase 2 gameplay. Thes
 **Owner**: AI Agent
 
 **Dependencies**:
-- 2.1: Ship sprite at `asterax/assets/sprites/ship.png`
-- Phase 1: `InputManager` in `asterax/app/src/input/input_manager.py` for key-held state
-- Phase 1: `game_config.py` in `asterax/app/src/config/game_config.py` for physics constants
+- 2.1: Ship sprite at `void-breaker/assets/sprites/ship.png`
+- Phase 1: `InputManager` in `void-breaker/app/src/input/input_manager.py` for key-held state
+- Phase 1: `game_config.py` in `void-breaker/app/src/config/game_config.py` for physics constants
 - Phase 1: Window and state machine operational
 
 **Features**:
@@ -135,12 +135,12 @@ Implements the `PlayerShip` entity with the full inertial physics model from sol
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/entities/__init__.py` (create, export PlayerShip)
-  - `asterax/app/src/entities/player_ship.py` (create)
-  - `asterax/app/src/physics/__init__.py` (create, export wrap_entity)
-  - `asterax/app/src/physics/engine.py` (create)
-  - `asterax/app/src/physics/wrap.py` (create)
-  - `asterax/app/src/config/game_config.py` (modify -- add PhysicsConfig dataclass with ship physics constants)
+  - `void-breaker/app/src/entities/__init__.py` (create, export PlayerShip)
+  - `void-breaker/app/src/entities/player_ship.py` (create)
+  - `void-breaker/app/src/physics/__init__.py` (create, export wrap_entity)
+  - `void-breaker/app/src/physics/engine.py` (create)
+  - `void-breaker/app/src/physics/wrap.py` (create)
+  - `void-breaker/app/src/config/game_config.py` (modify -- add PhysicsConfig dataclass with ship physics constants)
 - **Key Functions/Classes**:
   - `PlayerShip(arcade.Sprite)` -- main ship entity class
   - `PlayerShip.apply_thrust(dt)` -- applies thrust force in facing direction
@@ -157,13 +157,13 @@ Implements the `PlayerShip` entity with the full inertial physics model from sol
 - **Dependencies**: `arcade>=3.0`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/entities/player_ship.py`**: Implement `PlayerShip` as a subclass of `arcade.Sprite`. Constructor accepts the ship sprite path (from config or constant), initial position (screen centre), and a reference to `PhysicsConfig`. Store velocity as `velocity_x: float` and `velocity_y: float` attributes (not using arcade's built-in change_x/change_y to keep physics explicit and testable). Store `angle` using arcade's built-in angle property. Store `shields: float` and `max_shields: float`. Implement `apply_thrust(dt)` using the formula from solution-design.md: `thrust_x = cos(radians(angle + 90)) * effective_thrust`, `velocity_x += thrust_x * dt`. `apply_drag(dt)`: `velocity_x *= (1.0 - NATURAL_DRAG * dt)`. `apply_brake(dt)`: `velocity_x *= (1.0 - BRAKE_DRAG * dt)`. `cap_speed()`: clamp `hypot(velocity_x, velocity_y)` to `MAX_SHIP_SPEED`. `update_position(dt)`: `center_x += velocity_x * dt`, `center_y += velocity_y * dt`. `take_damage(amount)`: reduce shields, clamp to 0, return `shields <= 0`. Also store a `fire_cooldown_remaining: float` timer, decremented each update, used by the projectile system in component 2.4.
+- **File: `void-breaker/app/src/entities/player_ship.py`**: Implement `PlayerShip` as a subclass of `arcade.Sprite`. Constructor accepts the ship sprite path (from config or constant), initial position (screen centre), and a reference to `PhysicsConfig`. Store velocity as `velocity_x: float` and `velocity_y: float` attributes (not using arcade's built-in change_x/change_y to keep physics explicit and testable). Store `angle` using arcade's built-in angle property. Store `shields: float` and `max_shields: float`. Implement `apply_thrust(dt)` using the formula from solution-design.md: `thrust_x = cos(radians(angle + 90)) * effective_thrust`, `velocity_x += thrust_x * dt`. `apply_drag(dt)`: `velocity_x *= (1.0 - NATURAL_DRAG * dt)`. `apply_brake(dt)`: `velocity_x *= (1.0 - BRAKE_DRAG * dt)`. `cap_speed()`: clamp `hypot(velocity_x, velocity_y)` to `MAX_SHIP_SPEED`. `update_position(dt)`: `center_x += velocity_x * dt`, `center_y += velocity_y * dt`. `take_damage(amount)`: reduce shields, clamp to 0, return `shields <= 0`. Also store a `fire_cooldown_remaining: float` timer, decremented each update, used by the projectile system in component 2.4.
 
-- **File: `asterax/app/src/physics/wrap.py`**: Implement `wrap_entity(entity: arcade.Sprite, width: float, height: float)` exactly as specified in solution-design.md. Check each edge: if `entity.right < 0`, set `entity.left = width`; if `entity.left > width`, set `entity.right = 0`; same for top/bottom. This function is used by all entities (ship, asteroids, projectiles, pickups) and is the single source of truth for wrap-around logic.
+- **File: `void-breaker/app/src/physics/wrap.py`**: Implement `wrap_entity(entity: arcade.Sprite, width: float, height: float)` exactly as specified in solution-design.md. Check each edge: if `entity.right < 0`, set `entity.left = width`; if `entity.left > width`, set `entity.right = 0`; same for top/bottom. This function is used by all entities (ship, asteroids, projectiles, pickups) and is the single source of truth for wrap-around logic.
 
-- **File: `asterax/app/src/physics/engine.py`**: Implement `PhysicsEngine` class. Constructor takes a reference to the `EntityManager` (created in 2.6) and `PhysicsConfig`. Method `update(dt, keys_held, input_manager)`: reads key-held state from InputManager, calls ship's thrust/rotation/brake methods accordingly, applies drag, caps speed, updates position, then calls `wrap_entity` for the ship. This class will be extended in later components to also update asteroids, projectiles, and pickups. For now, it only handles the ship.
+- **File: `void-breaker/app/src/physics/engine.py`**: Implement `PhysicsEngine` class. Constructor takes a reference to the `EntityManager` (created in 2.6) and `PhysicsConfig`. Method `update(dt, keys_held, input_manager)`: reads key-held state from InputManager, calls ship's thrust/rotation/brake methods accordingly, applies drag, caps speed, updates position, then calls `wrap_entity` for the ship. This class will be extended in later components to also update asteroids, projectiles, and pickups. For now, it only handles the ship.
 
-- **File: `asterax/app/src/config/game_config.py`** (modify): Add a `PhysicsConfig` dataclass with fields: `natural_drag: float = 0.3`, `brake_drag: float = 3.0`, `max_ship_speed: float = 600.0`, `base_thrust: float = 400.0`, `base_turn_rate: float = 240.0`, `base_fire_rate: float = 5.0` (shots/sec), `base_projectile_speed: float = 800.0`, `base_projectile_range: float = 600.0`, `base_damage: float = 1.0`, `max_shields: float = 100.0`. Add this to the top-level config or register it in the existing config structure established by Phase 1. **Serialisation constraint**: Phase 1 creates this file; Phase 2 adds to it.
+- **File: `void-breaker/app/src/config/game_config.py`** (modify): Add a `PhysicsConfig` dataclass with fields: `natural_drag: float = 0.3`, `brake_drag: float = 3.0`, `max_ship_speed: float = 600.0`, `base_thrust: float = 400.0`, `base_turn_rate: float = 240.0`, `base_fire_rate: float = 5.0` (shots/sec), `base_projectile_speed: float = 800.0`, `base_projectile_range: float = 600.0`, `base_damage: float = 1.0`, `max_shields: float = 100.0`. Add this to the top-level config or register it in the existing config structure established by Phase 1. **Serialisation constraint**: Phase 1 creates this file; Phase 2 adds to it.
 
 **Test Requirements**:
 - [ ] Unit test: applying thrust for N steps increases velocity in facing direction
@@ -199,7 +199,7 @@ Implements the `PlayerShip` entity with the full inertial physics model from sol
 **Owner**: AI Agent
 
 **Dependencies**:
-- 2.1: Asteroid sprites at `asterax/assets/sprites/asteroid_large.png`, `asteroid_medium.png`, `asteroid_small.png`
+- 2.1: Asteroid sprites at `void-breaker/assets/sprites/asteroid_large.png`, `asteroid_medium.png`, `asteroid_small.png`
 - 2.2: `wrap_entity()` in `physics/wrap.py`
 - Phase 1: `game_config.py` for difficulty parameters
 - Phase 1: `difficulty_tables.py` for per-level asteroid configuration
@@ -230,13 +230,13 @@ Implements the asteroid entity system: three sizes of asteroids that drift with 
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/entities/asteroid.py` (create)
-  - `asterax/app/src/entities/__init__.py` (modify -- export Asteroid, AsteroidSize)
-  - `asterax/app/src/managers/__init__.py` (create, export SpawnManager)
-  - `asterax/app/src/managers/spawn_manager.py` (create)
-  - `asterax/app/src/config/game_config.py` (modify -- add AsteroidConfig dataclass)
-  - `asterax/app/src/config/difficulty_tables.py` (modify -- populate asteroid difficulty parameters per level)
-  - `asterax/app/src/physics/engine.py` (modify -- add asteroid position updates and wrapping)
+  - `void-breaker/app/src/entities/asteroid.py` (create)
+  - `void-breaker/app/src/entities/__init__.py` (modify -- export Asteroid, AsteroidSize)
+  - `void-breaker/app/src/managers/__init__.py` (create, export SpawnManager)
+  - `void-breaker/app/src/managers/spawn_manager.py` (create)
+  - `void-breaker/app/src/config/game_config.py` (modify -- add AsteroidConfig dataclass)
+  - `void-breaker/app/src/config/difficulty_tables.py` (modify -- populate asteroid difficulty parameters per level)
+  - `void-breaker/app/src/physics/engine.py` (modify -- add asteroid position updates and wrapping)
 - **Key Functions/Classes**:
   - `AsteroidSize` enum: `LARGE`, `MEDIUM`, `SMALL`
   - `Asteroid(arcade.Sprite)` -- asteroid entity
@@ -250,15 +250,15 @@ Implements the asteroid entity system: three sizes of asteroids that drift with 
 - **Dependencies**: `arcade>=3.0`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/entities/asteroid.py`**: Define `AsteroidSize` as an `enum.Enum` with values `LARGE`, `MEDIUM`, `SMALL`. Each size maps to a configuration tuple: sprite path, scale factor, hit points (1 for all sizes -- single-hit destruction), point value, and currency drop chance. Implement `Asteroid` extending `arcade.Sprite`. Constructor accepts `size: AsteroidSize`, position, velocity vector `(vx, vy)`, and rotation speed. Store `velocity_x`, `velocity_y`, `rotation_speed` (degrees/sec) as attributes. The `update(dt)` method advances position by velocity and rotates the sprite. `split()` returns a list of 2-3 new `Asteroid` instances one size smaller, each with randomised velocity derived from the parent's velocity (spread angle of 30-120 degrees, speed multiplied by 1.2-1.5x). For SMALL asteroids, `split()` returns an empty list. `on_destroyed()` returns a dict with `point_value`, `currency_drop_chance`, and the result of `split()`.
+- **File: `void-breaker/app/src/entities/asteroid.py`**: Define `AsteroidSize` as an `enum.Enum` with values `LARGE`, `MEDIUM`, `SMALL`. Each size maps to a configuration tuple: sprite path, scale factor, hit points (1 for all sizes -- single-hit destruction), point value, and currency drop chance. Implement `Asteroid` extending `arcade.Sprite`. Constructor accepts `size: AsteroidSize`, position, velocity vector `(vx, vy)`, and rotation speed. Store `velocity_x`, `velocity_y`, `rotation_speed` (degrees/sec) as attributes. The `update(dt)` method advances position by velocity and rotates the sprite. `split()` returns a list of 2-3 new `Asteroid` instances one size smaller, each with randomised velocity derived from the parent's velocity (spread angle of 30-120 degrees, speed multiplied by 1.2-1.5x). For SMALL asteroids, `split()` returns an empty list. `on_destroyed()` returns a dict with `point_value`, `currency_drop_chance`, and the result of `split()`.
 
-- **File: `asterax/app/src/managers/spawn_manager.py`**: Implement `SpawnManager` with `spawn_level_asteroids(level, player_position, screen_width, screen_height)`. This method reads `DifficultyParams` for the given level from `difficulty_tables.py`, creates the specified number of large asteroids at random positions that are at least 150px away from `player_position`, with random velocity vectors within the level's speed range, and random rotation speeds between 30-120 deg/s. Returns a list of `Asteroid` instances. Also provide a `spawn_child_asteroids(parent: Asteroid) -> list[Asteroid]` method that delegates to `parent.split()` for use during collision resolution. **Serialisation constraint**: Phase 3 will extend this class to add `spawn_enemy()` and timed enemy wave logic. Design the class to be extensible -- use clear method boundaries and avoid monolithic methods.
+- **File: `void-breaker/app/src/managers/spawn_manager.py`**: Implement `SpawnManager` with `spawn_level_asteroids(level, player_position, screen_width, screen_height)`. This method reads `DifficultyParams` for the given level from `difficulty_tables.py`, creates the specified number of large asteroids at random positions that are at least 150px away from `player_position`, with random velocity vectors within the level's speed range, and random rotation speeds between 30-120 deg/s. Returns a list of `Asteroid` instances. Also provide a `spawn_child_asteroids(parent: Asteroid) -> list[Asteroid]` method that delegates to `parent.split()` for use during collision resolution. **Serialisation constraint**: Phase 3 will extend this class to add `spawn_enemy()` and timed enemy wave logic. Design the class to be extensible -- use clear method boundaries and avoid monolithic methods.
 
-- **File: `asterax/app/src/config/game_config.py`** (modify): Add `AsteroidConfig` dataclass with per-size configuration: `large_sprite`, `medium_sprite`, `small_sprite` paths; `large_scale`, `medium_scale`, `small_scale` factors; `point_values: dict[AsteroidSize, int]` defaulting to `{LARGE: 20, MEDIUM: 50, SMALL: 100}`; `currency_drop_chances: dict[AsteroidSize, float]` defaulting to `{LARGE: 0.2, MEDIUM: 0.35, SMALL: 0.5}`; `child_count_range: tuple[int, int] = (2, 3)` (inclusive); `child_speed_multiplier_range: tuple[float, float] = (1.2, 1.5)`. **Serialisation constraint**: adding to file created by Phase 1.
+- **File: `void-breaker/app/src/config/game_config.py`** (modify): Add `AsteroidConfig` dataclass with per-size configuration: `large_sprite`, `medium_sprite`, `small_sprite` paths; `large_scale`, `medium_scale`, `small_scale` factors; `point_values: dict[AsteroidSize, int]` defaulting to `{LARGE: 20, MEDIUM: 50, SMALL: 100}`; `currency_drop_chances: dict[AsteroidSize, float]` defaulting to `{LARGE: 0.2, MEDIUM: 0.35, SMALL: 0.5}`; `child_count_range: tuple[int, int] = (2, 3)` (inclusive); `child_speed_multiplier_range: tuple[float, float] = (1.2, 1.5)`. **Serialisation constraint**: adding to file created by Phase 1.
 
-- **File: `asterax/app/src/config/difficulty_tables.py`** (modify): Populate with a function `get_difficulty_params(level: int) -> DifficultyParams` that returns level-specific parameters. For Phase 2 (asteroid-only levels): level 1 starts with 4 large asteroids, speed range 50-100 px/s. Each subsequent level adds 1-2 more asteroids and increases speed range by ~10%. Cap at reasonable maximums (e.g., 20 large asteroids, speed 50-350 px/s by level 30). Enemy parameters are present in `DifficultyParams` but set to `enemy_spawn_enabled=False` for all levels (Phase 3 enables enemies). **Serialisation constraint**: Phase 1 creates this file with the `DifficultyParams` dataclass; Phase 2 populates the level data; Phase 3 adds enemy parameters.
+- **File: `void-breaker/app/src/config/difficulty_tables.py`** (modify): Populate with a function `get_difficulty_params(level: int) -> DifficultyParams` that returns level-specific parameters. For Phase 2 (asteroid-only levels): level 1 starts with 4 large asteroids, speed range 50-100 px/s. Each subsequent level adds 1-2 more asteroids and increases speed range by ~10%. Cap at reasonable maximums (e.g., 20 large asteroids, speed 50-350 px/s by level 30). Enemy parameters are present in `DifficultyParams` but set to `enemy_spawn_enabled=False` for all levels (Phase 3 enables enemies). **Serialisation constraint**: Phase 1 creates this file with the `DifficultyParams` dataclass; Phase 2 populates the level data; Phase 3 adds enemy parameters.
 
-- **File: `asterax/app/src/physics/engine.py`** (modify): Extend `PhysicsEngine.update()` to iterate over all asteroids in the entity manager's asteroid SpriteList, calling each asteroid's `update(dt)` method and then `wrap_entity()` on each.
+- **File: `void-breaker/app/src/physics/engine.py`** (modify): Extend `PhysicsEngine.update()` to iterate over all asteroids in the entity manager's asteroid SpriteList, calling each asteroid's `update(dt)` method and then `wrap_entity()` on each.
 
 **Test Requirements**:
 - [ ] Unit test: asteroid moves by velocity * dt each step
@@ -295,7 +295,7 @@ Implements the asteroid entity system: three sizes of asteroids that drift with 
 **Owner**: AI Agent
 
 **Dependencies**:
-- 2.1: Projectile sprite at `asterax/assets/sprites/projectile_player.png`
+- 2.1: Projectile sprite at `void-breaker/assets/sprites/projectile_player.png`
 - 2.2: `PlayerShip` with `fire_cooldown_remaining`, `PhysicsConfig` for fire rate/projectile speed/range
 - 2.3: `Asteroid` entity and `AsteroidSize` for collision response
 - 2.2: `wrap_entity()` in `physics/wrap.py`
@@ -325,15 +325,15 @@ Implements the projectile entity and the collision detection system. Players fir
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/entities/projectile.py` (create)
-  - `asterax/app/src/entities/__init__.py` (modify -- export Projectile)
-  - `asterax/app/src/physics/collisions.py` (create)
-  - `asterax/app/src/physics/__init__.py` (modify -- export CollisionSystem)
-  - `asterax/app/src/managers/score_manager.py` (create)
-  - `asterax/app/src/managers/__init__.py` (modify -- export ScoreManager)
-  - `asterax/app/src/entities/player_ship.py` (modify -- add fire() method)
-  - `asterax/app/src/physics/engine.py` (modify -- add projectile updates and wrapping)
-  - `asterax/app/src/config/game_config.py` (modify -- add CollisionConfig if needed)
+  - `void-breaker/app/src/entities/projectile.py` (create)
+  - `void-breaker/app/src/entities/__init__.py` (modify -- export Projectile)
+  - `void-breaker/app/src/physics/collisions.py` (create)
+  - `void-breaker/app/src/physics/__init__.py` (modify -- export CollisionSystem)
+  - `void-breaker/app/src/managers/score_manager.py` (create)
+  - `void-breaker/app/src/managers/__init__.py` (modify -- export ScoreManager)
+  - `void-breaker/app/src/entities/player_ship.py` (modify -- add fire() method)
+  - `void-breaker/app/src/physics/engine.py` (modify -- add projectile updates and wrapping)
+  - `void-breaker/app/src/config/game_config.py` (modify -- add CollisionConfig if needed)
 - **Key Functions/Classes**:
   - `Projectile(arcade.Sprite)` -- projectile entity
   - `Projectile.update(dt)` -- advance position, decrement lifetime, kill if expired
@@ -348,9 +348,9 @@ Implements the projectile entity and the collision detection system. Players fir
 - **Dependencies**: `arcade>=3.0`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/entities/projectile.py`**: Implement `Projectile` extending `arcade.Sprite`. Constructor accepts position (ship's center), angle (ship's facing angle), speed (`base_projectile_speed`), max_range, and damage. Calculate `velocity_x = cos(radians(angle + 90)) * speed` and `velocity_y = sin(radians(angle + 90)) * speed` (same angle offset as ship thrust). Store `distance_traveled: float = 0.0`. `update(dt)`: advance `center_x += velocity_x * dt`, `center_y += velocity_y * dt`, increment `distance_traveled += speed * dt`. If `distance_traveled >= max_range`, call `self.kill()` to remove from SpriteList. The projectile should be spawned slightly ahead of the ship's centre (offset by half the ship's height in the facing direction) to avoid immediate self-collision.
+- **File: `void-breaker/app/src/entities/projectile.py`**: Implement `Projectile` extending `arcade.Sprite`. Constructor accepts position (ship's center), angle (ship's facing angle), speed (`base_projectile_speed`), max_range, and damage. Calculate `velocity_x = cos(radians(angle + 90)) * speed` and `velocity_y = sin(radians(angle + 90)) * speed` (same angle offset as ship thrust). Store `distance_traveled: float = 0.0`. `update(dt)`: advance `center_x += velocity_x * dt`, `center_y += velocity_y * dt`, increment `distance_traveled += speed * dt`. If `distance_traveled >= max_range`, call `self.kill()` to remove from SpriteList. The projectile should be spawned slightly ahead of the ship's centre (offset by half the ship's height in the facing direction) to avoid immediate self-collision.
 
-- **File: `asterax/app/src/physics/collisions.py`**: Implement `CollisionSystem`. This is the core collision detection engine. Method `check_all(entity_manager, game_state, spawn_manager, score_manager, screen_width, screen_height)` performs the following checks in order:
+- **File: `void-breaker/app/src/physics/collisions.py`**: Implement `CollisionSystem`. This is the core collision detection engine. Method `check_all(entity_manager, game_state, spawn_manager, score_manager, screen_width, screen_height)` performs the following checks in order:
 
   1. **Ghost sprite creation**: For each entity in player_projectiles and for the player ship, check if the entity is within one bounding-box width of any screen edge. If so, create a temporary `arcade.Sprite` clone at the wrapped position (opposite edge). Add these ghosts to temporary lists that mirror the originals (e.g., ghost_projectiles SpriteList). For asteroids, the spatial-hashed SpriteList should already include any asteroids near edges, but ghost sprites for asteroids near edges are also needed for projectile-vs-asteroid checks at the seam.
 
@@ -362,11 +362,11 @@ Implements the projectile entity and the collision detection system. Players fir
 
   **Serialisation constraint**: Phase 3 will add enemy collision pairs to this class. Design `check_all()` so new collision checks can be appended without restructuring existing code. Consider separate private methods per collision pair (e.g., `_check_projectiles_vs_asteroids()`, `_check_ship_vs_asteroids()`) that Phase 3 can augment with `_check_projectiles_vs_enemies()`, `_check_ship_vs_enemy_projectiles()`, etc.
 
-- **File: `asterax/app/src/entities/player_ship.py`** (modify): Add `fire(projectile_list: arcade.SpriteList) -> Projectile | None` method. Checks `fire_cooldown_remaining <= 0`. If ready: creates a `Projectile` at the ship's nose position (offset from center in the facing direction), adds it to `projectile_list`, resets `fire_cooldown_remaining = 1.0 / effective_fire_rate`, and returns the projectile. Otherwise returns None. Also add `update_cooldown(dt)` to decrement `fire_cooldown_remaining` each step.
+- **File: `void-breaker/app/src/entities/player_ship.py`** (modify): Add `fire(projectile_list: arcade.SpriteList) -> Projectile | None` method. Checks `fire_cooldown_remaining <= 0`. If ready: creates a `Projectile` at the ship's nose position (offset from center in the facing direction), adds it to `projectile_list`, resets `fire_cooldown_remaining = 1.0 / effective_fire_rate`, and returns the projectile. Otherwise returns None. Also add `update_cooldown(dt)` to decrement `fire_cooldown_remaining` each step.
 
-- **File: `asterax/app/src/managers/score_manager.py`**: Implement `ScoreManager` with `score: int` property, `award_asteroid_points(asteroid_size: AsteroidSize)` that looks up point value from `AsteroidConfig` and adds it, and `reset()` for new runs. Keep this simple -- Phase 3 will add enemy points. **Serialisation constraint**: Phase 3 extends with enemy scoring.
+- **File: `void-breaker/app/src/managers/score_manager.py`**: Implement `ScoreManager` with `score: int` property, `award_asteroid_points(asteroid_size: AsteroidSize)` that looks up point value from `AsteroidConfig` and adds it, and `reset()` for new runs. Keep this simple -- Phase 3 will add enemy points. **Serialisation constraint**: Phase 3 extends with enemy scoring.
 
-- **File: `asterax/app/src/physics/engine.py`** (modify): Extend `update()` to iterate over projectiles in `entity_manager.player_projectiles`, call each projectile's `update(dt)`, and call `wrap_entity()` on each. Also call `player_ship.update_cooldown(dt)`.
+- **File: `void-breaker/app/src/physics/engine.py`** (modify): Extend `update()` to iterate over projectiles in `entity_manager.player_projectiles`, call each projectile's `update(dt)`, and call `wrap_entity()` on each. Also call `player_ship.update_cooldown(dt)`.
 
 **Test Requirements**:
 - [ ] Unit test: projectile moves in ship's facing direction at correct speed
@@ -408,7 +408,7 @@ Implements the projectile entity and the collision detection system. Players fir
 **Owner**: AI Agent
 
 **Dependencies**:
-- 2.1: Currency pickup sprite at `asterax/assets/sprites/currency_pickup.png`
+- 2.1: Currency pickup sprite at `void-breaker/assets/sprites/currency_pickup.png`
 - 2.4: `CollisionSystem` for ship-pickup collision detection
 - 2.3: Asteroid destruction flow (currency drop roll happens on asteroid death)
 - Phase 1: `game_config.py` for currency config
@@ -434,13 +434,13 @@ Implements currency pickup entities that spawn when asteroids are destroyed, bas
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/entities/pickups.py` (create)
-  - `asterax/app/src/entities/__init__.py` (modify -- export CurrencyPickup)
-  - `asterax/app/src/managers/currency_manager.py` (create)
-  - `asterax/app/src/managers/__init__.py` (modify -- export CurrencyManager)
-  - `asterax/app/src/physics/collisions.py` (modify -- add ship-vs-pickup collision check)
-  - `asterax/app/src/physics/engine.py` (modify -- add pickup updates and wrapping)
-  - `asterax/app/src/config/game_config.py` (modify -- add CurrencyConfig dataclass)
+  - `void-breaker/app/src/entities/pickups.py` (create)
+  - `void-breaker/app/src/entities/__init__.py` (modify -- export CurrencyPickup)
+  - `void-breaker/app/src/managers/currency_manager.py` (create)
+  - `void-breaker/app/src/managers/__init__.py` (modify -- export CurrencyManager)
+  - `void-breaker/app/src/physics/collisions.py` (modify -- add ship-vs-pickup collision check)
+  - `void-breaker/app/src/physics/engine.py` (modify -- add pickup updates and wrapping)
+  - `void-breaker/app/src/config/game_config.py` (modify -- add CurrencyConfig dataclass)
 - **Key Functions/Classes**:
   - `CurrencyPickup(arcade.Sprite)` -- pickup entity
   - `CurrencyPickup.update(dt)` -- advance position, decrement lifetime, kill if expired
@@ -454,15 +454,15 @@ Implements currency pickup entities that spawn when asteroids are destroyed, bas
 - **Dependencies**: `arcade>=3.0`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/entities/pickups.py`**: Implement `CurrencyPickup` extending `arcade.Sprite`. Constructor accepts position (asteroid's death position), a small random drift velocity (magnitude 10-30 px/s in a random direction), value (default 10), and lifetime (default 10.0 seconds). Store `velocity_x`, `velocity_y`, `value: int`, `lifetime_remaining: float`. `update(dt)`: advance position by velocity, decrement `lifetime_remaining -= dt`, call `self.kill()` if expired. The sprite should use the currency_pickup.png asset with a slight scale factor to ensure visibility. **Serialisation constraint**: Phase 3 will add `BuffPickup` to this same file. Structure the file to accommodate a second entity class.
+- **File: `void-breaker/app/src/entities/pickups.py`**: Implement `CurrencyPickup` extending `arcade.Sprite`. Constructor accepts position (asteroid's death position), a small random drift velocity (magnitude 10-30 px/s in a random direction), value (default 10), and lifetime (default 10.0 seconds). Store `velocity_x`, `velocity_y`, `value: int`, `lifetime_remaining: float`. `update(dt)`: advance position by velocity, decrement `lifetime_remaining -= dt`, call `self.kill()` if expired. The sprite should use the currency_pickup.png asset with a slight scale factor to ensure visibility. **Serialisation constraint**: Phase 3 will add `BuffPickup` to this same file. Structure the file to accommodate a second entity class.
 
-- **File: `asterax/app/src/managers/currency_manager.py`**: Implement `CurrencyManager` with `_balance: int` (private), `earn(amount: int)` that adds to balance, `spend(amount: int) -> bool` that deducts if affordable and returns success, `get_balance() -> int`, and `reset()`. Also track `total_earned: int` and `total_spent: int` for run summary statistics. This manager is intentionally simple in Phase 2 -- Phase 4 will use it for shop purchases and insurance deductions. **Serialisation constraint**: Phase 4's UpgradeManager and InsuranceManager will call `spend()`.
+- **File: `void-breaker/app/src/managers/currency_manager.py`**: Implement `CurrencyManager` with `_balance: int` (private), `earn(amount: int)` that adds to balance, `spend(amount: int) -> bool` that deducts if affordable and returns success, `get_balance() -> int`, and `reset()`. Also track `total_earned: int` and `total_spent: int` for run summary statistics. This manager is intentionally simple in Phase 2 -- Phase 4 will use it for shop purchases and insurance deductions. **Serialisation constraint**: Phase 4's UpgradeManager and InsuranceManager will call `spend()`.
 
-- **File: `asterax/app/src/physics/collisions.py`** (modify): Add `_check_ship_vs_pickups(entity_manager, currency_manager)` method. Check `arcade.check_for_collision_with_list(player_ship, entity_manager.currency_pickups)`. On hit: call `currency_manager.earn(pickup.value)`, play pickup sound via AudioManager (graceful no-op if sound not loaded), call `pickup.kill()`. Ghost sprites for pickups near edges are optional (pickups are small and the magnet radius feature comes in Phase 4 -- for now, basic AABB collision is sufficient without ghosts for pickups).
+- **File: `void-breaker/app/src/physics/collisions.py`** (modify): Add `_check_ship_vs_pickups(entity_manager, currency_manager)` method. Check `arcade.check_for_collision_with_list(player_ship, entity_manager.currency_pickups)`. On hit: call `currency_manager.earn(pickup.value)`, play pickup sound via AudioManager (graceful no-op if sound not loaded), call `pickup.kill()`. Ghost sprites for pickups near edges are optional (pickups are small and the magnet radius feature comes in Phase 4 -- for now, basic AABB collision is sufficient without ghosts for pickups).
 
-- **File: `asterax/app/src/physics/engine.py`** (modify): Extend `update()` to iterate over currency pickups, call each pickup's `update(dt)`, and call `wrap_entity()` on each.
+- **File: `void-breaker/app/src/physics/engine.py`** (modify): Extend `update()` to iterate over currency pickups, call each pickup's `update(dt)`, and call `wrap_entity()` on each.
 
-- **File: `asterax/app/src/config/game_config.py`** (modify): Add `CurrencyConfig` dataclass with `pickup_value: int = 10`, `pickup_lifetime: float = 10.0`, `pickup_drift_speed_range: tuple[float, float] = (10.0, 30.0)`. Currency drop chances are already in `AsteroidConfig` from component 2.3.
+- **File: `void-breaker/app/src/config/game_config.py`** (modify): Add `CurrencyConfig` dataclass with `pickup_value: int = 10`, `pickup_lifetime: float = 10.0`, `pickup_drift_speed_range: tuple[float, float] = (10.0, 30.0)`. Currency drop chances are already in `AsteroidConfig` from component 2.3.
 
 **Test Requirements**:
 - [ ] Unit test: CurrencyPickup moves by drift velocity each step
@@ -522,10 +522,10 @@ Implements the `EntityManager` that owns all typed `SpriteList` collections for 
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/managers/entity_manager.py` (create)
-  - `asterax/app/src/managers/__init__.py` (modify -- export EntityManager)
-  - `asterax/app/src/rendering/particle_system.py` (create)
-  - `asterax/app/src/rendering/__init__.py` (modify -- Phase 1.2 creates this file; add ParticleSystem export)
+  - `void-breaker/app/src/managers/entity_manager.py` (create)
+  - `void-breaker/app/src/managers/__init__.py` (modify -- export EntityManager)
+  - `void-breaker/app/src/rendering/particle_system.py` (create)
+  - `void-breaker/app/src/rendering/__init__.py` (modify -- Phase 1.2 creates this file; add ParticleSystem export)
 - **Key Functions/Classes**:
   - `EntityManager` -- owns all entity SpriteLists
   - `EntityManager.player: PlayerShip | None`
@@ -544,9 +544,9 @@ Implements the `EntityManager` that owns all typed `SpriteList` collections for 
 - **Dependencies**: `arcade>=3.0`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/managers/entity_manager.py`**: Implement `EntityManager` as the single owner of all entity collections. Store `player: PlayerShip | None`, `asteroids: arcade.SpriteList(use_spatial_hash=True)`, `player_projectiles: arcade.SpriteList()`, `currency_pickups: arcade.SpriteList()`, `particles: arcade.SpriteList()`. Provide typed add/remove methods that delegate to SpriteList.append()/remove(). The `draw()` method draws SpriteLists in z-order: asteroids, currency_pickups, particles, player_projectiles, then player ship (ship on top so it is always visible). `clear_all()` empties all lists (used on level transition or game over). `clear_projectiles()` empties only projectiles (used on level clear). **Serialisation constraint**: Phase 3 will add `enemies: arcade.SpriteList()`, `enemy_projectiles: arcade.SpriteList()`, and `buff_pickups: arcade.SpriteList()` to this class. Structure the class so new SpriteLists can be added with minimal modification (add field, add to draw order, add to clear_all).
+- **File: `void-breaker/app/src/managers/entity_manager.py`**: Implement `EntityManager` as the single owner of all entity collections. Store `player: PlayerShip | None`, `asteroids: arcade.SpriteList(use_spatial_hash=True)`, `player_projectiles: arcade.SpriteList()`, `currency_pickups: arcade.SpriteList()`, `particles: arcade.SpriteList()`. Provide typed add/remove methods that delegate to SpriteList.append()/remove(). The `draw()` method draws SpriteLists in z-order: asteroids, currency_pickups, particles, player_projectiles, then player ship (ship on top so it is always visible). `clear_all()` empties all lists (used on level transition or game over). `clear_projectiles()` empties only projectiles (used on level clear). **Serialisation constraint**: Phase 3 will add `enemies: arcade.SpriteList()`, `enemy_projectiles: arcade.SpriteList()`, and `buff_pickups: arcade.SpriteList()` to this class. Structure the class so new SpriteLists can be added with minimal modification (add field, add to draw order, add to clear_all).
 
-- **File: `asterax/app/src/rendering/particle_system.py`**: Implement `ParticleSystem` with a simple sprite-based particle approach. `spawn_explosion(position, size: AsteroidSize)` creates 5-15 small `arcade.Sprite` instances (using the explosion_particle.png asset) at the given position with random velocities radiating outward. Particle count and speed scale with asteroid size (large explosions: 10-15 particles, faster; small: 5-8, slower). Each particle has a `lifetime: float` attribute (0.3-0.5 seconds). `update(dt)` advances all particle positions and removes expired particles by calling `kill()`. `draw()` draws the internal SpriteList. Particles fade out (reduce alpha) over their lifetime for a nicer visual effect. Keep the implementation simple -- this is enhanced in Phase 5.
+- **File: `void-breaker/app/src/rendering/particle_system.py`**: Implement `ParticleSystem` with a simple sprite-based particle approach. `spawn_explosion(position, size: AsteroidSize)` creates 5-15 small `arcade.Sprite` instances (using the explosion_particle.png asset) at the given position with random velocities radiating outward. Particle count and speed scale with asteroid size (large explosions: 10-15 particles, faster; small: 5-8, slower). Each particle has a `lifetime: float` attribute (0.3-0.5 seconds). `update(dt)` advances all particle positions and removes expired particles by calling `kill()`. `draw()` draws the internal SpriteList. Particles fade out (reduce alpha) over their lifetime for a nicer visual effect. Keep the implementation simple -- this is enhanced in Phase 5.
 
 **Test Requirements**:
 - [ ] Unit test: EntityManager.add_asteroid adds to asteroids SpriteList
@@ -617,11 +617,11 @@ This is the integration component that brings all Phase 2 systems together into 
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/states/combat.py` (modify -- replace stub with full implementation)
-  - `asterax/app/src/states/game_over.py` (modify -- replace stub with functional GameOver)
-  - `asterax/app/src/rendering/hud.py` (modify -- Phase 1.7 creates basic HUD utility; Phase 2 extends with combat HUD elements)
-  - `asterax/app/src/rendering/__init__.py` (modify -- export HUDRenderer)
-  - `asterax/app/src/config/game_config.py` (modify -- add HUDConfig if needed)
+  - `void-breaker/app/src/states/combat.py` (modify -- replace stub with full implementation)
+  - `void-breaker/app/src/states/game_over.py` (modify -- replace stub with functional GameOver)
+  - `void-breaker/app/src/rendering/hud.py` (modify -- Phase 1.7 creates basic HUD utility; Phase 2 extends with combat HUD elements)
+  - `void-breaker/app/src/rendering/__init__.py` (modify -- export HUDRenderer)
+  - `void-breaker/app/src/config/game_config.py` (modify -- add HUDConfig if needed)
 - **Key Functions/Classes**:
   - `CombatPhase` state class -- full implementation
   - `CombatPhase.on_enter()` -- initialise level, spawn entities
@@ -642,7 +642,7 @@ This is the integration component that brings all Phase 2 systems together into 
 - **Dependencies**: `arcade>=3.0`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/states/combat.py`** (modify): Replace the Phase 1 stub with a full `CombatPhase` implementation. `on_enter()`: create `EntityManager`, `PhysicsEngine`, `CollisionSystem`, `SpawnManager`, `ScoreManager`, `CurrencyManager`, `ParticleSystem`, `HUDRenderer`. Create `PlayerShip` at screen centre. Get `DifficultyParams` for level 1 from `difficulty_tables.py`. Call `spawn_manager.spawn_level_asteroids()` to populate the asteroid SpriteList. Initialise the fixed-timestep accumulator (`accumulator: float = 0.0`).
+- **File: `void-breaker/app/src/states/combat.py`** (modify): Replace the Phase 1 stub with a full `CombatPhase` implementation. `on_enter()`: create `EntityManager`, `PhysicsEngine`, `CollisionSystem`, `SpawnManager`, `ScoreManager`, `CurrencyManager`, `ParticleSystem`, `HUDRenderer`. Create `PlayerShip` at screen centre. Get `DifficultyParams` for level 1 from `difficulty_tables.py`. Call `spawn_manager.spawn_level_asteroids()` to populate the asteroid SpriteList. Initialise the fixed-timestep accumulator (`accumulator: float = 0.0`).
 
   `on_update(delta_time)`: Implement the fixed-timestep accumulator from solution-design.md: cap `frame_time = min(delta_time, 0.25)`, accumulate, while accumulator >= `PHYSICS_DT` (1/60), call `_physics_step(PHYSICS_DT)` and subtract.
 
@@ -658,9 +658,9 @@ This is the integration component that brings all Phase 2 systems together into 
 
   `on_key_press()` / `on_key_release()`: Delegate to `InputManager` for key-held tracking. Handle pause key (transition to Pause overlay state).
 
-- **File: `asterax/app/src/states/game_over.py`** (modify): Replace stub with functional `GameOver` state. `on_enter()` receives `RunStats` from CombatPhase. Displays: "GAME OVER", final score, level reached, currency collected. Check if score qualifies for high score table via `PersistenceManager`. If qualifying, show initials entry prompt (simple 3-character input for now -- full polish in Phase 5). Save high score. `on_key_press()`: any key returns to MainMenu state.
+- **File: `void-breaker/app/src/states/game_over.py`** (modify): Replace stub with functional `GameOver` state. `on_enter()` receives `RunStats` from CombatPhase. Displays: "GAME OVER", final score, level reached, currency collected. Check if score qualifies for high score table via `PersistenceManager`. If qualifying, show initials entry prompt (simple 3-character input for now -- full polish in Phase 5). Save high score. `on_key_press()`: any key returns to MainMenu state.
 
-- **File: `asterax/app/src/rendering/hud.py`**: Implement `HUDRenderer` that draws HUD elements as `arcade.Text` objects positioned at screen edges. Top-left: "Score: {score}". Top-right: "Level: {level}". Bottom-left: "Shields: {shields}/{max_shields}" (numeric for now; Phase 5 adds a graphical bar). Bottom-right: "Credits: {currency}". Use `arcade.Text` with pre-created text objects for performance (only update when values change, not every frame -- see solution-design.md "lazy text rendering"). Colours: white text, medium font size (~16-20pt).
+- **File: `void-breaker/app/src/rendering/hud.py`**: Implement `HUDRenderer` that draws HUD elements as `arcade.Text` objects positioned at screen edges. Top-left: "Score: {score}". Top-right: "Level: {level}". Bottom-left: "Shields: {shields}/{max_shields}" (numeric for now; Phase 5 adds a graphical bar). Bottom-right: "Credits: {currency}". Use `arcade.Text` with pre-created text objects for performance (only update when values change, not every frame -- see solution-design.md "lazy text rendering"). Colours: white text, medium font size (~16-20pt).
 
 **Test Requirements**:
 - [ ] Unit test: fixed-timestep accumulator produces correct number of physics steps per frame
@@ -720,22 +720,22 @@ Comprehensive testing and documentation for all Phase 2 components. Writes pytes
 **Acceptance Criteria**:
 - [ ] All unit tests pass: physics, collisions, splitting, scoring, currency, difficulty
 - [ ] Integration test: simulated combat phase (spawn, destroy asteroids, level clear, game over) passes
-- [ ] `pytest --cov=asterax/app/src --cov-report=term-missing` shows 30%+ coverage on Phase 2 modules
-- [ ] `black --check asterax/app/src/` passes
-- [ ] `isort --check-only asterax/app/src/` passes
+- [ ] `pytest --cov=void-breaker/app/src --cov-report=term-missing` shows 30%+ coverage on Phase 2 modules
+- [ ] `black --check void-breaker/app/src/` passes
+- [ ] `isort --check-only void-breaker/app/src/` passes
 - [ ] `python scripts/evals.py` passes (no TODO/FIXME, all public functions have docstrings)
 - [ ] `docs/implementation-context-phase-2.md` exists with component summaries (max 800 lines total)
 - [ ] All component overview docs exist in `docs/components/`
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/tests/test_physics.py` (create or extend from Phase 1)
-  - `asterax/tests/test_collisions.py` (create)
-  - `asterax/tests/test_entities.py` (create)
-  - `asterax/tests/test_scoring.py` (create)
-  - `asterax/tests/test_currency.py` (create)
-  - `asterax/tests/test_difficulty.py` (create or extend from Phase 1)
-  - `asterax/tests/conftest.py` (modify -- add Phase 2 fixtures)
+  - `void-breaker/tests/test_physics.py` (create or extend from Phase 1)
+  - `void-breaker/tests/test_collisions.py` (create)
+  - `void-breaker/tests/test_entities.py` (create)
+  - `void-breaker/tests/test_scoring.py` (create)
+  - `void-breaker/tests/test_currency.py` (create)
+  - `void-breaker/tests/test_difficulty.py` (create or extend from Phase 1)
+  - `void-breaker/tests/conftest.py` (modify -- add Phase 2 fixtures)
   - `docs/implementation-context-phase-2.md` (create)
   - `docs/components/phase-2-component-2-1-overview.md` (create -- if not done by 2.1)
   - `docs/components/phase-2-component-2-2-overview.md` (create)
@@ -768,15 +768,15 @@ Comprehensive testing and documentation for all Phase 2 components. Writes pytes
 - **Dependencies**: `pytest>=8.0`, `pytest-cov`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/tests/conftest.py`** (modify): Add shared fixtures for Phase 2 testing. `physics_config` fixture returning a `PhysicsConfig` instance with default values. `asteroid_config` fixture returning an `AsteroidConfig` instance. `player_ship` fixture creating a `PlayerShip` at (640, 480) with default config. `entity_manager` fixture creating a fresh `EntityManager`. `collision_system` fixture. `score_manager` fixture. `currency_manager` fixture. These fixtures should NOT require an Arcade window -- entity creation may need a headless context or mock textures. Use `arcade.Sprite()` without textures where possible, or create minimal 1x1 pixel textures for testing.
+- **File: `void-breaker/tests/conftest.py`** (modify): Add shared fixtures for Phase 2 testing. `physics_config` fixture returning a `PhysicsConfig` instance with default values. `asteroid_config` fixture returning an `AsteroidConfig` instance. `player_ship` fixture creating a `PlayerShip` at (640, 480) with default config. `entity_manager` fixture creating a fresh `EntityManager`. `collision_system` fixture. `score_manager` fixture. `currency_manager` fixture. These fixtures should NOT require an Arcade window -- entity creation may need a headless context or mock textures. Use `arcade.Sprite()` without textures where possible, or create minimal 1x1 pixel textures for testing.
 
-- **File: `asterax/tests/test_physics.py`**: Test all physics calculations using the `PlayerShip` and `wrap_entity` function. Tests should create entities, apply operations, and assert numeric results. No rendering needed. Example: create ship at (100, 100) facing up (angle=0), apply thrust for 10 steps, assert velocity_y has increased and position has moved upward. Test drag by applying thrust then removing it and stepping 60 times -- velocity should decrease toward zero. Test speed cap by applying thrust for 1000 steps -- speed should plateau at MAX_SHIP_SPEED.
+- **File: `void-breaker/tests/test_physics.py`**: Test all physics calculations using the `PlayerShip` and `wrap_entity` function. Tests should create entities, apply operations, and assert numeric results. No rendering needed. Example: create ship at (100, 100) facing up (angle=0), apply thrust for 10 steps, assert velocity_y has increased and position has moved upward. Test drag by applying thrust then removing it and stepping 60 times -- velocity should decrease toward zero. Test speed cap by applying thrust for 1000 steps -- speed should plateau at MAX_SHIP_SPEED.
 
-- **File: `asterax/tests/test_collisions.py`**: Test collision detection by creating sprites at known positions and running collision checks. Test normal collision: projectile at (100, 100), asteroid at (105, 105) -- should collide. Test miss: projectile at (100, 100), asteroid at (500, 500) -- should not collide. Test edge collision with ghost: projectile at (5, 300) (near left edge), asteroid at (1275, 300) (near right edge on a 1280-wide screen) -- ghost sprite approach should detect this. Test corner case: entity at (5, 5) near both left and bottom edges.
+- **File: `void-breaker/tests/test_collisions.py`**: Test collision detection by creating sprites at known positions and running collision checks. Test normal collision: projectile at (100, 100), asteroid at (105, 105) -- should collide. Test miss: projectile at (100, 100), asteroid at (500, 500) -- should not collide. Test edge collision with ghost: projectile at (5, 300) (near left edge), asteroid at (1275, 300) (near right edge on a 1280-wide screen) -- ghost sprite approach should detect this. Test corner case: entity at (5, 5) near both left and bottom edges.
 
-- **File: `asterax/tests/test_entities.py`**: Test entity-specific logic. Asteroid splitting: create large asteroid, call split(), verify 2-3 medium children with appropriate velocities. Create medium asteroid, split, verify 2-3 small children. Create small asteroid, split, verify empty list. CurrencyPickup: create with lifetime 1.0, call update(0.5), verify alive. Call update(0.6), verify killed.
+- **File: `void-breaker/tests/test_entities.py`**: Test entity-specific logic. Asteroid splitting: create large asteroid, call split(), verify 2-3 medium children with appropriate velocities. Create medium asteroid, split, verify 2-3 small children. Create small asteroid, split, verify empty list. CurrencyPickup: create with lifetime 1.0, call update(0.5), verify alive. Call update(0.6), verify killed.
 
-- **File: `asterax/tests/test_difficulty.py`**: Test `get_difficulty_params()` for levels 1 through 30. Verify asteroid_count increases monotonically (or at least non-decreases). Verify asteroid_speed_max increases. Verify enemy_spawn_enabled is False for all levels (Phase 2 -- no enemies). Verify no parameter returns unreasonable values (e.g., negative counts, infinite speeds).
+- **File: `void-breaker/tests/test_difficulty.py`**: Test `get_difficulty_params()` for levels 1 through 30. Verify asteroid_count increases monotonically (or at least non-decreases). Verify asteroid_speed_max increases. Verify enemy_spawn_enabled is False for all levels (Phase 2 -- no enemies). Verify no parameter returns unreasonable values (e.g., negative counts, infinite speeds).
 
 - **File: `docs/implementation-context-phase-2.md`**: Create a summary document with one section per component (2.1-2.8), each max 100 lines. For each: what was built, key files created, key design decisions made, patterns established, known limitations. Total document max 800 lines.
 
@@ -814,42 +814,42 @@ This table shows which component creates or modifies each file. Files shared acr
 
 | File | Created By | Modified By |
 |------|-----------|-------------|
-| `asterax/assets/sprites/ship.png` | 2.1 | -- |
-| `asterax/assets/sprites/asteroid_large.png` | 2.1 | -- |
-| `asterax/assets/sprites/asteroid_medium.png` | 2.1 | -- |
-| `asterax/assets/sprites/asteroid_small.png` | 2.1 | -- |
-| `asterax/assets/sprites/projectile_player.png` | 2.1 | -- |
-| `asterax/assets/sprites/currency_pickup.png` | 2.1 | -- |
-| `asterax/assets/sprites/explosion_particle.png` | 2.1 | -- |
-| `asterax/assets/sounds/*.wav` (8 files) | 2.1 | -- |
-| `asterax/app/src/entities/player_ship.py` | 2.2 | 2.4 |
-| `asterax/app/src/entities/__init__.py` | 2.2 | 2.3, 2.4, 2.5 |
-| `asterax/app/src/physics/wrap.py` | 2.2 | -- |
-| `asterax/app/src/physics/engine.py` | 2.2 | 2.3, 2.4, 2.5 |
-| `asterax/app/src/physics/__init__.py` | 2.2 | 2.4 |
-| `asterax/app/src/config/game_config.py` | Phase 1 | 2.2, 2.3, 2.5 |
-| `asterax/app/src/entities/asteroid.py` | 2.3 | -- |
-| `asterax/app/src/managers/spawn_manager.py` | 2.3 | -- |
-| `asterax/app/src/managers/__init__.py` | 2.3 | 2.4, 2.5, 2.6 |
-| `asterax/app/src/config/difficulty_tables.py` | Phase 1 | 2.3 |
-| `asterax/app/src/entities/projectile.py` | 2.4 | -- |
-| `asterax/app/src/physics/collisions.py` | 2.4 | 2.5 |
-| `asterax/app/src/managers/score_manager.py` | 2.4 | -- |
-| `asterax/app/src/entities/pickups.py` | 2.5 | -- |
-| `asterax/app/src/managers/currency_manager.py` | 2.5 | -- |
-| `asterax/app/src/managers/entity_manager.py` | 2.6 | -- |
-| `asterax/app/src/rendering/particle_system.py` | 2.6 | -- |
-| `asterax/app/src/rendering/__init__.py` | Phase 1 | 2.6, 2.7 |
-| `asterax/app/src/states/combat.py` | Phase 1 | 2.7 |
-| `asterax/app/src/states/game_over.py` | Phase 1 | 2.7 |
-| `asterax/app/src/rendering/hud.py` | Phase 1 | 2.7 |
-| `asterax/tests/test_physics.py` | 2.8 | -- |
-| `asterax/tests/test_collisions.py` | 2.8 | -- |
-| `asterax/tests/test_entities.py` | 2.8 | -- |
-| `asterax/tests/test_scoring.py` | 2.8 | -- |
-| `asterax/tests/test_currency.py` | 2.8 | -- |
-| `asterax/tests/test_difficulty.py` | 2.8 | -- |
-| `asterax/tests/conftest.py` | Phase 1 | 2.8 |
+| `void-breaker/assets/sprites/ship.png` | 2.1 | -- |
+| `void-breaker/assets/sprites/asteroid_large.png` | 2.1 | -- |
+| `void-breaker/assets/sprites/asteroid_medium.png` | 2.1 | -- |
+| `void-breaker/assets/sprites/asteroid_small.png` | 2.1 | -- |
+| `void-breaker/assets/sprites/projectile_player.png` | 2.1 | -- |
+| `void-breaker/assets/sprites/currency_pickup.png` | 2.1 | -- |
+| `void-breaker/assets/sprites/explosion_particle.png` | 2.1 | -- |
+| `void-breaker/assets/sounds/*.wav` (8 files) | 2.1 | -- |
+| `void-breaker/app/src/entities/player_ship.py` | 2.2 | 2.4 |
+| `void-breaker/app/src/entities/__init__.py` | 2.2 | 2.3, 2.4, 2.5 |
+| `void-breaker/app/src/physics/wrap.py` | 2.2 | -- |
+| `void-breaker/app/src/physics/engine.py` | 2.2 | 2.3, 2.4, 2.5 |
+| `void-breaker/app/src/physics/__init__.py` | 2.2 | 2.4 |
+| `void-breaker/app/src/config/game_config.py` | Phase 1 | 2.2, 2.3, 2.5 |
+| `void-breaker/app/src/entities/asteroid.py` | 2.3 | -- |
+| `void-breaker/app/src/managers/spawn_manager.py` | 2.3 | -- |
+| `void-breaker/app/src/managers/__init__.py` | 2.3 | 2.4, 2.5, 2.6 |
+| `void-breaker/app/src/config/difficulty_tables.py` | Phase 1 | 2.3 |
+| `void-breaker/app/src/entities/projectile.py` | 2.4 | -- |
+| `void-breaker/app/src/physics/collisions.py` | 2.4 | 2.5 |
+| `void-breaker/app/src/managers/score_manager.py` | 2.4 | -- |
+| `void-breaker/app/src/entities/pickups.py` | 2.5 | -- |
+| `void-breaker/app/src/managers/currency_manager.py` | 2.5 | -- |
+| `void-breaker/app/src/managers/entity_manager.py` | 2.6 | -- |
+| `void-breaker/app/src/rendering/particle_system.py` | 2.6 | -- |
+| `void-breaker/app/src/rendering/__init__.py` | Phase 1 | 2.6, 2.7 |
+| `void-breaker/app/src/states/combat.py` | Phase 1 | 2.7 |
+| `void-breaker/app/src/states/game_over.py` | Phase 1 | 2.7 |
+| `void-breaker/app/src/rendering/hud.py` | Phase 1 | 2.7 |
+| `void-breaker/tests/test_physics.py` | 2.8 | -- |
+| `void-breaker/tests/test_collisions.py` | 2.8 | -- |
+| `void-breaker/tests/test_entities.py` | 2.8 | -- |
+| `void-breaker/tests/test_scoring.py` | 2.8 | -- |
+| `void-breaker/tests/test_currency.py` | 2.8 | -- |
+| `void-breaker/tests/test_difficulty.py` | 2.8 | -- |
+| `void-breaker/tests/conftest.py` | Phase 1 | 2.8 |
 | `docs/implementation-context-phase-2.md` | 2.8 | -- |
 | `docs/components/phase-2-component-2-*.md` | Each component | -- |
 

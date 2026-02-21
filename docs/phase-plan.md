@@ -329,7 +329,7 @@ VoidBreaker is implemented in six incremental phases, each building on the previ
 ### DevOps & Deployment
 
 - **Environment**: Local macOS development with Python 3.13+ virtual environment. No cloud infrastructure.
-- **Testing**: `pytest -q --cov=asterax/app/src --cov-report=term-missing` for unit/integration tests. Manual structured playthroughs for E2E.
+- **Testing**: `pytest -q --cov=void-breaker/app/src --cov-report=term-missing` for unit/integration tests. Manual structured playthroughs for E2E.
 - **Build**: PyInstaller 6.x for macOS `.app` bundle. DMG creation via `hdiutil` or `create-dmg`.
 - **Distribution**: DMG disk image for local distribution. No App Store or notarisation required for v1.0.
 - **Monitoring**: Not applicable (offline game). Performance profiling during Phase 6 QA.

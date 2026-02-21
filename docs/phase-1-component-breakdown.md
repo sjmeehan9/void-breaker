@@ -51,57 +51,57 @@ This matrix declares every file created or modified per component. Components sh
 | `.env/.env.example` | C | | | | | | | |
 | `.env/.env.test` | C | | | | | | | |
 | `.python-version` | C | | | | | | | |
-| `asterax/app/src/__init__.py` | | C | | | | | | |
-| `asterax/app/src/main.py` | | C | | | | | | |
-| `asterax/app/src/window.py` | | C | | | | M | | |
-| `asterax/app/src/states/__init__.py` | | C | M | | | | | |
-| `asterax/app/src/states/base_state.py` | | | C | | | | | |
-| `asterax/app/src/states/state_machine.py` | | | C | | | | | |
-| `asterax/app/src/states/main_menu.py` | | | C | | | | | |
-| `asterax/app/src/states/combat.py` | | | C | | | | | |
-| `asterax/app/src/states/shop.py` | | | C | | | | | |
-| `asterax/app/src/states/game_over.py` | | | C | | | | | |
-| `asterax/app/src/states/pause.py` | | | C | | | | | |
-| `asterax/app/src/states/how_to_play.py` | | | C | | | | | |
-| `asterax/app/src/states/high_scores.py` | | | C | | | | | |
-| `asterax/app/src/states/settings_screen.py` | | | C | | | | | |
-| `asterax/app/src/persistence/__init__.py` | | | | C | | | | |
-| `asterax/app/src/persistence/persistence_manager.py` | | | | C | | | | |
-| `asterax/app/src/persistence/schemas.py` | | | | C | | | | |
-| `asterax/app/src/input/__init__.py` | | | | | C | | | |
-| `asterax/app/src/input/input_manager.py` | | | | | C | | | |
-| `asterax/app/src/config/__init__.py` | | | | | | C | | |
-| `asterax/app/src/config/game_config.py` | | | | | | C | | |
-| `asterax/app/src/config/upgrade_definitions.py` | | | | | | C | | |
-| `asterax/app/src/config/difficulty_tables.py` | | | | | | C | | |
-| `asterax/app/src/audio/__init__.py` | | | | | | | C | |
-| `asterax/app/src/audio/audio_manager.py` | | | | | | | C | |
-| `asterax/app/src/rendering/__init__.py` | | | | | | | C | |
-| `asterax/app/src/rendering/hud.py` | | | | | | | C | |
-| `asterax/app/src/rendering/starfield.py` | | | | | | | C | |
-| `asterax/app/src/entities/__init__.py` | | C | | | | | | |
-| `asterax/app/src/physics/__init__.py` | | C | | | | | | |
-| `asterax/app/src/managers/__init__.py` | | C | | | | | | |
-| `asterax/app/config/settings_defaults.yaml` | | | | C | | | | |
-| `asterax/assets/sprites/.gitkeep` | | C | | | | | | |
-| `asterax/assets/sounds/.gitkeep` | | C | | | | | | |
-| `asterax/assets/fonts/.gitkeep` | | C | | | | | | |
-| `asterax/scripts/evals.py` | | C | | | | | | |
-| `asterax/tests/__init__.py` | | C | | | | | | |
-| `asterax/tests/conftest.py` | | | | | | | | C |
-| `asterax/tests/test_state_machine.py` | | | | | | | | C |
-| `asterax/tests/test_persistence.py` | | | | | | | | C |
-| `asterax/tests/test_input.py` | | | | | | | | C |
-| `asterax/tests/test_config.py` | | | | | | | | C |
-| `asterax/tests/test_audio.py` | | | | | | | | C |
+| `void-breaker/app/src/__init__.py` | | C | | | | | | |
+| `void-breaker/app/src/main.py` | | C | | | | | | |
+| `void-breaker/app/src/window.py` | | C | | | | M | | |
+| `void-breaker/app/src/states/__init__.py` | | C | M | | | | | |
+| `void-breaker/app/src/states/base_state.py` | | | C | | | | | |
+| `void-breaker/app/src/states/state_machine.py` | | | C | | | | | |
+| `void-breaker/app/src/states/main_menu.py` | | | C | | | | | |
+| `void-breaker/app/src/states/combat.py` | | | C | | | | | |
+| `void-breaker/app/src/states/shop.py` | | | C | | | | | |
+| `void-breaker/app/src/states/game_over.py` | | | C | | | | | |
+| `void-breaker/app/src/states/pause.py` | | | C | | | | | |
+| `void-breaker/app/src/states/how_to_play.py` | | | C | | | | | |
+| `void-breaker/app/src/states/high_scores.py` | | | C | | | | | |
+| `void-breaker/app/src/states/settings_screen.py` | | | C | | | | | |
+| `void-breaker/app/src/persistence/__init__.py` | | | | C | | | | |
+| `void-breaker/app/src/persistence/persistence_manager.py` | | | | C | | | | |
+| `void-breaker/app/src/persistence/schemas.py` | | | | C | | | | |
+| `void-breaker/app/src/input/__init__.py` | | | | | C | | | |
+| `void-breaker/app/src/input/input_manager.py` | | | | | C | | | |
+| `void-breaker/app/src/config/__init__.py` | | | | | | C | | |
+| `void-breaker/app/src/config/game_config.py` | | | | | | C | | |
+| `void-breaker/app/src/config/upgrade_definitions.py` | | | | | | C | | |
+| `void-breaker/app/src/config/difficulty_tables.py` | | | | | | C | | |
+| `void-breaker/app/src/audio/__init__.py` | | | | | | | C | |
+| `void-breaker/app/src/audio/audio_manager.py` | | | | | | | C | |
+| `void-breaker/app/src/rendering/__init__.py` | | | | | | | C | |
+| `void-breaker/app/src/rendering/hud.py` | | | | | | | C | |
+| `void-breaker/app/src/rendering/starfield.py` | | | | | | | C | |
+| `void-breaker/app/src/entities/__init__.py` | | C | | | | | | |
+| `void-breaker/app/src/physics/__init__.py` | | C | | | | | | |
+| `void-breaker/app/src/managers/__init__.py` | | C | | | | | | |
+| `void-breaker/app/config/settings_defaults.yaml` | | | | C | | | | |
+| `void-breaker/assets/sprites/.gitkeep` | | C | | | | | | |
+| `void-breaker/assets/sounds/.gitkeep` | | C | | | | | | |
+| `void-breaker/assets/fonts/.gitkeep` | | C | | | | | | |
+| `void-breaker/scripts/evals.py` | | C | | | | | | |
+| `void-breaker/tests/__init__.py` | | C | | | | | | |
+| `void-breaker/tests/conftest.py` | | | | | | | | C |
+| `void-breaker/tests/test_state_machine.py` | | | | | | | | C |
+| `void-breaker/tests/test_persistence.py` | | | | | | | | C |
+| `void-breaker/tests/test_input.py` | | | | | | | | C |
+| `void-breaker/tests/test_config.py` | | | | | | | | C |
+| `void-breaker/tests/test_audio.py` | | | | | | | | C |
 | `docs/implementation-context-phase-1.md` | | | | | | | | C |
 | `docs/components/` | | | | | | | | C |
 
 Legend: **C** = Creates, **M** = Modifies
 
 **Serialisation constraints**:
-- `asterax/app/src/window.py`: Created by 1.2, modified by 1.7 (to wire starfield/HUD). Component 1.7 must run after 1.2.
-- `asterax/app/src/states/__init__.py`: Created by 1.2 (empty/minimal), modified by 1.3 (exports all states). Component 1.3 must run after 1.2.
+- `void-breaker/app/src/window.py`: Created by 1.2, modified by 1.7 (to wire starfield/HUD). Component 1.7 must run after 1.2.
+- `void-breaker/app/src/states/__init__.py`: Created by 1.2 (empty/minimal), modified by 1.3 (exports all states). Component 1.3 must run after 1.2.
 
 ---
 
@@ -133,9 +133,9 @@ Sets up the development environment so that all subsequent AI Agent components c
 **Acceptance Criteria**:
 - [ ] Python 3.13+ virtual environment exists at `.venv/` and activates via `source .venv/bin/activate`
 - [ ] `pip install -e .` succeeds with Arcade 3.x, platformdirs, pytest, pytest-cov, black, isort, mypy installed
-- [ ] `black --check asterax/` passes (empty project has no files to check, or a minimal `__init__.py`)
-- [ ] `isort --check-only asterax/` passes
-- [ ] `mypy asterax/` passes with no errors
+- [ ] `black --check void-breaker/` passes (empty project has no files to check, or a minimal `__init__.py`)
+- [ ] `isort --check-only void-breaker/` passes
+- [ ] `mypy void-breaker/` passes with no errors
 - [ ] `pytest` runs and reports 0 collected (no tests yet)
 - [ ] `.env/.env.local`, `.env/.env.example`, and `.env/.env.test` files exist
 
@@ -154,7 +154,7 @@ Sets up the development environment so that all subsequent AI Agent components c
 
 **Detailed Implementation Requirements**:
 
-- **File: `pyproject.toml`**: Must define the `asterax` package with `packages = [{include = "asterax"}]` so that `pip install -e .` makes the package importable. Use `[build-system]` with `setuptools` or `hatchling`. Under `[project]`, set `name = "voidbreaker"`, `version = "0.1.0"`, `requires-python = ">=3.13"`, and list all runtime dependencies (`arcade>=3.3,<4`, `platformdirs>=4.0`, `pyyaml>=6.0`). Under `[project.optional-dependencies]`, list dev dependencies: `pytest>=8.0`, `pytest-cov>=5.0`, `black>=24.0`, `isort>=5.13`, `mypy>=1.10`. Configure `[tool.black]` with `line-length = 88`, `target-version = ["py313"]`. Configure `[tool.isort]` with `profile = "black"`. Configure `[tool.mypy]` with `python_version = "3.13"`, `strict = true`, `warn_return_any = true`, `warn_unused_configs = true`. Configure `[tool.pytest.ini_options]` with `testpaths = ["asterax/tests"]`, `pythonpath = ["."]`.
+- **File: `pyproject.toml`**: Must define the `asterax` package with `packages = [{include = "asterax"}]` so that `pip install -e .` makes the package importable. Use `[build-system]` with `setuptools` or `hatchling`. Under `[project]`, set `name = "voidbreaker"`, `version = "0.1.0"`, `requires-python = ">=3.13"`, and list all runtime dependencies (`arcade>=3.3,<4`, `platformdirs>=4.0`, `pyyaml>=6.0`). Under `[project.optional-dependencies]`, list dev dependencies: `pytest>=8.0`, `pytest-cov>=5.0`, `black>=24.0`, `isort>=5.13`, `mypy>=1.10`. Configure `[tool.black]` with `line-length = 88`, `target-version = ["py313"]`. Configure `[tool.isort]` with `profile = "black"`. Configure `[tool.mypy]` with `python_version = "3.13"`, `strict = true`, `warn_return_any = true`, `warn_unused_configs = true`. Configure `[tool.pytest.ini_options]` with `testpaths = ["void-breaker/tests"]`, `pythonpath = ["."]`.
 
 - **File: `.env/.env.local`**: Minimal environment file. Can contain `VOIDBREAKER_ENV=local` as a placeholder. This file is gitignored and holds local-only overrides.
 
@@ -167,8 +167,8 @@ Sets up the development environment so that all subsequent AI Agent components c
 **Test Requirements**:
 - [ ] Manual verification: `source .venv/bin/activate && pip install -e .` succeeds
 - [ ] Manual verification: `python -c "import arcade; print(arcade.version)"` prints 3.x
-- [ ] Manual verification: `black --check asterax/` exits 0
-- [ ] Manual verification: `isort --check-only asterax/` exits 0
+- [ ] Manual verification: `black --check void-breaker/` exits 0
+- [ ] Manual verification: `isort --check-only void-breaker/` exits 0
 - [ ] Manual verification: `pytest` exits 0 with 0 tests collected
 
 **Definition of Done**:
@@ -219,27 +219,27 @@ Creates the complete directory tree and the application shell. The entry point `
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/__init__.py` (create)
-  - `asterax/app/__init__.py` (create)
-  - `asterax/app/src/__init__.py` (create)
-  - `asterax/app/src/main.py` (create)
-  - `asterax/app/src/window.py` (create)
-  - `asterax/app/src/states/__init__.py` (create — minimal, exports nothing yet)
-  - `asterax/app/src/entities/__init__.py` (create — empty)
-  - `asterax/app/src/physics/__init__.py` (create — empty)
-  - `asterax/app/src/managers/__init__.py` (create — empty)
-  - `asterax/app/src/audio/__init__.py` (create — empty)
-  - `asterax/app/src/persistence/__init__.py` (create — empty)
-  - `asterax/app/src/rendering/__init__.py` (create — empty)
-  - `asterax/app/src/input/__init__.py` (create — empty)
-  - `asterax/app/src/config/__init__.py` (create — empty)
-  - `asterax/app/config/` (create directory)
-  - `asterax/app/docs/` (create directory)
-  - `asterax/assets/sprites/.gitkeep` (create)
-  - `asterax/assets/sounds/.gitkeep` (create)
-  - `asterax/assets/fonts/.gitkeep` (create)
-  - `asterax/scripts/evals.py` (create)
-  - `asterax/tests/__init__.py` (create — empty)
+  - `void-breaker/__init__.py` (create)
+  - `void-breaker/app/__init__.py` (create)
+  - `void-breaker/app/src/__init__.py` (create)
+  - `void-breaker/app/src/main.py` (create)
+  - `void-breaker/app/src/window.py` (create)
+  - `void-breaker/app/src/states/__init__.py` (create — minimal, exports nothing yet)
+  - `void-breaker/app/src/entities/__init__.py` (create — empty)
+  - `void-breaker/app/src/physics/__init__.py` (create — empty)
+  - `void-breaker/app/src/managers/__init__.py` (create — empty)
+  - `void-breaker/app/src/audio/__init__.py` (create — empty)
+  - `void-breaker/app/src/persistence/__init__.py` (create — empty)
+  - `void-breaker/app/src/rendering/__init__.py` (create — empty)
+  - `void-breaker/app/src/input/__init__.py` (create — empty)
+  - `void-breaker/app/src/config/__init__.py` (create — empty)
+  - `void-breaker/app/config/` (create directory)
+  - `void-breaker/app/docs/` (create directory)
+  - `void-breaker/assets/sprites/.gitkeep` (create)
+  - `void-breaker/assets/sounds/.gitkeep` (create)
+  - `void-breaker/assets/fonts/.gitkeep` (create)
+  - `void-breaker/scripts/evals.py` (create)
+  - `void-breaker/tests/__init__.py` (create — empty)
 - **Key Functions/Classes**:
   - `main()` in `main.py` — creates window, calls `arcade.run()`
   - `VoidBreakerWindow(arcade.Window)` in `window.py` — the application window
@@ -252,17 +252,17 @@ Creates the complete directory tree and the application shell. The entry point `
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/main.py`**: The entry point for the entire application. Must contain a `main()` function that instantiates `VoidBreakerWindow` and calls `arcade.run()`. The module must include an `if __name__ == "__main__"` guard that calls `main()`. The `main()` function signature should accept no arguments and return `None`. This file must be importable as a module (for `python -m asterax.app.src.main`) and executable directly. Keep this file minimal — its sole responsibility is to bootstrap the window and start the event loop. Do not initialise subsystems here; that is the window's responsibility.
+- **File: `void-breaker/app/src/main.py`**: The entry point for the entire application. Must contain a `main()` function that instantiates `VoidBreakerWindow` and calls `arcade.run()`. The module must include an `if __name__ == "__main__"` guard that calls `main()`. The `main()` function signature should accept no arguments and return `None`. This file must be importable as a module (for `python -m asterax.app.src.main`) and executable directly. Keep this file minimal — its sole responsibility is to bootstrap the window and start the event loop. Do not initialise subsystems here; that is the window's responsibility.
 
-- **File: `asterax/app/src/window.py`**: Contains the `VoidBreakerWindow` class inheriting from `arcade.Window`. The constructor sets window dimensions (default `1280x960`), title `"VoidBreaker"`, and calls `super().__init__()`. Initialise an `accumulator: float = 0.0` instance variable. Define constants `PHYSICS_DT: Final[float] = 1.0 / 60.0` and `MAX_FRAME_TIME: Final[float] = 0.25` at module level. The `on_update(delta_time)` method implements the fixed-timestep accumulator pattern: cap `delta_time` to `MAX_FRAME_TIME`, add to accumulator, and run `_physics_step(PHYSICS_DT)` in a while loop while accumulator >= `PHYSICS_DT`. The `_physics_step(dt)` method is a stub that will later delegate to the active state. The `on_draw()` method calls `self.clear()` to render a black frame. Add `on_key_press(key, modifiers)` and `on_key_release(key, modifiers)` stubs that will later delegate to the state machine. The window must call `self.set_update_rate(1/60)` in the constructor to target 60fps.
+- **File: `void-breaker/app/src/window.py`**: Contains the `VoidBreakerWindow` class inheriting from `arcade.Window`. The constructor sets window dimensions (default `1280x960`), title `"VoidBreaker"`, and calls `super().__init__()`. Initialise an `accumulator: float = 0.0` instance variable. Define constants `PHYSICS_DT: Final[float] = 1.0 / 60.0` and `MAX_FRAME_TIME: Final[float] = 0.25` at module level. The `on_update(delta_time)` method implements the fixed-timestep accumulator pattern: cap `delta_time` to `MAX_FRAME_TIME`, add to accumulator, and run `_physics_step(PHYSICS_DT)` in a while loop while accumulator >= `PHYSICS_DT`. The `_physics_step(dt)` method is a stub that will later delegate to the active state. The `on_draw()` method calls `self.clear()` to render a black frame. Add `on_key_press(key, modifiers)` and `on_key_release(key, modifiers)` stubs that will later delegate to the state machine. The window must call `self.set_update_rate(1/60)` in the constructor to target 60fps.
 
-- **File: `asterax/scripts/evals.py`**: The evaluation script required by `copilot.instructions.md`. Must check: (1) all `.py` files under `asterax/app/src/` have no `TODO` or `FIXME` comments, (2) all public functions and classes have docstrings. The script must exit with code 0 if all checks pass and code 1 if any fail, printing a summary of violations. Use `ast` module to parse Python files and inspect docstrings. Use simple string search for TODO/FIXME.
+- **File: `void-breaker/scripts/evals.py`**: The evaluation script required by `copilot.instructions.md`. Must check: (1) all `.py` files under `void-breaker/app/src/` have no `TODO` or `FIXME` comments, (2) all public functions and classes have docstrings. The script must exit with code 0 if all checks pass and code 1 if any fail, printing a summary of violations. Use `ast` module to parse Python files and inspect docstrings. Use simple string search for TODO/FIXME.
 
 **Test Requirements**:
 - [ ] Manual verification: `python -m asterax.app.src.main` opens a window
 - [ ] Manual verification: Window displays a black screen
 - [ ] Manual verification: Closing the window exits cleanly (no exceptions)
-- [ ] Programmatic: `python asterax/scripts/evals.py` exits 0
+- [ ] Programmatic: `python void-breaker/scripts/evals.py` exits 0
 
 **Definition of Done**:
 - [ ] All directories and `__init__.py` files exist per solution-design.md
@@ -315,18 +315,18 @@ Implements the core state machine architecture that governs all game behaviour. 
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/states/base_state.py` (create)
-  - `asterax/app/src/states/state_machine.py` (create)
-  - `asterax/app/src/states/main_menu.py` (create)
-  - `asterax/app/src/states/combat.py` (create)
-  - `asterax/app/src/states/shop.py` (create)
-  - `asterax/app/src/states/game_over.py` (create)
-  - `asterax/app/src/states/pause.py` (create)
-  - `asterax/app/src/states/how_to_play.py` (create)
-  - `asterax/app/src/states/high_scores.py` (create)
-  - `asterax/app/src/states/settings_screen.py` (create)
-  - `asterax/app/src/states/game_init.py` (create)
-  - `asterax/app/src/states/__init__.py` (modify — re-export all state classes and protocol)
+  - `void-breaker/app/src/states/base_state.py` (create)
+  - `void-breaker/app/src/states/state_machine.py` (create)
+  - `void-breaker/app/src/states/main_menu.py` (create)
+  - `void-breaker/app/src/states/combat.py` (create)
+  - `void-breaker/app/src/states/shop.py` (create)
+  - `void-breaker/app/src/states/game_over.py` (create)
+  - `void-breaker/app/src/states/pause.py` (create)
+  - `void-breaker/app/src/states/how_to_play.py` (create)
+  - `void-breaker/app/src/states/high_scores.py` (create)
+  - `void-breaker/app/src/states/settings_screen.py` (create)
+  - `void-breaker/app/src/states/game_init.py` (create)
+  - `void-breaker/app/src/states/__init__.py` (modify — re-export all state classes and protocol)
 - **Key Functions/Classes**:
   - `GameState` (Protocol) in `base_state.py`
   - `BaseState` (abstract base implementing `GameState`) in `base_state.py`
@@ -346,29 +346,29 @@ Implements the core state machine architecture that governs all game behaviour. 
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/states/base_state.py`**: Define a `GameState` Protocol class with methods: `on_enter(self) -> None`, `on_exit(self) -> None`, `on_update(self, delta_time: float) -> None`, `on_draw(self) -> None`, `on_key_press(self, key: int, modifiers: int) -> None`, `on_key_release(self, key: int, modifiers: int) -> None`. Below the protocol, define `BaseState` as an abstract class implementing `GameState` with a constructor that accepts a reference to the `StateMachine` instance (`self.state_machine: StateMachine`). Provide default no-op implementations for all protocol methods. Subclasses override only what they need. Import `TYPE_CHECKING` and forward-reference `StateMachine` to avoid circular imports.
+- **File: `void-breaker/app/src/states/base_state.py`**: Define a `GameState` Protocol class with methods: `on_enter(self) -> None`, `on_exit(self) -> None`, `on_update(self, delta_time: float) -> None`, `on_draw(self) -> None`, `on_key_press(self, key: int, modifiers: int) -> None`, `on_key_release(self, key: int, modifiers: int) -> None`. Below the protocol, define `BaseState` as an abstract class implementing `GameState` with a constructor that accepts a reference to the `StateMachine` instance (`self.state_machine: StateMachine`). Provide default no-op implementations for all protocol methods. Subclasses override only what they need. Import `TYPE_CHECKING` and forward-reference `StateMachine` to avoid circular imports.
 
-- **File: `asterax/app/src/states/state_machine.py`**: The `StateMachine` class holds a `_stack: list[GameState]` for state management. `switch_state(state)` calls `on_exit()` on the current top state (if any), clears the stack, pushes the new state, and calls `on_enter()`. `push_state(state)` calls `on_exit()` on the current top state (for pause semantics — the underlying state "pauses"), pushes the new state, and calls `on_enter()`. `pop_state()` calls `on_exit()` on the top state, removes it, and calls `on_enter()` on the newly-revealed top state. The `update(delta_time)` method calls `on_update(delta_time)` on the top state only. The `draw()` method iterates the entire stack from bottom to top, calling `on_draw()` on each state — this allows overlay states like Pause to render on top of the game state beneath them. `on_key_press` and `on_key_release` delegate to the top state only. Property `current_state` returns the top of the stack. The machine must handle the case where the stack is empty gracefully (no-op).
+- **File: `void-breaker/app/src/states/state_machine.py`**: The `StateMachine` class holds a `_stack: list[GameState]` for state management. `switch_state(state)` calls `on_exit()` on the current top state (if any), clears the stack, pushes the new state, and calls `on_enter()`. `push_state(state)` calls `on_exit()` on the current top state (for pause semantics — the underlying state "pauses"), pushes the new state, and calls `on_enter()`. `pop_state()` calls `on_exit()` on the top state, removes it, and calls `on_enter()` on the newly-revealed top state. The `update(delta_time)` method calls `on_update(delta_time)` on the top state only. The `draw()` method iterates the entire stack from bottom to top, calling `on_draw()` on each state — this allows overlay states like Pause to render on top of the game state beneath them. `on_key_press` and `on_key_release` delegate to the top state only. Property `current_state` returns the top of the stack. The machine must handle the case where the stack is empty gracefully (no-op).
 
-- **File: `asterax/app/src/states/main_menu.py`**: `MainMenuState(BaseState)` renders "VoidBreaker - Main Menu" centred on screen using `arcade.draw_text()`. `on_key_press` handles: `arcade.key.KEY_1` or `arcade.key.ENTER` -> switch to `GameInitState`, `arcade.key.KEY_2` -> switch to `HowToPlayState`, `arcade.key.KEY_3` -> switch to `HighScoresState`, `arcade.key.KEY_4` -> switch to `SettingsScreenState`, `arcade.key.Q` -> `arcade.close_window()`. Also render a legend of these controls below the title.
+- **File: `void-breaker/app/src/states/main_menu.py`**: `MainMenuState(BaseState)` renders "VoidBreaker - Main Menu" centred on screen using `arcade.draw_text()`. `on_key_press` handles: `arcade.key.KEY_1` or `arcade.key.ENTER` -> switch to `GameInitState`, `arcade.key.KEY_2` -> switch to `HowToPlayState`, `arcade.key.KEY_3` -> switch to `HighScoresState`, `arcade.key.KEY_4` -> switch to `SettingsScreenState`, `arcade.key.Q` -> `arcade.close_window()`. Also render a legend of these controls below the title.
 
-- **File: `asterax/app/src/states/game_init.py`**: `GameInitState(BaseState)` renders "Initializing..." on screen. In `on_enter()`, immediately transition to `CombatPhaseState` (placeholder logic — in Phase 2 this will initialise run state). For Phase 1, this is effectively a pass-through state demonstrating the transition chain.
+- **File: `void-breaker/app/src/states/game_init.py`**: `GameInitState(BaseState)` renders "Initializing..." on screen. In `on_enter()`, immediately transition to `CombatPhaseState` (placeholder logic — in Phase 2 this will initialise run state). For Phase 1, this is effectively a pass-through state demonstrating the transition chain.
 
-- **File: `asterax/app/src/states/combat.py`**: `CombatPhaseState(BaseState)` renders "Combat Phase (stub)" on screen. `on_key_press` handles: `arcade.key.ESCAPE` -> push `PauseState`, `arcade.key.N` -> switch to `ShopPhaseState` (placeholder for "level clear"), `arcade.key.G` -> switch to `GameOverState` (placeholder for "shields depleted").
+- **File: `void-breaker/app/src/states/combat.py`**: `CombatPhaseState(BaseState)` renders "Combat Phase (stub)" on screen. `on_key_press` handles: `arcade.key.ESCAPE` -> push `PauseState`, `arcade.key.N` -> switch to `ShopPhaseState` (placeholder for "level clear"), `arcade.key.G` -> switch to `GameOverState` (placeholder for "shields depleted").
 
-- **File: `asterax/app/src/states/shop.py`**: `ShopPhaseState(BaseState)` renders "Shop Phase (stub)" on screen. `on_key_press` handles: `arcade.key.ESCAPE` -> push `PauseState`, `arcade.key.ENTER` -> switch to `CombatPhaseState` (placeholder for "continue to next level").
+- **File: `void-breaker/app/src/states/shop.py`**: `ShopPhaseState(BaseState)` renders "Shop Phase (stub)" on screen. `on_key_press` handles: `arcade.key.ESCAPE` -> push `PauseState`, `arcade.key.ENTER` -> switch to `CombatPhaseState` (placeholder for "continue to next level").
 
-- **File: `asterax/app/src/states/game_over.py`**: `GameOverState(BaseState)` renders "Game Over (stub)" on screen. `on_key_press` handles: `arcade.key.ENTER` or `arcade.key.ESCAPE` -> switch to `MainMenuState`.
+- **File: `void-breaker/app/src/states/game_over.py`**: `GameOverState(BaseState)` renders "Game Over (stub)" on screen. `on_key_press` handles: `arcade.key.ENTER` or `arcade.key.ESCAPE` -> switch to `MainMenuState`.
 
-- **File: `asterax/app/src/states/pause.py`**: `PauseState(BaseState)` renders a semi-transparent overlay with "PAUSED" text. `on_key_press` handles: `arcade.key.ESCAPE` -> `pop_state()` (resume), `arcade.key.R` -> switch to `GameInitState` (restart run), `arcade.key.M` -> switch to `MainMenuState` (exit to menu). This is an overlay state — it is always pushed, never switched to directly.
+- **File: `void-breaker/app/src/states/pause.py`**: `PauseState(BaseState)` renders a semi-transparent overlay with "PAUSED" text. `on_key_press` handles: `arcade.key.ESCAPE` -> `pop_state()` (resume), `arcade.key.R` -> switch to `GameInitState` (restart run), `arcade.key.M` -> switch to `MainMenuState` (exit to menu). This is an overlay state — it is always pushed, never switched to directly.
 
-- **File: `asterax/app/src/states/how_to_play.py`**: `HowToPlayState(BaseState)` renders "How to Play (stub)" with placeholder control descriptions. `on_key_press` handles: `arcade.key.ESCAPE` or `arcade.key.BACKSPACE` -> switch to `MainMenuState`.
+- **File: `void-breaker/app/src/states/how_to_play.py`**: `HowToPlayState(BaseState)` renders "How to Play (stub)" with placeholder control descriptions. `on_key_press` handles: `arcade.key.ESCAPE` or `arcade.key.BACKSPACE` -> switch to `MainMenuState`.
 
-- **File: `asterax/app/src/states/high_scores.py`**: `HighScoresState(BaseState)` renders "High Scores (stub)" on screen. `on_key_press` handles: `arcade.key.ESCAPE` or `arcade.key.BACKSPACE` -> switch to `MainMenuState`.
+- **File: `void-breaker/app/src/states/high_scores.py`**: `HighScoresState(BaseState)` renders "High Scores (stub)" on screen. `on_key_press` handles: `arcade.key.ESCAPE` or `arcade.key.BACKSPACE` -> switch to `MainMenuState`.
 
-- **File: `asterax/app/src/states/settings_screen.py`**: `SettingsScreenState(BaseState)` renders "Settings (stub)" on screen. `on_key_press` handles: `arcade.key.ESCAPE` or `arcade.key.BACKSPACE` -> switch to `MainMenuState`.
+- **File: `void-breaker/app/src/states/settings_screen.py`**: `SettingsScreenState(BaseState)` renders "Settings (stub)" on screen. `on_key_press` handles: `arcade.key.ESCAPE` or `arcade.key.BACKSPACE` -> switch to `MainMenuState`.
 
-- **File: `asterax/app/src/states/__init__.py`**: Re-export all state classes and the `GameState` protocol. Example: `from asterax.app.src.states.base_state import BaseState, GameState` and similarly for all concrete states.
+- **File: `void-breaker/app/src/states/__init__.py`**: Re-export all state classes and the `GameState` protocol. Example: `from asterax.app.src.states.base_state import BaseState, GameState` and similarly for all concrete states.
 
 **Test Requirements**:
 - [ ] Unit tests: `StateMachine.switch_state()` calls `on_exit()` then `on_enter()` in correct order
@@ -433,10 +433,10 @@ Implements the complete persistence layer for reading and writing JSON files (se
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/persistence/__init__.py` (modify — export `PersistenceManager`)
-  - `asterax/app/src/persistence/persistence_manager.py` (create)
-  - `asterax/app/src/persistence/schemas.py` (create)
-  - `asterax/app/config/settings_defaults.yaml` (create)
+  - `void-breaker/app/src/persistence/__init__.py` (modify — export `PersistenceManager`)
+  - `void-breaker/app/src/persistence/persistence_manager.py` (create)
+  - `void-breaker/app/src/persistence/schemas.py` (create)
+  - `void-breaker/app/config/settings_defaults.yaml` (create)
 - **Key Functions/Classes**:
   - `PersistenceManager` — main class
   - `PersistenceManager.__init__(base_dir: Path | None = None)` — resolves storage directory
@@ -455,11 +455,11 @@ Implements the complete persistence layer for reading and writing JSON files (se
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/persistence/schemas.py`**: Define `GameSettings` as a dataclass matching the schema from solution-design.md. Fields: `master_volume: float = 0.8`, `music_volume: float = 0.5`, `sfx_volume: float = 1.0`, `key_rotate_left: str = "LEFT"`, `key_rotate_right: str = "RIGHT"`, `key_thrust: str = "UP"`, `key_fire: str = "SPACE"`, `key_brake: str = "DOWN"`, `key_special: str = "LSHIFT"`, `key_pause: str = "ESCAPE"`, `fire_mode: str = "hold"`, `autofire: bool = False`, `colorblind_mode: bool = False`, `screen_shake: str = "medium"`, `difficulty: str = "classic"`, `fullscreen: bool = False`, `resolution: tuple[int, int] = (1280, 960)`. Store key bindings as string names (e.g., `"LEFT"`, `"SPACE"`) rather than Arcade integer constants — this keeps the JSON human-readable and decouples persistence from Arcade's key code values. Define a `to_dict()` method that serialises the dataclass to a JSON-compatible dict and a `from_dict(data: dict) -> GameSettings` classmethod that deserialises with defaults for missing keys. Define `HighScoreEntry` as a dataclass with fields: `name: str`, `score: int`, `level_reached: int`, `difficulty: str`, `enemies_destroyed: int`, `currency_collected: int`, `currency_spent: int`, `date: str`. Provide corresponding `to_dict()` and `from_dict()` methods. Define module-level constants `SETTINGS_VERSION: Final[int] = 1` and `HIGH_SCORES_VERSION: Final[int] = 1`.
+- **File: `void-breaker/app/src/persistence/schemas.py`**: Define `GameSettings` as a dataclass matching the schema from solution-design.md. Fields: `master_volume: float = 0.8`, `music_volume: float = 0.5`, `sfx_volume: float = 1.0`, `key_rotate_left: str = "LEFT"`, `key_rotate_right: str = "RIGHT"`, `key_thrust: str = "UP"`, `key_fire: str = "SPACE"`, `key_brake: str = "DOWN"`, `key_special: str = "LSHIFT"`, `key_pause: str = "ESCAPE"`, `fire_mode: str = "hold"`, `autofire: bool = False`, `colorblind_mode: bool = False`, `screen_shake: str = "medium"`, `difficulty: str = "classic"`, `fullscreen: bool = False`, `resolution: tuple[int, int] = (1280, 960)`. Store key bindings as string names (e.g., `"LEFT"`, `"SPACE"`) rather than Arcade integer constants — this keeps the JSON human-readable and decouples persistence from Arcade's key code values. Define a `to_dict()` method that serialises the dataclass to a JSON-compatible dict and a `from_dict(data: dict) -> GameSettings` classmethod that deserialises with defaults for missing keys. Define `HighScoreEntry` as a dataclass with fields: `name: str`, `score: int`, `level_reached: int`, `difficulty: str`, `enemies_destroyed: int`, `currency_collected: int`, `currency_spent: int`, `date: str`. Provide corresponding `to_dict()` and `from_dict()` methods. Define module-level constants `SETTINGS_VERSION: Final[int] = 1` and `HIGH_SCORES_VERSION: Final[int] = 1`.
 
-- **File: `asterax/app/src/persistence/persistence_manager.py`**: `PersistenceManager.__init__` resolves the base directory: if `base_dir` is provided, use it (for testing); otherwise use `platformdirs.user_data_dir("VoidBreaker", appauthor=False)`. Create the directory if it does not exist (`Path.mkdir(parents=True, exist_ok=True)`). Store as `self._base_dir`. File paths: `self._settings_path = self._base_dir / "settings.json"`, `self._high_scores_path = self._base_dir / "high_scores.json"`. The `load_settings()` method: if file does not exist, return `GameSettings()` (defaults). If file exists, read JSON, check `"version"` field. If version matches `SETTINGS_VERSION`, call `GameSettings.from_dict(data)`. If version is higher than `SETTINGS_VERSION`, log a warning and return defaults. If JSON is invalid or keys are missing, catch exceptions, log a warning, and return defaults. The `save_settings(settings)` method: construct dict with `{"version": SETTINGS_VERSION, **settings.to_dict()}`, write to a `tempfile.NamedTemporaryFile` in the same directory (to ensure same filesystem for `os.replace`), then `os.replace(temp_path, self._settings_path)`. This ensures atomicity — the file is either fully written or not modified at all. Same pattern for `load_high_scores()` and `save_high_scores(entries)`, using `{"version": HIGH_SCORES_VERSION, "entries": [e.to_dict() for e in entries]}`. Use Python's `logging` module (`logger = logging.getLogger(__name__)`) for all warnings.
+- **File: `void-breaker/app/src/persistence/persistence_manager.py`**: `PersistenceManager.__init__` resolves the base directory: if `base_dir` is provided, use it (for testing); otherwise use `platformdirs.user_data_dir("VoidBreaker", appauthor=False)`. Create the directory if it does not exist (`Path.mkdir(parents=True, exist_ok=True)`). Store as `self._base_dir`. File paths: `self._settings_path = self._base_dir / "settings.json"`, `self._high_scores_path = self._base_dir / "high_scores.json"`. The `load_settings()` method: if file does not exist, return `GameSettings()` (defaults). If file exists, read JSON, check `"version"` field. If version matches `SETTINGS_VERSION`, call `GameSettings.from_dict(data)`. If version is higher than `SETTINGS_VERSION`, log a warning and return defaults. If JSON is invalid or keys are missing, catch exceptions, log a warning, and return defaults. The `save_settings(settings)` method: construct dict with `{"version": SETTINGS_VERSION, **settings.to_dict()}`, write to a `tempfile.NamedTemporaryFile` in the same directory (to ensure same filesystem for `os.replace`), then `os.replace(temp_path, self._settings_path)`. This ensures atomicity — the file is either fully written or not modified at all. Same pattern for `load_high_scores()` and `save_high_scores(entries)`, using `{"version": HIGH_SCORES_VERSION, "entries": [e.to_dict() for e in entries]}`. Use Python's `logging` module (`logger = logging.getLogger(__name__)`) for all warnings.
 
-- **File: `asterax/app/config/settings_defaults.yaml`**: A YAML file containing the default settings values. This serves as documentation and can be used as a reference for the defaults in `GameSettings`. Contents mirror the `GameSettings` defaults: `master_volume: 0.8`, `music_volume: 0.5`, etc. The `PersistenceManager` does NOT read this file at runtime — it exists purely as a human-readable reference. The authoritative defaults are the field defaults on the `GameSettings` dataclass.
+- **File: `void-breaker/app/config/settings_defaults.yaml`**: A YAML file containing the default settings values. This serves as documentation and can be used as a reference for the defaults in `GameSettings`. Contents mirror the `GameSettings` defaults: `master_volume: 0.8`, `music_volume: 0.5`, etc. The `PersistenceManager` does NOT read this file at runtime — it exists purely as a human-readable reference. The authoritative defaults are the field defaults on the `GameSettings` dataclass.
 
 **Test Requirements**:
 - [ ] Unit tests: `GameSettings()` returns correct defaults for all fields
@@ -526,8 +526,8 @@ Implements the input layer that captures keyboard events, maintains a set of cur
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/input/__init__.py` (modify — export `InputManager`)
-  - `asterax/app/src/input/input_manager.py` (create)
+  - `void-breaker/app/src/input/__init__.py` (modify — export `InputManager`)
+  - `void-breaker/app/src/input/input_manager.py` (create)
 - **Key Functions/Classes**:
   - `InputManager.__init__(settings: GameSettings)`
   - `InputManager.keys_held: set[int]` — set of currently pressed Arcade key codes
@@ -544,7 +544,7 @@ Implements the input layer that captures keyboard events, maintains a set of cur
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/input/input_manager.py`**: Define a module-level `KEY_NAME_MAP: dict[str, int]` that maps human-readable string key names (as stored in `settings.json`) to `arcade.key` integer constants. Must include at minimum: `"LEFT"`, `"RIGHT"`, `"UP"`, `"DOWN"`, `"SPACE"`, `"LSHIFT"`, `"RSHIFT"`, `"ESCAPE"`, `"ENTER"`, `"BACKSPACE"`, `"TAB"`, and all letter keys `"A"` through `"Z"`, plus number keys `"KEY_1"` through `"KEY_9"` and `"KEY_0"`. The `InputManager` class constructor accepts a `GameSettings` instance and builds an internal `_bindings: dict[str, int]` mapping action names (`"rotate_left"`, `"rotate_right"`, `"thrust"`, `"fire"`, `"brake"`, `"special"`, `"pause"`) to their resolved Arcade key codes using `KEY_NAME_MAP`. The `keys_held: set[int]` attribute is a public set. `on_key_press(key, modifiers)` adds `key` to `keys_held`. `on_key_release(key, modifiers)` discards `key` from `keys_held`. `is_action_held(action)` looks up the key code for the action in `_bindings` and checks membership in `keys_held`. `get_binding(action)` returns the key code from `_bindings`. `update_bindings(settings)` rebuilds `_bindings` from the provided settings — used when the player remaps keys in the Settings screen (Phase 5). If a key name from settings is not found in `KEY_NAME_MAP`, log a warning and use the default binding for that action.
+- **File: `void-breaker/app/src/input/input_manager.py`**: Define a module-level `KEY_NAME_MAP: dict[str, int]` that maps human-readable string key names (as stored in `settings.json`) to `arcade.key` integer constants. Must include at minimum: `"LEFT"`, `"RIGHT"`, `"UP"`, `"DOWN"`, `"SPACE"`, `"LSHIFT"`, `"RSHIFT"`, `"ESCAPE"`, `"ENTER"`, `"BACKSPACE"`, `"TAB"`, and all letter keys `"A"` through `"Z"`, plus number keys `"KEY_1"` through `"KEY_9"` and `"KEY_0"`. The `InputManager` class constructor accepts a `GameSettings` instance and builds an internal `_bindings: dict[str, int]` mapping action names (`"rotate_left"`, `"rotate_right"`, `"thrust"`, `"fire"`, `"brake"`, `"special"`, `"pause"`) to their resolved Arcade key codes using `KEY_NAME_MAP`. The `keys_held: set[int]` attribute is a public set. `on_key_press(key, modifiers)` adds `key` to `keys_held`. `on_key_release(key, modifiers)` discards `key` from `keys_held`. `is_action_held(action)` looks up the key code for the action in `_bindings` and checks membership in `keys_held`. `get_binding(action)` returns the key code from `_bindings`. `update_bindings(settings)` rebuilds `_bindings` from the provided settings — used when the player remaps keys in the Settings screen (Phase 5). If a key name from settings is not found in `KEY_NAME_MAP`, log a warning and use the default binding for that action.
 
 **Test Requirements**:
 - [ ] Unit tests: `on_key_press` adds key to `keys_held`, `on_key_release` removes it
@@ -602,10 +602,10 @@ Centralises all game configuration, tuning parameters, and data models into the 
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/config/__init__.py` (modify — export key classes and constants)
-  - `asterax/app/src/config/game_config.py` (create)
-  - `asterax/app/src/config/upgrade_definitions.py` (create)
-  - `asterax/app/src/config/difficulty_tables.py` (create)
+  - `void-breaker/app/src/config/__init__.py` (modify — export key classes and constants)
+  - `void-breaker/app/src/config/game_config.py` (create)
+  - `void-breaker/app/src/config/upgrade_definitions.py` (create)
+  - `void-breaker/app/src/config/difficulty_tables.py` (create)
 - **Key Functions/Classes**:
   - `GameConfig` (frozen dataclass) — all physics/gameplay constants
   - `GAME_CONFIG: Final[GameConfig]` — singleton instance
@@ -630,11 +630,11 @@ Centralises all game configuration, tuning parameters, and data models into the 
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/config/game_config.py`**: Define a `@dataclass(frozen=True)` class `GameConfig` with the following fields and their defaults from solution-design.md: `physics_dt: float = 1.0 / 60.0`, `max_frame_time: float = 0.25`, `target_fps: int = 60`, `window_width: int = 1280`, `window_height: int = 960`, `window_title: str = "VoidBreaker"`, `natural_drag: float = 0.3`, `brake_drag: float = 3.0`, `max_ship_speed: float = 600.0`, `base_thrust: float = 400.0`, `base_turn_rate: float = 240.0`, `base_fire_rate: float = 3.0` (shots/sec), `base_projectile_speed: float = 800.0`, `base_projectile_range: float = 500.0` (pixels), `base_damage: float = 1.0`, `base_shields: float = 100.0`, `invulnerability_duration: float = 1.0` (seconds after taking damage), `shop_recentre_duration: float = 0.3` (seconds), `currency_pickup_lifetime: float = 10.0` (seconds), `max_high_scores: int = 100`, `max_player_projectiles: int = 15`, `max_particles: int = 300`. Export a module-level `GAME_CONFIG: Final[GameConfig] = GameConfig()`. Also define all Enum types in this file: `GamePhase`, `AsteroidSize`, `EnemyArchetype`, `UpgradeCategory`, `InsuranceTier`. Define `GameState`, `ShipState`, `InsuranceState`, `LevelStats`, and `RunStats` dataclasses matching solution-design.md. `ShipState` includes all base stats, all upgrade levels (defaulting to 0), and all effective stats (computed from base + upgrades). Include a `recalculate_effective_stats(upgrade_definitions)` method on `ShipState` that recomputes effective values based on current upgrade levels — this method is called by `UpgradeManager` (Phase 4) after any upgrade purchase. `LevelStats` tracks per-level metrics: `asteroids_destroyed: int = 0`, `enemies_destroyed: int = 0`, `currency_collected: int = 0`, `damage_taken: float = 0.0`. `RunStats` tracks cumulative metrics: same fields as `LevelStats` plus `levels_completed: int = 0`, `currency_spent: int = 0`, `upgrades_purchased: int = 0`.
+- **File: `void-breaker/app/src/config/game_config.py`**: Define a `@dataclass(frozen=True)` class `GameConfig` with the following fields and their defaults from solution-design.md: `physics_dt: float = 1.0 / 60.0`, `max_frame_time: float = 0.25`, `target_fps: int = 60`, `window_width: int = 1280`, `window_height: int = 960`, `window_title: str = "VoidBreaker"`, `natural_drag: float = 0.3`, `brake_drag: float = 3.0`, `max_ship_speed: float = 600.0`, `base_thrust: float = 400.0`, `base_turn_rate: float = 240.0`, `base_fire_rate: float = 3.0` (shots/sec), `base_projectile_speed: float = 800.0`, `base_projectile_range: float = 500.0` (pixels), `base_damage: float = 1.0`, `base_shields: float = 100.0`, `invulnerability_duration: float = 1.0` (seconds after taking damage), `shop_recentre_duration: float = 0.3` (seconds), `currency_pickup_lifetime: float = 10.0` (seconds), `max_high_scores: int = 100`, `max_player_projectiles: int = 15`, `max_particles: int = 300`. Export a module-level `GAME_CONFIG: Final[GameConfig] = GameConfig()`. Also define all Enum types in this file: `GamePhase`, `AsteroidSize`, `EnemyArchetype`, `UpgradeCategory`, `InsuranceTier`. Define `GameState`, `ShipState`, `InsuranceState`, `LevelStats`, and `RunStats` dataclasses matching solution-design.md. `ShipState` includes all base stats, all upgrade levels (defaulting to 0), and all effective stats (computed from base + upgrades). Include a `recalculate_effective_stats(upgrade_definitions)` method on `ShipState` that recomputes effective values based on current upgrade levels — this method is called by `UpgradeManager` (Phase 4) after any upgrade purchase. `LevelStats` tracks per-level metrics: `asteroids_destroyed: int = 0`, `enemies_destroyed: int = 0`, `currency_collected: int = 0`, `damage_taken: float = 0.0`. `RunStats` tracks cumulative metrics: same fields as `LevelStats` plus `levels_completed: int = 0`, `currency_spent: int = 0`, `upgrades_purchased: int = 0`.
 
-- **File: `asterax/app/src/config/upgrade_definitions.py`**: Define the `UpgradeDefinition` dataclass with fields: `id: str`, `category: UpgradeCategory`, `name: str`, `description: str`, `max_level: int`, `base_cost: int`, `cost_scaling: float`, `effect_per_level: float`, `stat_key: str`. Define `UPGRADE_DEFINITIONS: Final[list[UpgradeDefinition]]` containing all upgrades from solution-design.md: weapon_fire_rate (max 5, base cost 50, scaling 1.5, +0.5 shots/sec/level), weapon_damage (max 5, base cost 60, scaling 1.5, +0.3/level), weapon_speed (max 3, base cost 40, scaling 1.4, +100 px/s/level), weapon_spread (max 3, base cost 100, scaling 2.0, +1 projectile/level), defense_shields (max 5, base cost 50, scaling 1.5, +25 max shields/level), mobility_thrust (max 5, base cost 40, scaling 1.4, +60 px/s^2/level), mobility_turn (max 3, base cost 30, scaling 1.3, +30 deg/s/level), economy_magnet (max 3, base cost 60, scaling 1.5, +50 px radius/level), economy_protection (max 1, base cost 150, scaling 1.0, currency becomes indestructible), repair (max 99, base cost 30, scaling 1.2, restores 25 shields/purchase). Include a helper `get_upgrade_cost(definition: UpgradeDefinition, current_level: int) -> int` that returns `int(definition.base_cost * (definition.cost_scaling ** current_level))`. Include a helper `get_upgrade_by_id(upgrade_id: str) -> UpgradeDefinition | None` for lookup.
+- **File: `void-breaker/app/src/config/upgrade_definitions.py`**: Define the `UpgradeDefinition` dataclass with fields: `id: str`, `category: UpgradeCategory`, `name: str`, `description: str`, `max_level: int`, `base_cost: int`, `cost_scaling: float`, `effect_per_level: float`, `stat_key: str`. Define `UPGRADE_DEFINITIONS: Final[list[UpgradeDefinition]]` containing all upgrades from solution-design.md: weapon_fire_rate (max 5, base cost 50, scaling 1.5, +0.5 shots/sec/level), weapon_damage (max 5, base cost 60, scaling 1.5, +0.3/level), weapon_speed (max 3, base cost 40, scaling 1.4, +100 px/s/level), weapon_spread (max 3, base cost 100, scaling 2.0, +1 projectile/level), defense_shields (max 5, base cost 50, scaling 1.5, +25 max shields/level), mobility_thrust (max 5, base cost 40, scaling 1.4, +60 px/s^2/level), mobility_turn (max 3, base cost 30, scaling 1.3, +30 deg/s/level), economy_magnet (max 3, base cost 60, scaling 1.5, +50 px radius/level), economy_protection (max 1, base cost 150, scaling 1.0, currency becomes indestructible), repair (max 99, base cost 30, scaling 1.2, restores 25 shields/purchase). Include a helper `get_upgrade_cost(definition: UpgradeDefinition, current_level: int) -> int` that returns `int(definition.base_cost * (definition.cost_scaling ** current_level))`. Include a helper `get_upgrade_by_id(upgrade_id: str) -> UpgradeDefinition | None` for lookup.
 
-- **File: `asterax/app/src/config/difficulty_tables.py`**: Define a function `get_difficulty(level: int, base: str = "classic") -> DifficultyParams` that returns difficulty parameters for the given level and base difficulty. For "classic" difficulty: asteroid_count starts at 4 (level 1) and increases by ~1 per level (capped at 20 for late game), asteroid_speed_min starts at 50 and increases by 5/level (capped at 200), asteroid_speed_max starts at 150 and increases by 8/level (capped at 400), enemy_spawn_enabled is False for levels 1-5 and True from level 6+, enemy_count_max starts at 1 (level 6) and increases by 1 every 3 levels (capped at 10), enemy_spawn_interval starts at 10s and decreases by 0.3/level (min 3s), enemy_aggression starts at 0.2 and increases by 0.03/level (capped at 0.9), currency_drop_chance starts at 0.4 and decreases by 0.005/level (min 0.2), currency_value_base starts at 10 and increases by 2/level. For "casual" difficulty: multiply asteroid count by 0.7, enemy aggression by 0.6, currency drop by 1.3. For "hard": multiply asteroid count by 1.3, enemy aggression by 1.3, currency drop by 0.7. Use `min()`/`max()` clamping to keep all values within sensible bounds. The function should compute values procedurally (formulaic) rather than using a lookup table, to support arbitrarily high levels.
+- **File: `void-breaker/app/src/config/difficulty_tables.py`**: Define a function `get_difficulty(level: int, base: str = "classic") -> DifficultyParams` that returns difficulty parameters for the given level and base difficulty. For "classic" difficulty: asteroid_count starts at 4 (level 1) and increases by ~1 per level (capped at 20 for late game), asteroid_speed_min starts at 50 and increases by 5/level (capped at 200), asteroid_speed_max starts at 150 and increases by 8/level (capped at 400), enemy_spawn_enabled is False for levels 1-5 and True from level 6+, enemy_count_max starts at 1 (level 6) and increases by 1 every 3 levels (capped at 10), enemy_spawn_interval starts at 10s and decreases by 0.3/level (min 3s), enemy_aggression starts at 0.2 and increases by 0.03/level (capped at 0.9), currency_drop_chance starts at 0.4 and decreases by 0.005/level (min 0.2), currency_value_base starts at 10 and increases by 2/level. For "casual" difficulty: multiply asteroid count by 0.7, enemy aggression by 0.6, currency drop by 1.3. For "hard": multiply asteroid count by 1.3, enemy aggression by 1.3, currency drop by 0.7. Use `min()`/`max()` clamping to keep all values within sensible bounds. The function should compute values procedurally (formulaic) rather than using a lookup table, to support arbitrarily high levels.
 
 **Test Requirements**:
 - [ ] Unit tests: `GAME_CONFIG` has correct default values for all physics constants
@@ -700,12 +700,12 @@ Implements the audio playback infrastructure and the foundational rendering syst
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/app/src/audio/__init__.py` (modify — export `AudioManager`)
-  - `asterax/app/src/audio/audio_manager.py` (create)
-  - `asterax/app/src/rendering/__init__.py` (modify — export `StarfieldRenderer`, `HUDRenderer`)
-  - `asterax/app/src/rendering/starfield.py` (create)
-  - `asterax/app/src/rendering/hud.py` (create)
-  - `asterax/app/src/window.py` (modify — wire starfield and HUD into draw pipeline)
+  - `void-breaker/app/src/audio/__init__.py` (modify — export `AudioManager`)
+  - `void-breaker/app/src/audio/audio_manager.py` (create)
+  - `void-breaker/app/src/rendering/__init__.py` (modify — export `StarfieldRenderer`, `HUDRenderer`)
+  - `void-breaker/app/src/rendering/starfield.py` (create)
+  - `void-breaker/app/src/rendering/hud.py` (create)
+  - `void-breaker/app/src/window.py` (modify — wire starfield and HUD into draw pipeline)
 - **Key Functions/Classes**:
   - `AudioManager.__init__(settings: GameSettings, sound_dir: Path)`
   - `AudioManager.play(name: str, volume_override: float | None = None) -> None`
@@ -722,13 +722,13 @@ Implements the audio playback infrastructure and the foundational rendering syst
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/audio/audio_manager.py`**: The `AudioManager` class constructor accepts a `GameSettings` instance and a `Path` to the sounds directory. Store both as instance attributes. Initialise `self._sounds: dict[str, arcade.Sound] = {}`. In the constructor, attempt to load all `.wav` files from the sound directory using `arcade.load_sound()`. For each file found, store it keyed by its stem name (e.g., `fire.wav` -> `"fire"`). If the sound directory does not exist or is empty, log a debug message and continue (no error). If an individual file fails to load, log a warning and skip it. The `play(name, volume_override)` method: if `name` not in `self._sounds`, return immediately (no-op). Otherwise, compute `effective_volume = (volume_override or self._settings.sfx_volume) * self._settings.master_volume`, clamp to `[0.0, 1.0]`, and call `arcade.play_sound(self._sounds[name], volume=effective_volume)`. Add a separate `play_music(name)` method stub that will support streaming playback in Phase 5. The `update_settings(settings)` method replaces the internal settings reference — used when the player changes volume in the Settings screen.
+- **File: `void-breaker/app/src/audio/audio_manager.py`**: The `AudioManager` class constructor accepts a `GameSettings` instance and a `Path` to the sounds directory. Store both as instance attributes. Initialise `self._sounds: dict[str, arcade.Sound] = {}`. In the constructor, attempt to load all `.wav` files from the sound directory using `arcade.load_sound()`. For each file found, store it keyed by its stem name (e.g., `fire.wav` -> `"fire"`). If the sound directory does not exist or is empty, log a debug message and continue (no error). If an individual file fails to load, log a warning and skip it. The `play(name, volume_override)` method: if `name` not in `self._sounds`, return immediately (no-op). Otherwise, compute `effective_volume = (volume_override or self._settings.sfx_volume) * self._settings.master_volume`, clamp to `[0.0, 1.0]`, and call `arcade.play_sound(self._sounds[name], volume=effective_volume)`. Add a separate `play_music(name)` method stub that will support streaming playback in Phase 5. The `update_settings(settings)` method replaces the internal settings reference — used when the player changes volume in the Settings screen.
 
-- **File: `asterax/app/src/rendering/starfield.py`**: The `StarfieldRenderer` class generates a static starfield texture at initialisation. Constructor accepts `width`, `height`, and `star_count` (default 200). Use a seeded `random.Random(42)` for deterministic star placement. Generate star positions and brightnesses. Create the starfield as an `arcade.Texture` by rendering stars onto a pixel array or by using Arcade's `arcade.create_line()` / point rendering to a framebuffer. The simplest approach: create a list of `(x, y, brightness)` tuples and render them as small white points with varying alpha. Store the result in `self._texture`. If Arcade's offscreen rendering is complex, an acceptable alternative is to store the star data and render as a `arcade.ShapeElementList` of points (this is batched and nearly as fast as a texture). The `draw()` method draws the pre-computed starfield. Stars should have 2-3 brightness levels (dim, medium, bright) to create depth. Optionally, a very subtle parallax scroll can be added later, but for Phase 1 the starfield is completely static.
+- **File: `void-breaker/app/src/rendering/starfield.py`**: The `StarfieldRenderer` class generates a static starfield texture at initialisation. Constructor accepts `width`, `height`, and `star_count` (default 200). Use a seeded `random.Random(42)` for deterministic star placement. Generate star positions and brightnesses. Create the starfield as an `arcade.Texture` by rendering stars onto a pixel array or by using Arcade's `arcade.create_line()` / point rendering to a framebuffer. The simplest approach: create a list of `(x, y, brightness)` tuples and render them as small white points with varying alpha. Store the result in `self._texture`. If Arcade's offscreen rendering is complex, an acceptable alternative is to store the star data and render as a `arcade.ShapeElementList` of points (this is batched and nearly as fast as a texture). The `draw()` method draws the pre-computed starfield. Stars should have 2-3 brightness levels (dim, medium, bright) to create depth. Optionally, a very subtle parallax scroll can be added later, but for Phase 1 the starfield is completely static.
 
-- **File: `asterax/app/src/rendering/hud.py`**: The `HUDRenderer` class provides convenience methods for drawing text on screen. Constructor accepts `window_width` and `window_height` for positioning calculations. Implement `draw_text(text, x, y, color=arcade.color.WHITE, font_size=14, anchor_x="left", anchor_y="baseline")` wrapping `arcade.draw_text()`. Implement `draw_value(label, value, x, y)` that formats and draws a label-value pair (e.g., "Score: 1234"). Implement a simple caching mechanism: maintain a dict of `{(label, value): arcade.Text}` objects. Use `arcade.Text` (Arcade 3.x's cached text object) to avoid re-creating text geometry every frame. When the value changes, update the `arcade.Text` object. This is critical for performance at 60fps — `arcade.draw_text()` is expensive if called with new strings every frame, but `arcade.Text.draw()` is cheap.
+- **File: `void-breaker/app/src/rendering/hud.py`**: The `HUDRenderer` class provides convenience methods for drawing text on screen. Constructor accepts `window_width` and `window_height` for positioning calculations. Implement `draw_text(text, x, y, color=arcade.color.WHITE, font_size=14, anchor_x="left", anchor_y="baseline")` wrapping `arcade.draw_text()`. Implement `draw_value(label, value, x, y)` that formats and draws a label-value pair (e.g., "Score: 1234"). Implement a simple caching mechanism: maintain a dict of `{(label, value): arcade.Text}` objects. Use `arcade.Text` (Arcade 3.x's cached text object) to avoid re-creating text geometry every frame. When the value changes, update the `arcade.Text` object. This is critical for performance at 60fps — `arcade.draw_text()` is expensive if called with new strings every frame, but `arcade.Text.draw()` is cheap.
 
-- **File: `asterax/app/src/window.py` (modifications)**: After the `StateMachine` is wired in (component 1.3), add `StarfieldRenderer` and `HUDRenderer` initialisation in the `VoidBreakerWindow.__init__()`. In `on_draw()`, call `starfield.draw()` before delegating to the state machine's draw. The `AudioManager` should also be initialised here and stored as an instance attribute accessible to states. Pass `AudioManager`, `StarfieldRenderer`, and `HUDRenderer` to states that need them via the `StateMachine` or as window attributes. Note: the exact wiring pattern depends on how component 1.3 structures state access to shared resources. The simplest approach is to store these on the window instance and have `BaseState` hold a reference to the window.
+- **File: `void-breaker/app/src/window.py` (modifications)**: After the `StateMachine` is wired in (component 1.3), add `StarfieldRenderer` and `HUDRenderer` initialisation in the `VoidBreakerWindow.__init__()`. In `on_draw()`, call `starfield.draw()` before delegating to the state machine's draw. The `AudioManager` should also be initialised here and stored as an instance attribute accessible to states. Pass `AudioManager`, `StarfieldRenderer`, and `HUDRenderer` to states that need them via the `StateMachine` or as window attributes. Note: the exact wiring pattern depends on how component 1.3 structures state access to shared resources. The simplest approach is to store these on the window instance and have `BaseState` hold a reference to the window.
 
 **Test Requirements**:
 - [ ] Unit tests: `AudioManager` initialises without errors with empty sound directory
@@ -785,7 +785,7 @@ The final component writes the comprehensive test suite for all Phase 1 modules 
 
 **Acceptance Criteria**:
 - [ ] `pytest` passes with 0 failures
-- [ ] Code coverage >= 30% on `asterax/app/src/` modules (measured by `pytest --cov=asterax/app/src`)
+- [ ] Code coverage >= 30% on `void-breaker/app/src/` modules (measured by `pytest --cov=void-breaker/app/src`)
 - [ ] `conftest.py` provides reusable fixtures: `game_settings`, `persistence_manager` (with `tmp_path`), `input_manager`, `game_config`, `game_state`
 - [ ] State machine tests cover: switch, push, pop, empty stack, draw-all-in-stack
 - [ ] Persistence tests cover: round-trip, corrupt file, missing file, future version
@@ -798,12 +798,12 @@ The final component writes the comprehensive test suite for all Phase 1 modules 
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - `asterax/tests/conftest.py` (create)
-  - `asterax/tests/test_state_machine.py` (create)
-  - `asterax/tests/test_persistence.py` (create)
-  - `asterax/tests/test_input.py` (create)
-  - `asterax/tests/test_config.py` (create)
-  - `asterax/tests/test_audio.py` (create)
+  - `void-breaker/tests/conftest.py` (create)
+  - `void-breaker/tests/test_state_machine.py` (create)
+  - `void-breaker/tests/test_persistence.py` (create)
+  - `void-breaker/tests/test_input.py` (create)
+  - `void-breaker/tests/test_config.py` (create)
+  - `void-breaker/tests/test_audio.py` (create)
   - `docs/implementation-context-phase-1.md` (create)
   - `docs/components/phase-1-component-1-1-overview.md` (create)
   - `docs/components/phase-1-component-1-2-overview.md` (create)
@@ -821,17 +821,17 @@ The final component writes the comprehensive test suite for all Phase 1 modules 
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/tests/conftest.py`**: Define the following shared fixtures. `game_settings() -> GameSettings`: returns a `GameSettings()` with all defaults. `persistence_manager(tmp_path) -> PersistenceManager`: returns a `PersistenceManager(base_dir=tmp_path)` so tests write to a temporary directory. `input_manager(game_settings) -> InputManager`: returns an `InputManager(game_settings)`. `game_config() -> GameConfig`: returns the `GAME_CONFIG` singleton. `game_state() -> GameState`: returns a `GameState` with default values. `mock_state_machine() -> StateMachine`: returns a `StateMachine` instance for testing state transitions without a window.
+- **File: `void-breaker/tests/conftest.py`**: Define the following shared fixtures. `game_settings() -> GameSettings`: returns a `GameSettings()` with all defaults. `persistence_manager(tmp_path) -> PersistenceManager`: returns a `PersistenceManager(base_dir=tmp_path)` so tests write to a temporary directory. `input_manager(game_settings) -> InputManager`: returns an `InputManager(game_settings)`. `game_config() -> GameConfig`: returns the `GAME_CONFIG` singleton. `game_state() -> GameState`: returns a `GameState` with default values. `mock_state_machine() -> StateMachine`: returns a `StateMachine` instance for testing state transitions without a window.
 
-- **File: `asterax/tests/test_state_machine.py`**: Test `switch_state`: verify `on_exit` called on old state, `on_enter` called on new state (use mock/spy states). Test `push_state`: verify underlying state's `on_exit` is called, new state's `on_enter` is called, stack depth increases. Test `pop_state`: verify popped state's `on_exit` is called, revealed state's `on_enter` is called, stack depth decreases. Test `draw`: verify all states in stack have `on_draw` called (bottom to top order). Test `update` and `on_key_press`: verify only top state receives calls. Test empty stack: verify all operations are no-ops without exceptions. Test double-pop: verify popping an empty stack is a no-op. Use simple test double classes that record method calls.
+- **File: `void-breaker/tests/test_state_machine.py`**: Test `switch_state`: verify `on_exit` called on old state, `on_enter` called on new state (use mock/spy states). Test `push_state`: verify underlying state's `on_exit` is called, new state's `on_enter` is called, stack depth increases. Test `pop_state`: verify popped state's `on_exit` is called, revealed state's `on_enter` is called, stack depth decreases. Test `draw`: verify all states in stack have `on_draw` called (bottom to top order). Test `update` and `on_key_press`: verify only top state receives calls. Test empty stack: verify all operations are no-ops without exceptions. Test double-pop: verify popping an empty stack is a no-op. Use simple test double classes that record method calls.
 
-- **File: `asterax/tests/test_persistence.py`**: Test `load_settings` with no file: returns defaults. Test `save_settings` + `load_settings` round-trip: all fields match. Test corrupt JSON file: returns defaults (write garbage bytes to the settings path, then load). Test missing keys in JSON: returns defaults for missing fields, preserves present fields. Test future version: returns defaults (write JSON with `"version": 999`). Test `save_high_scores` + `load_high_scores` round-trip. Test empty high scores: returns empty list. Test high scores capping (if implemented): save 200 entries, load, verify capped to max. Test atomic write: verify settings file exists and is valid after save (no temp file remnants). All tests use the `persistence_manager` fixture with `tmp_path`.
+- **File: `void-breaker/tests/test_persistence.py`**: Test `load_settings` with no file: returns defaults. Test `save_settings` + `load_settings` round-trip: all fields match. Test corrupt JSON file: returns defaults (write garbage bytes to the settings path, then load). Test missing keys in JSON: returns defaults for missing fields, preserves present fields. Test future version: returns defaults (write JSON with `"version": 999`). Test `save_high_scores` + `load_high_scores` round-trip. Test empty high scores: returns empty list. Test high scores capping (if implemented): save 200 entries, load, verify capped to max. Test atomic write: verify settings file exists and is valid after save (no temp file remnants). All tests use the `persistence_manager` fixture with `tmp_path`.
 
-- **File: `asterax/tests/test_input.py`**: Test `on_key_press` adds to `keys_held`. Test `on_key_release` removes from `keys_held`. Test `on_key_release` with unheld key does not raise. Test `is_action_held` returns True when bound key is held. Test `is_action_held` returns False when bound key is not held. Test `get_binding` returns correct Arcade key code for default bindings. Test `update_bindings` with new settings changes the active binding. Test invalid key name in settings logs warning and uses default.
+- **File: `void-breaker/tests/test_input.py`**: Test `on_key_press` adds to `keys_held`. Test `on_key_release` removes from `keys_held`. Test `on_key_release` with unheld key does not raise. Test `is_action_held` returns True when bound key is held. Test `is_action_held` returns False when bound key is not held. Test `get_binding` returns correct Arcade key code for default bindings. Test `update_bindings` with new settings changes the active binding. Test invalid key name in settings logs warning and uses default.
 
-- **File: `asterax/tests/test_config.py`**: Test `GAME_CONFIG` has expected default values (spot-check physics constants). Test all `UpgradeDefinition` entries have valid fields. Test `get_upgrade_cost` returns expected values at different levels. Test `get_difficulty` returns sensible values for levels 1, 5, 10, 20, 50. Test `get_difficulty` values are clamped for extreme levels. Test "casual" is easier than "classic" on key metrics (asteroid count, enemy aggression). Test "hard" is harder than "classic". Test all dataclass models instantiate with defaults. Test all enums have expected members.
+- **File: `void-breaker/tests/test_config.py`**: Test `GAME_CONFIG` has expected default values (spot-check physics constants). Test all `UpgradeDefinition` entries have valid fields. Test `get_upgrade_cost` returns expected values at different levels. Test `get_difficulty` returns sensible values for levels 1, 5, 10, 20, 50. Test `get_difficulty` values are clamped for extreme levels. Test "casual" is easier than "classic" on key metrics (asteroid count, enemy aggression). Test "hard" is harder than "classic". Test all dataclass models instantiate with defaults. Test all enums have expected members.
 
-- **File: `asterax/tests/test_audio.py`**: Test `AudioManager` initialises without errors when sound directory is empty. Test `AudioManager` initialises without errors when sound directory does not exist. Test `AudioManager.play("nonexistent")` does not raise. Test `AudioManager.update_settings()` stores new settings. Note: actual sound playback cannot be tested without a display/audio context. Tests verify construction and method calls, not actual audio output.
+- **File: `void-breaker/tests/test_audio.py`**: Test `AudioManager` initialises without errors when sound directory is empty. Test `AudioManager` initialises without errors when sound directory does not exist. Test `AudioManager.play("nonexistent")` does not raise. Test `AudioManager.update_settings()` stores new settings. Note: actual sound playback cannot be tested without a display/audio context. Tests verify construction and method calls, not actual audio output.
 
 - **File: `docs/implementation-context-phase-1.md`**: Summarise each of the 8 components in Phase 1 with: what was built, key patterns established, important file locations, and any decisions made during implementation. Maximum 100 lines per component. Total document should be a concise reference for Phase 2+ developers.
 
@@ -839,10 +839,10 @@ The final component writes the comprehensive test suite for all Phase 1 modules 
 
 **Test Requirements**:
 - [ ] All test files execute via `pytest` without failures
-- [ ] `pytest --cov=asterax/app/src --cov-report=term-missing` shows >= 30% coverage
-- [ ] `python asterax/scripts/evals.py` exits 0
-- [ ] `black --check asterax/` exits 0
-- [ ] `isort --check-only asterax/` exits 0
+- [ ] `pytest --cov=void-breaker/app/src --cov-report=term-missing` shows >= 30% coverage
+- [ ] `python void-breaker/scripts/evals.py` exits 0
+- [ ] `black --check void-breaker/` exits 0
+- [ ] `isort --check-only void-breaker/` exits 0
 
 **Definition of Done**:
 - [ ] All test files created with comprehensive test cases
@@ -855,7 +855,7 @@ The final component writes the comprehensive test suite for all Phase 1 modules 
 
 **Notes**:
 - Tests that require an Arcade window or audio context should be skipped or mocked. Use `unittest.mock.MagicMock` for Arcade objects that require a display context. The state machine tests should work entirely with mock state objects, not real Arcade-dependent states.
-- The 30% coverage target applies to the `asterax/app/src/` directory. Pure data model files (config, schemas) are easy to test and will contribute significantly to coverage. State stubs and window code are harder to test without a display and may have lower individual coverage.
+- The 30% coverage target applies to the `void-breaker/app/src/` directory. Pure data model files (config, schemas) are easy to test and will contribute significantly to coverage. State stubs and window code are harder to test without a display and may have lower individual coverage.
 - `conftest.py` fixtures should use `@pytest.fixture` with appropriate scopes. The `persistence_manager` fixture must use `tmp_path` (function-scoped by default) to ensure test isolation.
 - Documentation should be written in Markdown and be concise. Avoid repeating the full specification — reference `phase-1-component-breakdown.md` for details. Focus on what was actually built (post-implementation), decisions made, and patterns established.
 
@@ -881,7 +881,7 @@ All states in Phases 2-5 must implement this protocol by extending `BaseState`.
 `python -m asterax.app.src.main` is the canonical launch command. No other entry point.
 
 ### 3. Configuration Pattern
-All tuning constants go in `asterax/app/src/config/game_config.py`. No hardcoded magic numbers in game logic modules.
+All tuning constants go in `void-breaker/app/src/config/game_config.py`. No hardcoded magic numbers in game logic modules.
 
 ### 4. Persistence Pattern
 `PersistenceManager` is the sole interface for file I/O. No other module reads/writes files to the user data directory.

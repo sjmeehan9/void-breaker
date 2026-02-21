@@ -42,15 +42,15 @@ Phase 4 implements VoidBreaker's primary market differentiators: the fly-through
 
 | File | Created by | Modified by | Constraint |
 |------|-----------|-------------|------------|
-| `asterax/app/src/states/shop.py` | 4.2 | 4.7 | 4.7 must wait for 4.2 |
-| `asterax/app/src/entities/shop_node.py` | 4.3 | 4.7 | 4.7 must wait for 4.3 |
-| `asterax/app/src/managers/upgrade_manager.py` | 4.4 | — | No conflict |
-| `asterax/app/src/managers/insurance_manager.py` | 4.5 | — | No conflict |
-| `asterax/app/src/managers/currency_manager.py` | Phase 2.5 (created) | 4.6 (REWRITE) | Phase 2.5 must be complete before 4.6. Phase 4 replaces Phase 2's basic implementation with the full CurrencyManager (adding `deduct()`, `can_spend()`, `CurrencyRunStats`, validation, run tracking) |
-| `asterax/app/src/config/upgrade_definitions.py` | Phase 1 (created) | 4.4 (populated with full definitions) | 4.4 owns the data content |
-| `asterax/app/src/entities/__init__.py` | Phase 2 (created) | 4.3 (adds ShopNode export) | Append-only, safe |
-| `asterax/app/src/managers/__init__.py` | Phase 2 (created) | 4.4, 4.5, 4.6 (add exports) | Append-only, safe |
-| `asterax/app/src/states/__init__.py` | Phase 1 (created) | 4.2 (registers ShopPhase) | Append-only, safe |
+| `void-breaker/app/src/states/shop.py` | 4.2 | 4.7 | 4.7 must wait for 4.2 |
+| `void-breaker/app/src/entities/shop_node.py` | 4.3 | 4.7 | 4.7 must wait for 4.3 |
+| `void-breaker/app/src/managers/upgrade_manager.py` | 4.4 | — | No conflict |
+| `void-breaker/app/src/managers/insurance_manager.py` | 4.5 | — | No conflict |
+| `void-breaker/app/src/managers/currency_manager.py` | Phase 2.5 (created) | 4.6 (REWRITE) | Phase 2.5 must be complete before 4.6. Phase 4 replaces Phase 2's basic implementation with the full CurrencyManager (adding `deduct()`, `can_spend()`, `CurrencyRunStats`, validation, run tracking) |
+| `void-breaker/app/src/config/upgrade_definitions.py` | Phase 1 (created) | 4.4 (populated with full definitions) | 4.4 owns the data content |
+| `void-breaker/app/src/entities/__init__.py` | Phase 2 (created) | 4.3 (adds ShopNode export) | Append-only, safe |
+| `void-breaker/app/src/managers/__init__.py` | Phase 2 (created) | 4.4, 4.5, 4.6 (add exports) | Append-only, safe |
+| `void-breaker/app/src/states/__init__.py` | Phase 1 (created) | 4.2 (registers ShopPhase) | Append-only, safe |
 
 **Parallelisation:** Components 4.4, 4.5, and 4.6 can run in parallel (no shared files). Component 4.3 can run in parallel with 4.4/4.5/4.6. Component 4.7 depends on 4.2, 4.3, 4.4, 4.5, and 4.6. Component 4.8 depends on all prior components.
 
@@ -164,9 +164,9 @@ Implements the `ShopPhase` game state that activates between combat levels. The 
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - **Create**: `asterax/app/src/states/shop.py` (replaces stub)
-  - **Modify**: `asterax/app/src/states/__init__.py` (register `ShopPhase`)
-  - **Modify**: `asterax/app/src/states/combat.py` (add transition to `ShopPhase` on level clear)
+  - **Create**: `void-breaker/app/src/states/shop.py` (replaces stub)
+  - **Modify**: `void-breaker/app/src/states/__init__.py` (register `ShopPhase`)
+  - **Modify**: `void-breaker/app/src/states/combat.py` (add transition to `ShopPhase` on level clear)
 - **Key Functions/Classes**:
   - `ShopPhase` class with state protocol methods (`on_enter`, `on_exit`, `on_update`, `on_draw`, `on_key_press`, `on_key_release`)
   - `ShopPhase._generate_node_layout()` — calculates node positions in a circle
@@ -178,9 +178,9 @@ Implements the `ShopPhase` game state that activates between combat levels. The 
 - **Dependencies**: `arcade` (SpriteList, Sprite, check_for_collision)
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/states/shop.py`**: This is the core shop state. The `on_enter()` method receives the current `GameState` and `ShipState`, places the player ship at `(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)` with velocity zeroed, and calls `_generate_node_layout()` to create `ShopNode` entities arranged in a circle. The circle radius should be approximately 35-40% of the smaller screen dimension so all nodes are reachable without excessive travel. Nodes are evenly spaced around the circle (360 / node_count degrees apart). The "Continue" node is placed at the bottom of the circle (6 o'clock position) or slightly outside the ring. The `on_update(dt)` method applies ship physics (thrust, rotation from `InputManager`) but replaces the wrap logic with clamping: `ship.center_x = clamp(ship.center_x, 0, SCREEN_WIDTH)` and similarly for y. The `on_draw()` method renders the background (starfield), all shop nodes, the player ship, and a HUD overlay showing current currency. The shop phase must also draw text labels on each node (name, level, cost) — this can use `arcade.draw_text()` positioned relative to each node's centre. The `on_exit()` method cleans up shop node entities and prepares the game state for the next combat level (increment `GameState.current_level`, deduct insurance cost via `InsuranceManager` if active).
+- **File: `void-breaker/app/src/states/shop.py`**: This is the core shop state. The `on_enter()` method receives the current `GameState` and `ShipState`, places the player ship at `(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)` with velocity zeroed, and calls `_generate_node_layout()` to create `ShopNode` entities arranged in a circle. The circle radius should be approximately 35-40% of the smaller screen dimension so all nodes are reachable without excessive travel. Nodes are evenly spaced around the circle (360 / node_count degrees apart). The "Continue" node is placed at the bottom of the circle (6 o'clock position) or slightly outside the ring. The `on_update(dt)` method applies ship physics (thrust, rotation from `InputManager`) but replaces the wrap logic with clamping: `ship.center_x = clamp(ship.center_x, 0, SCREEN_WIDTH)` and similarly for y. The `on_draw()` method renders the background (starfield), all shop nodes, the player ship, and a HUD overlay showing current currency. The shop phase must also draw text labels on each node (name, level, cost) — this can use `arcade.draw_text()` positioned relative to each node's centre. The `on_exit()` method cleans up shop node entities and prepares the game state for the next combat level (increment `GameState.current_level`, deduct insurance cost via `InsuranceManager` if active).
 
-- **File: `asterax/app/src/states/combat.py` (modification)**: In the `CombatPhase` class, the level-clear check (all asteroids destroyed) currently transitions to the next combat level directly. Modify this to transition to `ShopPhase` instead. The transition should pass the current `GameState` and `ShipState` to the shop. After the shop, the `ShopPhase.on_exit()` increments the level and the state machine transitions back to `CombatPhase`. The combat -> shop transition should also play the `level_clear` sound via `AudioManager`.
+- **File: `void-breaker/app/src/states/combat.py` (modification)**: In the `CombatPhase` class, the level-clear check (all asteroids destroyed) currently transitions to the next combat level directly. Modify this to transition to `ShopPhase` instead. The transition should pass the current `GameState` and `ShipState` to the shop. After the shop, the `ShopPhase.on_exit()` increments the level and the state machine transitions back to `CombatPhase`. The combat -> shop transition should also play the `level_clear` sound via `AudioManager`.
 
 **Test Requirements**:
 - [ ] Unit tests: `ShopPhase` initialises correctly with ship at centre
@@ -241,8 +241,8 @@ Implements the `ShopNode` entity — a purchasable upgrade node rendered as a co
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - **Create**: `asterax/app/src/entities/shop_node.py`
-  - **Modify**: `asterax/app/src/entities/__init__.py` (add `ShopNode` export)
+  - **Create**: `void-breaker/app/src/entities/shop_node.py`
+  - **Modify**: `void-breaker/app/src/entities/__init__.py` (add `ShopNode` export)
 - **Key Functions/Classes**:
   - `ShopNode(arcade.Sprite)` — main entity class
   - `ShopNode.__init__(upgrade_definition, current_level, texture_path)` — initialises with upgrade reference
@@ -257,9 +257,9 @@ Implements the `ShopNode` entity — a purchasable upgrade node rendered as a co
 - **Dependencies**: `arcade` (Sprite, draw_text, load_texture)
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/entities/shop_node.py`**: The `ShopNode` class extends `arcade.Sprite`. The constructor takes an `UpgradeDefinition` (or `None` for the Continue node), loads the appropriate orb texture from `assets/sprites/shop/` based on the upgrade's category, and stores the upgrade reference. The `calculate_cost()` method implements the cost formula: `int(base_cost * (cost_scaling ** current_level))` where `current_level` is the player's current level for this upgrade (0 = not purchased, cost is `base_cost`; level 1 = cost is `base_cost * cost_scaling`; etc.). The `can_purchase()` method returns `True` only if `currency >= calculate_cost(current_level)` AND `current_level < max_level`. The `update_visual_state()` method is called each frame to adjust the node's visual presentation: if affordable, the node's `alpha` oscillates between 200 and 255 on a sine wave (period ~1 second) to create a subtle pulse; if unaffordable, `alpha` is set to 100 (dimmed); if at max level, `alpha` is 150 with no pulse. The `on_draw_label()` method uses `arcade.draw_text()` to render three lines of text below the sprite: the upgrade name (white, 12pt), the level indicator ("Lv {current}/{max}" or "MAX", 10pt), and the cost ("{cost}c" or "---" if maxed, gold colour, 10pt). For the `ContinueNode` subclass, the texture is `node_continue.png`, no cost/level labels are shown, and the label simply reads "Continue" or "Next Level". The continue node pulses continuously (always "affordable").
+- **File: `void-breaker/app/src/entities/shop_node.py`**: The `ShopNode` class extends `arcade.Sprite`. The constructor takes an `UpgradeDefinition` (or `None` for the Continue node), loads the appropriate orb texture from `assets/sprites/shop/` based on the upgrade's category, and stores the upgrade reference. The `calculate_cost()` method implements the cost formula: `int(base_cost * (cost_scaling ** current_level))` where `current_level` is the player's current level for this upgrade (0 = not purchased, cost is `base_cost`; level 1 = cost is `base_cost * cost_scaling`; etc.). The `can_purchase()` method returns `True` only if `currency >= calculate_cost(current_level)` AND `current_level < max_level`. The `update_visual_state()` method is called each frame to adjust the node's visual presentation: if affordable, the node's `alpha` oscillates between 200 and 255 on a sine wave (period ~1 second) to create a subtle pulse; if unaffordable, `alpha` is set to 100 (dimmed); if at max level, `alpha` is 150 with no pulse. The `on_draw_label()` method uses `arcade.draw_text()` to render three lines of text below the sprite: the upgrade name (white, 12pt), the level indicator ("Lv {current}/{max}" or "MAX", 10pt), and the cost ("{cost}c" or "---" if maxed, gold colour, 10pt). For the `ContinueNode` subclass, the texture is `node_continue.png`, no cost/level labels are shown, and the label simply reads "Continue" or "Next Level". The continue node pulses continuously (always "affordable").
 
-- **File: `asterax/app/src/entities/__init__.py` (modification)**: Add `ShopNode` and `ContinueNode` to the module's public exports. This is an append-only change — do not modify existing exports.
+- **File: `void-breaker/app/src/entities/__init__.py` (modification)**: Add `ShopNode` and `ContinueNode` to the module's public exports. This is an append-only change — do not modify existing exports.
 
 **Test Requirements**:
 - [ ] Unit tests: `ShopNode.calculate_cost()` returns correct values for levels 0-5 with known base_cost and cost_scaling
@@ -328,9 +328,9 @@ Implements the `UpgradeManager` — the central system for tracking purchased up
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - **Create**: `asterax/app/src/managers/upgrade_manager.py`
-  - **Modify**: `asterax/app/src/config/upgrade_definitions.py` (populate with full upgrade data)
-  - **Modify**: `asterax/app/src/managers/__init__.py` (add `UpgradeManager` export)
+  - **Create**: `void-breaker/app/src/managers/upgrade_manager.py`
+  - **Modify**: `void-breaker/app/src/config/upgrade_definitions.py` (populate with full upgrade data)
+  - **Modify**: `void-breaker/app/src/managers/__init__.py` (add `UpgradeManager` export)
 - **Key Functions/Classes**:
   - `UpgradeManager.__init__(ship_state, game_state, upgrade_definitions)` — initialises with references to mutable state
   - `UpgradeManager.apply_upgrade(upgrade_id: str) -> bool` — applies an upgrade, returns `True` on success
@@ -349,9 +349,9 @@ Implements the `UpgradeManager` — the central system for tracking purchased up
 - **Dependencies**: None (pure Python logic operating on dataclasses)
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/managers/upgrade_manager.py`**: The `UpgradeManager` holds a reference to the `ShipState` (to read base stats and write effective stats), the `GameState` (to read/write shields for repairs), and the list of `UpgradeDefinition` objects (loaded from `upgrade_definitions.py`). Internally, it maintains a `dict[str, int]` mapping `upgrade_id` to current level (all starting at 0). The `apply_upgrade()` method: (1) looks up the `UpgradeDefinition` by `upgrade_id`, (2) checks `current_level < max_level`, (3) increments the level, (4) calls `recalculate_all_stats()`. For the "repairs" upgrade specifically, `apply_repair()` restores shields by a fixed amount (defined in the repair `UpgradeDefinition.effect_per_level` field) capped at `max_shields` — repairs do NOT increment a persistent level. The `recalculate_all_stats()` method iterates all upgrade definitions, computes `base_value + (current_level * effect_per_level)` for each stat key, and writes the result to the corresponding `effective_*` field on `ShipState`. The mapping from `stat_key` to `ShipState` field is direct: e.g., `stat_key="thrust"` maps to `ShipState.effective_thrust = ShipState.base_thrust + (level * effect_per_level)`. For defense shields, the upgrade increases `max_shields` (and current shields by the same delta, so the player immediately gains the new shield capacity). For the score bonus multiplier, the upgrade level is stored but does not modify `ShipState` — instead, `get_score_multiplier()` returns the multiplier for `ScoreManager` to apply. The `set_levels()` method is used by the insurance system to restore upgrade levels after death — it bulk-sets levels and calls `recalculate_all_stats()`.
+- **File: `void-breaker/app/src/managers/upgrade_manager.py`**: The `UpgradeManager` holds a reference to the `ShipState` (to read base stats and write effective stats), the `GameState` (to read/write shields for repairs), and the list of `UpgradeDefinition` objects (loaded from `upgrade_definitions.py`). Internally, it maintains a `dict[str, int]` mapping `upgrade_id` to current level (all starting at 0). The `apply_upgrade()` method: (1) looks up the `UpgradeDefinition` by `upgrade_id`, (2) checks `current_level < max_level`, (3) increments the level, (4) calls `recalculate_all_stats()`. For the "repairs" upgrade specifically, `apply_repair()` restores shields by a fixed amount (defined in the repair `UpgradeDefinition.effect_per_level` field) capped at `max_shields` — repairs do NOT increment a persistent level. The `recalculate_all_stats()` method iterates all upgrade definitions, computes `base_value + (current_level * effect_per_level)` for each stat key, and writes the result to the corresponding `effective_*` field on `ShipState`. The mapping from `stat_key` to `ShipState` field is direct: e.g., `stat_key="thrust"` maps to `ShipState.effective_thrust = ShipState.base_thrust + (level * effect_per_level)`. For defense shields, the upgrade increases `max_shields` (and current shields by the same delta, so the player immediately gains the new shield capacity). For the score bonus multiplier, the upgrade level is stored but does not modify `ShipState` — instead, `get_score_multiplier()` returns the multiplier for `ScoreManager` to apply. The `set_levels()` method is used by the insurance system to restore upgrade levels after death — it bulk-sets levels and calls `recalculate_all_stats()`.
 
-- **File: `asterax/app/src/config/upgrade_definitions.py`**: Phase 1 created the `UpgradeDefinition` dataclass and `UpgradeCategory` enum. This component populates the module with the actual upgrade data. Define a list `ALL_UPGRADES: list[UpgradeDefinition]` containing the following entries (values are starting points for balance tuning):
+- **File: `void-breaker/app/src/config/upgrade_definitions.py`**: Phase 1 created the `UpgradeDefinition` dataclass and `UpgradeCategory` enum. This component populates the module with the actual upgrade data. Define a list `ALL_UPGRADES: list[UpgradeDefinition]` containing the following entries (values are starting points for balance tuning):
 
   | id | category | name | max_level | base_cost | cost_scaling | effect_per_level | stat_key |
   |----|----------|------|-----------|-----------|--------------|------------------|----------|
@@ -430,8 +430,8 @@ Implements the `InsuranceManager` — the system that manages the player's insur
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - **Create**: `asterax/app/src/managers/insurance_manager.py`
-  - **Modify**: `asterax/app/src/managers/__init__.py` (add `InsuranceManager` export)
+  - **Create**: `void-breaker/app/src/managers/insurance_manager.py`
+  - **Modify**: `void-breaker/app/src/managers/__init__.py` (add `InsuranceManager` export)
 - **Key Functions/Classes**:
   - `InsuranceManager.__init__(insurance_state, currency_manager, upgrade_manager)` — initialises with references
   - `InsuranceManager.set_tier(tier: InsuranceTier)` — changes insurance tier
@@ -446,7 +446,7 @@ Implements the `InsuranceManager` — the system that manages the player's insur
 - **Dependencies**: None (pure Python logic; depends on `CurrencyManager` and `UpgradeManager` interfaces)
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/managers/insurance_manager.py`**: The `InsuranceManager` holds a reference to the `InsuranceState` dataclass (which stores `tier`, `cost_per_level`, and `retention_fraction`), the `CurrencyManager` (for deducting costs), and the `UpgradeManager` (for reading/setting upgrade levels). The tier costs are defined as constants or a config dataclass:
+- **File: `void-breaker/app/src/managers/insurance_manager.py`**: The `InsuranceManager` holds a reference to the `InsuranceState` dataclass (which stores `tier`, `cost_per_level`, and `retention_fraction`), the `CurrencyManager` (for deducting costs), and the `UpgradeManager` (for reading/setting upgrade levels). The tier costs are defined as constants or a config dataclass:
 
   | Tier | Base Cost Per Level | Retention Fraction |
   |------|--------------------|--------------------|
@@ -516,8 +516,8 @@ Implements the `CurrencyManager` — the single authority for all currency trans
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - **Rewrite**: `asterax/app/src/managers/currency_manager.py` (refactors and replaces the basic `currency_manager.py` created in Phase 2.5. Phase 2.5 must be complete before 4.6. Phase 2's collision handlers that reference `GameState.currency` directly will be updated by this component to use `CurrencyManager` methods)
-  - **Modify**: `asterax/app/src/managers/__init__.py` (add `CurrencyManager` export)
+  - **Rewrite**: `void-breaker/app/src/managers/currency_manager.py` (refactors and replaces the basic `currency_manager.py` created in Phase 2.5. Phase 2.5 must be complete before 4.6. Phase 2's collision handlers that reference `GameState.currency` directly will be updated by this component to use `CurrencyManager` methods)
+  - **Modify**: `void-breaker/app/src/managers/__init__.py` (add `CurrencyManager` export)
 - **Key Functions/Classes**:
   - `CurrencyManager.__init__(game_state)` — initialises with reference to `GameState`
   - `CurrencyManager.earn(amount: int)` — adds currency, updates `total_earned`
@@ -533,9 +533,9 @@ Implements the `CurrencyManager` — the single authority for all currency trans
 - **Dependencies**: None (pure Python logic operating on `GameState`)
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/managers/currency_manager.py`**: The `CurrencyManager` wraps all access to `GameState.currency`. It holds a reference to the `GameState` and maintains two internal counters: `_total_earned: int = 0` and `_total_spent: int = 0`. The `earn()` method adds the given amount to `GameState.currency` and increments `_total_earned`. The `spend()` method checks `GameState.currency >= amount` — if yes, deducts and increments `_total_spent`, returning `True`; if no, returns `False` without modification. The `deduct()` method behaves identically to `spend()` but is a semantic alias for insurance deductions (both track spending). The `can_spend()` method is a read-only check returning `GameState.currency >= amount`. All amount parameters must be validated as positive integers — passing zero or negative amounts should raise a `ValueError`. The `get_run_stats()` method returns a `CurrencyRunStats` dataclass for the game-over summary. The `CurrencyManager` also exposes a `reset()` method called at the start of a new run to zero out `GameState.currency` and both tracking counters. Integration note: Phase 2's currency pickup collection code (in `CombatPhase` or `CollisionSystem`) currently writes directly to `GameState.currency` — this must be refactored to call `CurrencyManager.earn()` instead. This is the only cross-file modification: the collision handler that awards currency from pickups must be updated to use the manager.
+- **File: `void-breaker/app/src/managers/currency_manager.py`**: The `CurrencyManager` wraps all access to `GameState.currency`. It holds a reference to the `GameState` and maintains two internal counters: `_total_earned: int = 0` and `_total_spent: int = 0`. The `earn()` method adds the given amount to `GameState.currency` and increments `_total_earned`. The `spend()` method checks `GameState.currency >= amount` — if yes, deducts and increments `_total_spent`, returning `True`; if no, returns `False` without modification. The `deduct()` method behaves identically to `spend()` but is a semantic alias for insurance deductions (both track spending). The `can_spend()` method is a read-only check returning `GameState.currency >= amount`. All amount parameters must be validated as positive integers — passing zero or negative amounts should raise a `ValueError`. The `get_run_stats()` method returns a `CurrencyRunStats` dataclass for the game-over summary. The `CurrencyManager` also exposes a `reset()` method called at the start of a new run to zero out `GameState.currency` and both tracking counters. Integration note: Phase 2's currency pickup collection code (in `CombatPhase` or `CollisionSystem`) currently writes directly to `GameState.currency` — this must be refactored to call `CurrencyManager.earn()` instead. This is the only cross-file modification: the collision handler that awards currency from pickups must be updated to use the manager.
 
-- **File: `asterax/app/src/managers/__init__.py` (modification)**: Add `CurrencyManager` and `CurrencyRunStats` to the public exports.
+- **File: `void-breaker/app/src/managers/__init__.py` (modification)**: Add `CurrencyManager` and `CurrencyRunStats` to the public exports.
 
 **Test Requirements**:
 - [ ] Unit tests: `earn()` increases balance and tracks total
@@ -600,8 +600,8 @@ Polishes the complete shop purchase flow by implementing the ship re-centring me
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - **Modify**: `asterax/app/src/states/shop.py` (add re-centring logic, purchase flow, Enter key handling)
-  - **Modify**: `asterax/app/src/entities/shop_node.py` (add collision response method if not already present)
+  - **Modify**: `void-breaker/app/src/states/shop.py` (add re-centring logic, purchase flow, Enter key handling)
+  - **Modify**: `void-breaker/app/src/entities/shop_node.py` (add collision response method if not already present)
 - **Key Functions/Classes**:
   - `ShopPhase._handle_node_collision(node: ShopNode)` — orchestrates the purchase flow
   - `ShopPhase._start_recentre()` — begins the interpolation to centre
@@ -615,9 +615,9 @@ Polishes the complete shop purchase flow by implementing the ship re-centring me
 - **Dependencies**: `arcade` (for collision detection), `math` (for interpolation)
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/states/shop.py` (modification)**: Add a re-centring state machine within `ShopPhase`. New instance variables: `_recentre_active: bool = False`, `_recentre_elapsed: float = 0.0`, `_recentre_duration: float = 0.3`, `_recentre_start_x: float`, `_recentre_start_y: float`. The `_start_recentre()` method captures the ship's current position as the start point and sets `_recentre_active = True`. The `_update_recentre(dt)` method is called from `on_update()` when re-centring is active: it increments `_recentre_elapsed`, calculates a normalized progress `t = min(_recentre_elapsed / _recentre_duration, 1.0)`, applies an ease-out curve `t_eased = 1.0 - (1.0 - t) ** 2`, and interpolates the ship position: `ship.center_x = _recentre_start_x + (centre_x - _recentre_start_x) * t_eased`. When `t >= 1.0`, re-centring completes: set `_recentre_active = False`, snap ship to exact centre, zero ship velocity. During re-centring, the collision check in `on_update()` is skipped (the `if _recentre_active: return` guard at the top of the collision section). The `_handle_node_collision()` method is the central purchase orchestrator. When a collision is detected (via `arcade.check_for_collision_with_list(ship, shop_nodes)`), it identifies the collided node, checks if re-centring is active (skip if so), then branches: for a `ContinueNode`, call `_handle_continue()`; for a regular `ShopNode`, check `node.can_purchase(currency_manager.get_balance(), upgrade_manager.get_level(node.upgrade_id))` — if `True`, call `currency_manager.spend(node.calculate_cost(...))`, `upgrade_manager.apply_upgrade(node.upgrade_id)`, `audio_manager.play('shop_purchase')`, then `_start_recentre()`; if `False`, call `audio_manager.play('shop_denied')` only. For the insurance node, the purchase changes the insurance tier via `InsuranceManager.set_tier()` (cycling OFF -> BASIC -> PREMIUM -> OFF, or a direct tier based on the node). After any successful purchase, call `update_visual_state()` on all nodes to refresh affordability indicators. The Enter key handler in `on_key_press()` calls `_handle_continue()` directly.
+- **File: `void-breaker/app/src/states/shop.py` (modification)**: Add a re-centring state machine within `ShopPhase`. New instance variables: `_recentre_active: bool = False`, `_recentre_elapsed: float = 0.0`, `_recentre_duration: float = 0.3`, `_recentre_start_x: float`, `_recentre_start_y: float`. The `_start_recentre()` method captures the ship's current position as the start point and sets `_recentre_active = True`. The `_update_recentre(dt)` method is called from `on_update()` when re-centring is active: it increments `_recentre_elapsed`, calculates a normalized progress `t = min(_recentre_elapsed / _recentre_duration, 1.0)`, applies an ease-out curve `t_eased = 1.0 - (1.0 - t) ** 2`, and interpolates the ship position: `ship.center_x = _recentre_start_x + (centre_x - _recentre_start_x) * t_eased`. When `t >= 1.0`, re-centring completes: set `_recentre_active = False`, snap ship to exact centre, zero ship velocity. During re-centring, the collision check in `on_update()` is skipped (the `if _recentre_active: return` guard at the top of the collision section). The `_handle_node_collision()` method is the central purchase orchestrator. When a collision is detected (via `arcade.check_for_collision_with_list(ship, shop_nodes)`), it identifies the collided node, checks if re-centring is active (skip if so), then branches: for a `ContinueNode`, call `_handle_continue()`; for a regular `ShopNode`, check `node.can_purchase(currency_manager.get_balance(), upgrade_manager.get_level(node.upgrade_id))` — if `True`, call `currency_manager.spend(node.calculate_cost(...))`, `upgrade_manager.apply_upgrade(node.upgrade_id)`, `audio_manager.play('shop_purchase')`, then `_start_recentre()`; if `False`, call `audio_manager.play('shop_denied')` only. For the insurance node, the purchase changes the insurance tier via `InsuranceManager.set_tier()` (cycling OFF -> BASIC -> PREMIUM -> OFF, or a direct tier based on the node). After any successful purchase, call `update_visual_state()` on all nodes to refresh affordability indicators. The Enter key handler in `on_key_press()` calls `_handle_continue()` directly.
 
-- **File: `asterax/app/src/entities/shop_node.py` (modification)**: Ensure the `ShopNode` has an `upgrade_id` property that returns the `UpgradeDefinition.id`. Add a `is_insurance_node: bool` property. Add a `is_continue_node: bool` property (always `False` for `ShopNode`, `True` for `ContinueNode`). These properties let `ShopPhase._handle_node_collision()` branch on node type without `isinstance` checks.
+- **File: `void-breaker/app/src/entities/shop_node.py` (modification)**: Ensure the `ShopNode` has an `upgrade_id` property that returns the `UpgradeDefinition.id`. Add a `is_insurance_node: bool` property. Add a `is_continue_node: bool` property (always `False` for `ShopNode`, `True` for `ContinueNode`). These properties let `ShopPhase._handle_node_collision()` branch on node type without `isinstance` checks.
 
 **Test Requirements**:
 - [ ] Unit tests: Re-centring interpolation reaches exact centre at t=1.0
@@ -682,10 +682,10 @@ Provides comprehensive test coverage for all Phase 4 components and creates all 
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - **Create**: `asterax/tests/test_upgrades.py`
-  - **Create**: `asterax/tests/test_insurance.py`
-  - **Create**: `asterax/tests/test_currency.py`
-  - **Create**: `asterax/tests/test_shop.py`
+  - **Create**: `void-breaker/tests/test_upgrades.py`
+  - **Create**: `void-breaker/tests/test_insurance.py`
+  - **Create**: `void-breaker/tests/test_currency.py`
+  - **Create**: `void-breaker/tests/test_shop.py`
   - **Create**: `docs/components/phase-4-component-4-2-overview.md`
   - **Create**: `docs/components/phase-4-component-4-3-overview.md`
   - **Create**: `docs/components/phase-4-component-4-4-overview.md`
@@ -693,7 +693,7 @@ Provides comprehensive test coverage for all Phase 4 components and creates all 
   - **Create**: `docs/components/phase-4-component-4-6-overview.md`
   - **Create**: `docs/components/phase-4-component-4-7-overview.md`
   - **Create**: `docs/implementation-context-phase-4.md`
-  - **Modify**: `asterax/tests/conftest.py` (add fixtures for UpgradeManager, InsuranceManager, CurrencyManager, ShopPhase)
+  - **Modify**: `void-breaker/tests/conftest.py` (add fixtures for UpgradeManager, InsuranceManager, CurrencyManager, ShopPhase)
 - **Key Functions/Classes**:
   - `conftest.py`: `upgrade_manager_fixture`, `insurance_manager_fixture`, `currency_manager_fixture`, `shop_phase_fixture`, `sample_upgrade_definitions`, `sample_game_state`, `sample_ship_state`
   - `test_upgrades.py`: Test classes for `UpgradeManager` covering all upgrade types, cost scaling, max level, stat recalculation
@@ -706,19 +706,19 @@ Provides comprehensive test coverage for all Phase 4 components and creates all 
 - **Dependencies**: `pytest`, `pytest-cov`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/tests/test_upgrades.py`**: Organise tests into logical groups. `TestUpgradeApplication`: test that `apply_upgrade()` increments level, recalculates stats, and returns `True`; test that applying at max level returns `False`. `TestCostScaling`: parametrized test that verifies `get_cost()` for all 11 upgrades at levels 0-5. `TestStatRecalculation`: test that `recalculate_all_stats()` produces `effective_X = base_X + (level * effect_per_level)` for each stat. `TestRepairs`: test that `apply_repair()` restores shields capped at `max_shields`. `TestScoreMultiplier`: test that `get_score_multiplier()` returns correct values. `TestSetLevels`: test that `set_levels()` bulk-restores and recalculates. All tests should use pytest fixtures that create `ShipState` and `GameState` with known base values.
+- **File: `void-breaker/tests/test_upgrades.py`**: Organise tests into logical groups. `TestUpgradeApplication`: test that `apply_upgrade()` increments level, recalculates stats, and returns `True`; test that applying at max level returns `False`. `TestCostScaling`: parametrized test that verifies `get_cost()` for all 11 upgrades at levels 0-5. `TestStatRecalculation`: test that `recalculate_all_stats()` produces `effective_X = base_X + (level * effect_per_level)` for each stat. `TestRepairs`: test that `apply_repair()` restores shields capped at `max_shields`. `TestScoreMultiplier`: test that `get_score_multiplier()` returns correct values. `TestSetLevels`: test that `set_levels()` bulk-restores and recalculates. All tests should use pytest fixtures that create `ShipState` and `GameState` with known base values.
 
-- **File: `asterax/tests/test_insurance.py`**: `TestInsuranceTiers`: test set/get tier. `TestCostDeduction`: parametrized test for `deduct_level_cost()` at various game levels and tiers. `TestCostDeductionFailure`: test that unaffordable deduction downgrades to OFF. `TestRetentionCalculation`: parametrized test with varied upgrade levels, verifying BASIC retains `int(level * 0.5)`, PREMIUM retains all, OFF retains zero. `TestRetentionExcludesRepairs`: test that the repairs "upgrade" is excluded. `TestApplyRetention`: test that `apply_retention()` calls `UpgradeManager.set_levels()` with correct retained levels.
+- **File: `void-breaker/tests/test_insurance.py`**: `TestInsuranceTiers`: test set/get tier. `TestCostDeduction`: parametrized test for `deduct_level_cost()` at various game levels and tiers. `TestCostDeductionFailure`: test that unaffordable deduction downgrades to OFF. `TestRetentionCalculation`: parametrized test with varied upgrade levels, verifying BASIC retains `int(level * 0.5)`, PREMIUM retains all, OFF retains zero. `TestRetentionExcludesRepairs`: test that the repairs "upgrade" is excluded. `TestApplyRetention`: test that `apply_retention()` calls `UpgradeManager.set_levels()` with correct retained levels.
 
-- **File: `asterax/tests/test_currency.py`**: `TestEarn`: test earn adds to balance and tracks total. `TestSpend`: test spend succeeds/fails correctly. `TestCanSpend`: test read-only check. `TestDeduct`: test deduction for insurance. `TestValidation`: test that non-positive amounts raise `ValueError`. `TestRunStats`: test cumulative tracking after mixed operations. `TestReset`: test that reset zeroes everything.
+- **File: `void-breaker/tests/test_currency.py`**: `TestEarn`: test earn adds to balance and tracks total. `TestSpend`: test spend succeeds/fails correctly. `TestCanSpend`: test read-only check. `TestDeduct`: test deduction for insurance. `TestValidation`: test that non-positive amounts raise `ValueError`. `TestRunStats`: test cumulative tracking after mixed operations. `TestReset`: test that reset zeroes everything.
 
-- **File: `asterax/tests/test_shop.py`**: `TestShopNodeCost`: test `calculate_cost()` for various levels. `TestShopNodeAffordability`: test `can_purchase()` with various currency/level combinations. `TestShopLayout`: test `_generate_node_layout()` produces correct positions for N nodes in a circle. `TestRecentring`: test interpolation math produces correct positions at t=0, 0.5, 1.0. `TestPurchaseFlow`: integration test mocking managers to verify the full purchase sequence (collision -> spend -> apply -> recentre). `TestDeniedFlow`: test that unaffordable collision triggers denied sound only.
+- **File: `void-breaker/tests/test_shop.py`**: `TestShopNodeCost`: test `calculate_cost()` for various levels. `TestShopNodeAffordability`: test `can_purchase()` with various currency/level combinations. `TestShopLayout`: test `_generate_node_layout()` produces correct positions for N nodes in a circle. `TestRecentring`: test interpolation math produces correct positions at t=0, 0.5, 1.0. `TestPurchaseFlow`: integration test mocking managers to verify the full purchase sequence (collision -> spend -> apply -> recentre). `TestDeniedFlow`: test that unaffordable collision triggers denied sound only.
 
 - **File: `docs/implementation-context-phase-4.md`**: Maximum 800 lines total (100 per component max). Summarise: what was built, key design decisions, patterns established, integration points with other phases, known limitations, and upgrade balance values chosen.
 
 **Test Requirements**:
-- [ ] `pytest -q --cov=asterax/app/src/managers --cov=asterax/app/src/states/shop --cov=asterax/app/src/entities/shop_node --cov-report=term-missing` reports 30%+ coverage
-- [ ] All tests pass: `pytest asterax/tests/test_upgrades.py asterax/tests/test_insurance.py asterax/tests/test_currency.py asterax/tests/test_shop.py -v`
+- [ ] `pytest -q --cov=void-breaker/app/src/managers --cov=void-breaker/app/src/states/shop --cov=void-breaker/app/src/entities/shop_node --cov-report=term-missing` reports 30%+ coverage
+- [ ] All tests pass: `pytest void-breaker/tests/test_upgrades.py void-breaker/tests/test_insurance.py void-breaker/tests/test_currency.py void-breaker/tests/test_shop.py -v`
 - [ ] No test requires an Arcade window or GPU (all logic-only tests)
 - [ ] Tests run in under 10 seconds total
 

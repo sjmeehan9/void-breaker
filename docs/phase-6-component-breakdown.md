@@ -99,8 +99,8 @@ Isolates all human-only tasks required before the automated build process can be
 - **Files to Create**:
   - `assets/icon.icns`
 - **Files to Modify**:
-  - `asterax/app/src/window.py` (window title string if not already finalised)
-  - `asterax/app/src/states/main_menu.py` (title text if not already finalised)
+  - `void-breaker/app/src/window.py` (window title string if not already finalised)
+  - `void-breaker/app/src/states/main_menu.py` (title text if not already finalised)
   - Any other files containing placeholder product name strings
 - **Key Functions/Classes**: N/A (asset creation and string review)
 - **Human/AI Agent**: All items are Human tasks — icon creation requires design tooling (e.g., macOS `iconutil`, Sketch, Figma, or GIMP), name finalisation requires product decision, asset review requires visual/audio inspection
@@ -111,7 +111,7 @@ Isolates all human-only tasks required before the automated build process can be
 **Detailed Implementation Requirements**:
 - **File: `assets/icon.icns`**: Create a macOS application icon that represents VoidBreaker's identity — a space-themed design consistent with the retro arcade aesthetic. The `.icns` file must be generated from a `.iconset` folder containing the following PNG files: `icon_16x16.png`, `icon_16x16@2x.png` (32x32), `icon_32x32.png`, `icon_32x32@2x.png` (64x64), `icon_128x128.png`, `icon_128x128@2x.png` (256x256), `icon_256x256.png`, `icon_256x256@2x.png` (512x512), `icon_512x512.png`, `icon_512x512@2x.png` (1024x1024). Use `iconutil -c icns VoidBreaker.iconset` to generate the `.icns` file. The icon should work well at small sizes (dock, Finder sidebar) and large sizes (Finder icon view). Suggested design: a stylised ship silhouette against a dark space background with a subtle glow effect, or a geometric shard/asteroid motif matching the game's retro aesthetic.
 
-- **User-facing string review**: Search the entire `asterax/app/src/` directory for any occurrences of placeholder names or generic titles. The confirmed product name must appear consistently in: `window.py` (the `self.set_caption()` or `title=` argument), `main_menu.py` (the rendered title text), any "About" or credits text, and the persistence directory path (should already be `VoidBreaker` via `platformdirs`). Run: `grep -rn "Asterax\|asterax\|ASTERAX\|placeholder\|PLACEHOLDER\|TODO\|FIXME\|todo\|fixme" asterax/app/src/` and resolve all findings. Note: the project directory name `asterax-tribute` and internal package name `asterax` in imports do NOT need to change — only user-facing strings visible to players matter.
+- **User-facing string review**: Search the entire `void-breaker/app/src/` directory for any occurrences of placeholder names or generic titles. The confirmed product name must appear consistently in: `window.py` (the `self.set_caption()` or `title=` argument), `main_menu.py` (the rendered title text), any "About" or credits text, and the persistence directory path (should already be `VoidBreaker` via `platformdirs`). Run: `grep -rn "Asterax\|asterax\|ASTERAX\|placeholder\|PLACEHOLDER\|TODO\|FIXME\|todo\|fixme" void-breaker/app/src/` and resolve all findings. Note: the project directory name `asterax-tribute` and internal package name `asterax` in imports do NOT need to change — only user-facing strings visible to players matter.
 
 **Test Requirements**:
 - [ ] Manual testing: Verify `assets/icon.icns` opens correctly in macOS Preview or Finder's Get Info
@@ -144,7 +144,7 @@ The `.icns` creation process on macOS is: (1) create a folder named `VoidBreaker
 **Dependencies**:
 - 6.1: Application icon (`assets/icon.icns`) must exist; product name must be finalised
 - Phase 5 (all): Complete game with all assets in `assets/` directory
-- Phase 1 (1.2): Entry point is `asterax/app/src/main.py`
+- Phase 1 (1.2): Entry point is `void-breaker/app/src/main.py`
 - `pyproject.toml`: Package is installable via `pip install -e .`
 
 **Features**:
@@ -186,7 +186,7 @@ Creates the PyInstaller configuration that packages VoidBreaker into a standalon
 **Detailed Implementation Requirements**:
 - **File: `VoidBreaker.spec`**: The spec file must be a complete PyInstaller configuration, not a minimal auto-generated stub. Key sections:
 
-  **Analysis block**: The entry point is `asterax/app/src/main.py`. The `pathex` should include the project root. `hiddenimports` must include all modules that Arcade and pyglet load dynamically: `['arcade', 'arcade.camera', 'arcade.color', 'arcade.csscolor', 'arcade.resources', 'arcade.text', 'arcade.tilemap', 'pyglet', 'pyglet.gl', 'pyglet.media', 'pyglet.media.codecs', 'pyglet.media.codecs.wave', 'pyglet.media.drivers', 'pyglet.media.drivers.openal', 'pyglet.window', 'pyglet.window.cocoa', 'pyglet.canvas', 'pyglet.canvas.cocoa', 'pyglet.libs', 'pyglet.libs.darwin', 'pyglet.libs.darwin.cocoa', 'pyglet.image', 'pyglet.image.codecs', 'pyglet.image.codecs.png', 'pyglet.font', 'pyglet.font.quartz', 'OpenGL', 'OpenGL.GL', 'OpenGL.platform', 'OpenGL.platform.darwin', 'ctypes', 'ctypes.util', 'json', 'pathlib', 'dataclasses', 'enum', 'math', 'random', 'time', 'logging', 'platformdirs']`. This list may need expansion during testing — hidden import errors manifest as `ModuleNotFoundError` at runtime. The `datas` field maps asset directories into the bundle: `[('asterax/assets/sprites', 'assets/sprites'), ('asterax/assets/sounds', 'assets/sounds'), ('asterax/assets/fonts', 'assets/fonts'), ('assets/icon.icns', '.')]`. Note: the exact source paths depend on the project's asset directory structure — verify the actual paths before writing the spec. `excludes` should include modules not needed at runtime to reduce bundle size: `['tkinter', 'unittest', 'test', 'distutils', 'setuptools', 'pip', 'wheel', 'pytest', 'black', 'isort', 'mypy']`.
+  **Analysis block**: The entry point is `void-breaker/app/src/main.py`. The `pathex` should include the project root. `hiddenimports` must include all modules that Arcade and pyglet load dynamically: `['arcade', 'arcade.camera', 'arcade.color', 'arcade.csscolor', 'arcade.resources', 'arcade.text', 'arcade.tilemap', 'pyglet', 'pyglet.gl', 'pyglet.media', 'pyglet.media.codecs', 'pyglet.media.codecs.wave', 'pyglet.media.drivers', 'pyglet.media.drivers.openal', 'pyglet.window', 'pyglet.window.cocoa', 'pyglet.canvas', 'pyglet.canvas.cocoa', 'pyglet.libs', 'pyglet.libs.darwin', 'pyglet.libs.darwin.cocoa', 'pyglet.image', 'pyglet.image.codecs', 'pyglet.image.codecs.png', 'pyglet.font', 'pyglet.font.quartz', 'OpenGL', 'OpenGL.GL', 'OpenGL.platform', 'OpenGL.platform.darwin', 'ctypes', 'ctypes.util', 'json', 'pathlib', 'dataclasses', 'enum', 'math', 'random', 'time', 'logging', 'platformdirs']`. This list may need expansion during testing — hidden import errors manifest as `ModuleNotFoundError` at runtime. The `datas` field maps asset directories into the bundle: `[('void-breaker/assets/sprites', 'assets/sprites'), ('void-breaker/assets/sounds', 'assets/sounds'), ('void-breaker/assets/fonts', 'assets/fonts'), ('assets/icon.icns', '.')]`. Note: the exact source paths depend on the project's asset directory structure — verify the actual paths before writing the spec. `excludes` should include modules not needed at runtime to reduce bundle size: `['tkinter', 'unittest', 'test', 'distutils', 'setuptools', 'pip', 'wheel', 'pytest', 'black', 'isort', 'mypy']`.
 
   **PYZ, EXE, COLLECT blocks**: Standard PyInstaller configuration. The `EXE` name should be `'VoidBreaker'`. Set `console=False` for windowed mode (no terminal). Set `icon='assets/icon.icns'`.
 
@@ -203,7 +203,7 @@ Creates the PyInstaller configuration that packages VoidBreaker into a standalon
           return Path(sys._MEIPASS) / 'assets'
       return Path(__file__).resolve().parent.parent.parent / 'assets'
   ```
-  This function should be placed in `asterax/app/src/config/game_config.py` or a new `asterax/app/src/utils/paths.py` file. All asset loading throughout the codebase must use this function rather than hardcoded relative paths. If the existing code already uses a centralised asset path, modify it to include the `sys._MEIPASS` detection.
+  This function should be placed in `void-breaker/app/src/config/game_config.py` or a new `void-breaker/app/src/utils/paths.py` file. All asset loading throughout the codebase must use this function rather than hardcoded relative paths. If the existing code already uses a centralised asset path, modify it to include the `sys._MEIPASS` detection.
 
 - **File: `scripts/build_app.sh`**: A shell script that automates the build process. Steps: (1) Activate the virtual environment: `source .venv/bin/activate`. (2) Verify PyInstaller is installed: `pip show pyinstaller || pip install pyinstaller`. (3) Clean previous builds: `rm -rf build/ dist/`. (4) Run PyInstaller: `pyinstaller VoidBreaker.spec --noconfirm`. (5) Verify the output exists: check that `dist/VoidBreaker.app/Contents/MacOS/VoidBreaker` is an executable. (6) Print the bundle size: `du -sh dist/VoidBreaker.app`. (7) Print success message with path. The script should `set -e` to fail fast on any error. Make the script executable: `chmod +x scripts/build_app.sh`.
 
@@ -540,9 +540,9 @@ Creates all release-facing and project documentation, runs final verification of
 **Acceptance Criteria**:
 - [ ] `README.md` exists at the project root with: installation instructions (DMG drag-to-install), system requirements (macOS 13+, Apple Silicon or Intel), controls reference (all default key bindings), gameplay overview (combat, shop, insurance, scoring), known issues (if any), credits
 - [ ] `python scripts/evals.py` passes with zero findings (no TODO/FIXME, all docstrings present)
-- [ ] `pytest -q --cov=asterax/app/src --cov-report=term-missing` passes with 30%+ coverage
-- [ ] `black --check asterax/app/src/` passes
-- [ ] `isort --check-only asterax/app/src/` passes
+- [ ] `pytest -q --cov=void-breaker/app/src --cov-report=term-missing` passes with 30%+ coverage
+- [ ] `black --check void-breaker/app/src/` passes
+- [ ] `isort --check-only void-breaker/app/src/` passes
 - [ ] `docs/phase-6-summary.md` created with phase deliverables, decisions, and known issues
 - [ ] All component overview documents created: `docs/components/phase-6-component-6-1-overview.md` through `phase-6-component-6-6-overview.md`
 - [ ] `docs/implementation-context-phase-6.md` created with all component summaries (max 600 lines total)
@@ -600,9 +600,9 @@ Creates all release-facing and project documentation, runs final verification of
 
 **Test Requirements**:
 - [ ] `python scripts/evals.py` passes with zero findings
-- [ ] `pytest -q --cov=asterax/app/src --cov-report=term-missing` passes with 30%+ coverage
-- [ ] `black --check asterax/app/src/` passes
-- [ ] `isort --check-only asterax/app/src/` passes
+- [ ] `pytest -q --cov=void-breaker/app/src --cov-report=term-missing` passes with 30%+ coverage
+- [ ] `black --check void-breaker/app/src/` passes
+- [ ] `isort --check-only void-breaker/app/src/` passes
 - [ ] Manual review: `README.md` is accurate, complete, and free of typos
 - [ ] Manual review: All component overview documents exist in `docs/components/`
 - [ ] Manual review: `docs/phase-6-summary.md` accurately reflects what was delivered

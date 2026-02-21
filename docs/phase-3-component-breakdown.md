@@ -71,7 +71,7 @@ Phase 3 adds the full enemy combat system to VoidBreaker: two enemy ship archety
 **Owner**: Human
 
 **Dependencies**:
-- Phase 2 complete: asset directory structure exists at `asterax/assets/sprites/` and `asterax/assets/sounds/`
+- Phase 2 complete: asset directory structure exists at `void-breaker/assets/sprites/` and `void-breaker/assets/sounds/`
 
 **Features**:
 - Create placeholder enemy ship sprites (Basic Shooter, Aggressive) — Human
@@ -83,22 +83,22 @@ Phase 3 adds the full enemy combat system to VoidBreaker: two enemy ship archety
 Creates all visual and audio placeholder assets required for enemy combat. These are intentionally simple geometric shapes and basic waveform sounds — final art is deferred to Phase 5.1. All subsequent Phase 3 components depend on these assets being present in the correct directories.
 
 **Acceptance Criteria**:
-- [ ] `asterax/assets/sprites/enemy_basic.png` exists — a simple geometric shape (e.g., red triangle or diamond), 64x64px, transparent background
-- [ ] `asterax/assets/sprites/enemy_aggressive.png` exists — a visually distinct geometric shape (e.g., red/orange chevron or arrow), 64x64px, transparent background
-- [ ] `asterax/assets/sprites/projectile_enemy.png` exists — a small coloured dot or dash (e.g., red/orange), 8x8px or 16x4px, transparent background
-- [ ] `asterax/assets/sounds/enemy_fire.wav` exists — short percussive sound, 16-bit PCM mono WAV, under 100KB
-- [ ] `asterax/assets/sounds/enemy_explode.wav` exists — brief explosion sound distinct from asteroid explosions, 16-bit PCM mono WAV, under 200KB
-- [ ] `asterax/assets/sounds/player_hit.wav` exists — sharp impact sound for player damage, 16-bit PCM mono WAV, under 100KB
+- [ ] `void-breaker/assets/sprites/enemy_basic.png` exists — a simple geometric shape (e.g., red triangle or diamond), 64x64px, transparent background
+- [ ] `void-breaker/assets/sprites/enemy_aggressive.png` exists — a visually distinct geometric shape (e.g., red/orange chevron or arrow), 64x64px, transparent background
+- [ ] `void-breaker/assets/sprites/projectile_enemy.png` exists — a small coloured dot or dash (e.g., red/orange), 8x8px or 16x4px, transparent background
+- [ ] `void-breaker/assets/sounds/enemy_fire.wav` exists — short percussive sound, 16-bit PCM mono WAV, under 100KB
+- [ ] `void-breaker/assets/sounds/enemy_explode.wav` exists — brief explosion sound distinct from asteroid explosions, 16-bit PCM mono WAV, under 200KB
+- [ ] `void-breaker/assets/sounds/player_hit.wav` exists — sharp impact sound for player damage, 16-bit PCM mono WAV, under 100KB
 - [ ] All assets load without errors when passed to `arcade.load_texture()` / `arcade.load_sound()`
 
 **Technical Details**:
 - **Files to Create**:
-  - `asterax/assets/sprites/enemy_basic.png`
-  - `asterax/assets/sprites/enemy_aggressive.png`
-  - `asterax/assets/sprites/projectile_enemy.png`
-  - `asterax/assets/sounds/enemy_fire.wav`
-  - `asterax/assets/sounds/enemy_explode.wav`
-  - `asterax/assets/sounds/player_hit.wav`
+  - `void-breaker/assets/sprites/enemy_basic.png`
+  - `void-breaker/assets/sprites/enemy_aggressive.png`
+  - `void-breaker/assets/sprites/projectile_enemy.png`
+  - `void-breaker/assets/sounds/enemy_fire.wav`
+  - `void-breaker/assets/sounds/enemy_explode.wav`
+  - `void-breaker/assets/sounds/player_hit.wav`
 - **Dependencies**: None beyond a basic image editor and audio tool (e.g., Audacity, sfxr, or any waveform generator)
 
 **Detailed Implementation Requirements**:
@@ -158,8 +158,8 @@ Implements the `EnemyShip` entity with two distinct archetypes. Each archetype h
 
 **Technical Details**:
 - **Files to Create**:
-  - `asterax/app/src/entities/enemy_ship.py`
-  - `asterax/app/src/config/enemy_config.py`
+  - `void-breaker/app/src/entities/enemy_ship.py`
+  - `void-breaker/app/src/config/enemy_config.py`
 - **Files to Modify**: None (new files only — no serialisation constraint)
 - **Key Functions/Classes**:
   - `EnemyArchetype(Enum)` — BASIC, AGGRESSIVE
@@ -177,9 +177,9 @@ Implements the `EnemyShip` entity with two distinct archetypes. Each archetype h
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/entities/enemy_ship.py`**: Implement `EnemyShip` as a subclass of `arcade.Sprite`. The constructor accepts an `EnemyArchetype` enum and an `EnemyConfig` dataclass, loads the appropriate sprite texture (`enemy_basic.png` or `enemy_aggressive.png`), and initialises internal state: current health, fire cooldown timer, telegraph timer, spawn grace timer, and a boolean `is_telegraphing`. The `update_ai()` method is called each physics step with delta time and the player's current position. It handles movement (constant velocity toward the player with slight randomness to avoid perfectly predictable paths), spawn grace countdown, telegraph state management, and fire cooldown. Movement uses a simple "steer toward player" approach: compute the angle to the player, rotate the enemy's velocity vector toward that angle at a limited turn rate (prevents instant snapping). The `try_fire()` method checks if the fire cooldown has expired, initiates a telegraph if not already telegraphing (set `is_telegraphing = True`, reset telegraph timer), and once the telegraph duration elapses, creates and returns a new `Projectile` with `owner=ENEMY`. During the telegraph, the enemy sprite should pulse (scale oscillation between 1.0 and 1.15) or flash (alternate alpha between 255 and 180) to clearly signal the impending attack to the player. The `_calculate_aim()` method for BASIC archetype simply aims at the player's current position. For AGGRESSIVE, it adds a leading component: `predicted_position = player_position + player_velocity * lead_time`, where `lead_time` is proportional to distance / projectile_speed. The `take_damage()` method decrements health and returns whether the enemy is destroyed. Wrap-around is handled externally by the same `wrap_entity()` function used for all entities in Phase 2's `physics/wrap.py`.
+- **File: `void-breaker/app/src/entities/enemy_ship.py`**: Implement `EnemyShip` as a subclass of `arcade.Sprite`. The constructor accepts an `EnemyArchetype` enum and an `EnemyConfig` dataclass, loads the appropriate sprite texture (`enemy_basic.png` or `enemy_aggressive.png`), and initialises internal state: current health, fire cooldown timer, telegraph timer, spawn grace timer, and a boolean `is_telegraphing`. The `update_ai()` method is called each physics step with delta time and the player's current position. It handles movement (constant velocity toward the player with slight randomness to avoid perfectly predictable paths), spawn grace countdown, telegraph state management, and fire cooldown. Movement uses a simple "steer toward player" approach: compute the angle to the player, rotate the enemy's velocity vector toward that angle at a limited turn rate (prevents instant snapping). The `try_fire()` method checks if the fire cooldown has expired, initiates a telegraph if not already telegraphing (set `is_telegraphing = True`, reset telegraph timer), and once the telegraph duration elapses, creates and returns a new `Projectile` with `owner=ENEMY`. During the telegraph, the enemy sprite should pulse (scale oscillation between 1.0 and 1.15) or flash (alternate alpha between 255 and 180) to clearly signal the impending attack to the player. The `_calculate_aim()` method for BASIC archetype simply aims at the player's current position. For AGGRESSIVE, it adds a leading component: `predicted_position = player_position + player_velocity * lead_time`, where `lead_time` is proportional to distance / projectile_speed. The `take_damage()` method decrements health and returns whether the enemy is destroyed. Wrap-around is handled externally by the same `wrap_entity()` function used for all entities in Phase 2's `physics/wrap.py`.
 
-- **File: `asterax/app/src/config/enemy_config.py`**: Define the `EnemyArchetype` enum and `EnemyConfig` dataclass. Provide factory functions `get_basic_config()` and `get_aggressive_config()` that return pre-configured `EnemyConfig` instances with default values. The config includes: `speed` (pixels/second), `turn_rate` (degrees/second for steering), `fire_rate` (shots per second), `fire_cooldown` (1/fire_rate, computed), `health` (hit points), `point_value` (score awarded), `accuracy` (0.0 to 1.0, used for aim scatter), `telegraph_duration` (seconds of visual windup before firing), `spawn_grace_period` (seconds after spawn before AI activates firing), `projectile_speed` (pixels/second for enemy projectiles), `projectile_damage` (damage per hit), `currency_drop_chance` (probability of dropping currency on death), `buff_drop_chance` (probability of dropping a buff on death — used by component 3.7). Default values: Basic = {speed: 60, turn_rate: 45, fire_rate: 0.4, health: 1, point_value: 200, accuracy: 0.6, telegraph_duration: 0.4, spawn_grace_period: 1.0, projectile_speed: 250, projectile_damage: 15.0, currency_drop_chance: 0.5, buff_drop_chance: 0.05}. Aggressive = {speed: 120, turn_rate: 90, fire_rate: 0.8, health: 2, point_value: 500, accuracy: 0.85, telegraph_duration: 0.3, spawn_grace_period: 1.0, projectile_speed: 350, projectile_damage: 20.0, currency_drop_chance: 0.7, buff_drop_chance: 0.1}.
+- **File: `void-breaker/app/src/config/enemy_config.py`**: Define the `EnemyArchetype` enum and `EnemyConfig` dataclass. Provide factory functions `get_basic_config()` and `get_aggressive_config()` that return pre-configured `EnemyConfig` instances with default values. The config includes: `speed` (pixels/second), `turn_rate` (degrees/second for steering), `fire_rate` (shots per second), `fire_cooldown` (1/fire_rate, computed), `health` (hit points), `point_value` (score awarded), `accuracy` (0.0 to 1.0, used for aim scatter), `telegraph_duration` (seconds of visual windup before firing), `spawn_grace_period` (seconds after spawn before AI activates firing), `projectile_speed` (pixels/second for enemy projectiles), `projectile_damage` (damage per hit), `currency_drop_chance` (probability of dropping currency on death), `buff_drop_chance` (probability of dropping a buff on death — used by component 3.7). Default values: Basic = {speed: 60, turn_rate: 45, fire_rate: 0.4, health: 1, point_value: 200, accuracy: 0.6, telegraph_duration: 0.4, spawn_grace_period: 1.0, projectile_speed: 250, projectile_damage: 15.0, currency_drop_chance: 0.5, buff_drop_chance: 0.05}. Aggressive = {speed: 120, turn_rate: 90, fire_rate: 0.8, health: 2, point_value: 500, accuracy: 0.85, telegraph_duration: 0.3, spawn_grace_period: 1.0, projectile_speed: 350, projectile_damage: 20.0, currency_drop_chance: 0.7, buff_drop_chance: 0.1}.
 
 **Test Requirements**:
 - [ ] Unit test: `EnemyShip` instantiation with BASIC and AGGRESSIVE configs
@@ -243,11 +243,11 @@ Integrates enemy ships and their projectiles into the existing entity management
 
 **Technical Details**:
 - **Files to Modify**:
-  - `asterax/app/src/managers/entity_manager.py` — add `enemies` and `enemy_projectiles` SpriteLists **[SERIALISATION CONSTRAINT: shared with Phase 2]**
-  - `asterax/app/src/physics/collisions.py` — add 3 new collision check methods **[SERIALISATION CONSTRAINT: shared with Phase 2]**
-  - `asterax/app/src/states/combat.py` — add enemy update and firing to the update loop **[SERIALISATION CONSTRAINT: shared with Phase 2, also modified by 3.4 and 3.5]**
+  - `void-breaker/app/src/managers/entity_manager.py` — add `enemies` and `enemy_projectiles` SpriteLists **[SERIALISATION CONSTRAINT: shared with Phase 2]**
+  - `void-breaker/app/src/physics/collisions.py` — add 3 new collision check methods **[SERIALISATION CONSTRAINT: shared with Phase 2]**
+  - `void-breaker/app/src/states/combat.py` — add enemy update and firing to the update loop **[SERIALISATION CONSTRAINT: shared with Phase 2, also modified by 3.4 and 3.5]**
 - **Files to Modify (minor)**:
-  - `asterax/app/src/entities/projectile.py` — ensure `owner` field supports ENEMY value (may already exist from Phase 2 design)
+  - `void-breaker/app/src/entities/projectile.py` — ensure `owner` field supports ENEMY value (may already exist from Phase 2 design)
 - **Key Functions/Classes**:
   - `EntityManager.enemies: arcade.SpriteList` — new attribute
   - `EntityManager.enemy_projectiles: arcade.SpriteList` — new attribute
@@ -261,11 +261,11 @@ Integrates enemy ships and their projectiles into the existing entity management
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/managers/entity_manager.py`**: Add two new SpriteList attributes to the `EntityManager.__init__()` method: `self.enemies = arcade.SpriteList()` and `self.enemy_projectiles = arcade.SpriteList()`. Note: `enemies` does NOT use spatial hashing because enemy positions change every frame (dynamic entities). Add `self.enemies` and `self.enemy_projectiles` to the draw order — enemies should render after asteroids but before the player ship, and enemy projectiles should render after enemies but before player projectiles. This ensures the player ship is always visually on top. Add a `clear_enemies()` method that calls `self.enemies.clear()` and `self.enemy_projectiles.clear()` — used during level transitions. Update any existing `clear_all()` or reset method to also clear these new lists.
+- **File: `void-breaker/app/src/managers/entity_manager.py`**: Add two new SpriteList attributes to the `EntityManager.__init__()` method: `self.enemies = arcade.SpriteList()` and `self.enemy_projectiles = arcade.SpriteList()`. Note: `enemies` does NOT use spatial hashing because enemy positions change every frame (dynamic entities). Add `self.enemies` and `self.enemy_projectiles` to the draw order — enemies should render after asteroids but before the player ship, and enemy projectiles should render after enemies but before player projectiles. This ensures the player ship is always visually on top. Add a `clear_enemies()` method that calls `self.enemies.clear()` and `self.enemy_projectiles.clear()` — used during level transitions. Update any existing `clear_all()` or reset method to also clear these new lists.
 
-- **File: `asterax/app/src/physics/collisions.py`**: Add three new public methods to `CollisionSystem`. Each method follows the same pattern as existing collision checks from Phase 2: use `arcade.check_for_collision_with_list()` for sprite-vs-list checks. `check_player_vs_enemy_projectiles()` checks the player sprite against the enemy_projectiles SpriteList. `check_player_projectiles_vs_enemies()` iterates the player_projectiles SpriteList and checks each against the enemies SpriteList. `check_player_vs_enemies()` checks the player sprite against the enemies SpriteList. All three methods must support the ghost sprite wrap-around approach from Phase 2 — if the player or any enemy/projectile is within one sprite-width of a screen edge, create a temporary ghost at the wrapped position and include it in collision checks. Each method returns a list of collision pairs for the caller to process. Add a new `check_all_combat()` method (or extend the existing `check_all()`) that calls all collision methods including the new ones, returning a comprehensive collision result object.
+- **File: `void-breaker/app/src/physics/collisions.py`**: Add three new public methods to `CollisionSystem`. Each method follows the same pattern as existing collision checks from Phase 2: use `arcade.check_for_collision_with_list()` for sprite-vs-list checks. `check_player_vs_enemy_projectiles()` checks the player sprite against the enemy_projectiles SpriteList. `check_player_projectiles_vs_enemies()` iterates the player_projectiles SpriteList and checks each against the enemies SpriteList. `check_player_vs_enemies()` checks the player sprite against the enemies SpriteList. All three methods must support the ghost sprite wrap-around approach from Phase 2 — if the player or any enemy/projectile is within one sprite-width of a screen edge, create a temporary ghost at the wrapped position and include it in collision checks. Each method returns a list of collision pairs for the caller to process. Add a new `check_all_combat()` method (or extend the existing `check_all()`) that calls all collision methods including the new ones, returning a comprehensive collision result object.
 
-- **File: `asterax/app/src/states/combat.py`**: In the `CombatPhase.physics_step()` (or equivalent update method), add two new calls: `self._update_enemies(dt)` and `self._process_enemy_collisions()`. The `_update_enemies()` method iterates all enemies in `self.entity_manager.enemies`, calls `enemy.update_ai(dt, player_position)`, then calls `enemy.try_fire(dt)` — if it returns a `Projectile`, add that projectile to `self.entity_manager.enemy_projectiles`. Also update all enemy projectiles for lifetime expiry (remove expired ones). The `_process_enemy_collisions()` method calls the three new collision check methods from `CollisionSystem` and handles results: player hit by enemy projectile -> call `player.take_damage(projectile.damage)`, remove projectile; player projectile hits enemy -> call `enemy.take_damage(projectile.damage)`, remove projectile, if enemy destroyed call `enemy.on_destroyed()`, award points, remove enemy; player collides with enemy -> damage both, remove enemy if destroyed. Wrap all enemies using the same `wrap_entity()` function used for other entities.
+- **File: `void-breaker/app/src/states/combat.py`**: In the `CombatPhase.physics_step()` (or equivalent update method), add two new calls: `self._update_enemies(dt)` and `self._process_enemy_collisions()`. The `_update_enemies()` method iterates all enemies in `self.entity_manager.enemies`, calls `enemy.update_ai(dt, player_position)`, then calls `enemy.try_fire(dt)` — if it returns a `Projectile`, add that projectile to `self.entity_manager.enemy_projectiles`. Also update all enemy projectiles for lifetime expiry (remove expired ones). The `_process_enemy_collisions()` method calls the three new collision check methods from `CollisionSystem` and handles results: player hit by enemy projectile -> call `player.take_damage(projectile.damage)`, remove projectile; player projectile hits enemy -> call `enemy.take_damage(projectile.damage)`, remove projectile, if enemy destroyed call `enemy.on_destroyed()`, award points, remove enemy; player collides with enemy -> damage both, remove enemy if destroyed. Wrap all enemies using the same `wrap_entity()` function used for other entities.
 
 **Test Requirements**:
 - [ ] Unit test: `EntityManager` has `enemies` and `enemy_projectiles` SpriteLists
@@ -328,10 +328,10 @@ Extends the existing `SpawnManager` to handle timed enemy spawning during combat
 
 **Technical Details**:
 - **Files to Modify**:
-  - `asterax/app/src/managers/spawn_manager.py` — add enemy spawning methods **[SERIALISATION CONSTRAINT: shared with Phase 2]**
-  - `asterax/app/src/config/difficulty_tables.py` — add enemy parameters to difficulty table entries **[SERIALISATION CONSTRAINT: shared with Phase 2, also modified by 3.6]**
-  - `asterax/app/src/config/game_config.py` — add enemy fields to `DifficultyParams` **[SERIALISATION CONSTRAINT: shared with Phase 2]**
-  - `asterax/app/src/states/combat.py` — add spawn manager enemy update call **[SERIALISATION CONSTRAINT: shared with 3.3 and 3.5]**
+  - `void-breaker/app/src/managers/spawn_manager.py` — add enemy spawning methods **[SERIALISATION CONSTRAINT: shared with Phase 2]**
+  - `void-breaker/app/src/config/difficulty_tables.py` — add enemy parameters to difficulty table entries **[SERIALISATION CONSTRAINT: shared with Phase 2, also modified by 3.6]**
+  - `void-breaker/app/src/config/game_config.py` — add enemy fields to `DifficultyParams` **[SERIALISATION CONSTRAINT: shared with Phase 2]**
+  - `void-breaker/app/src/states/combat.py` — add spawn manager enemy update call **[SERIALISATION CONSTRAINT: shared with 3.3 and 3.5]**
 - **Key Functions/Classes**:
   - `DifficultyParams` extended fields: `enemy_spawn_enabled`, `enemy_count_max`, `enemy_spawn_interval`, `enemy_aggression`, `aggressive_ratio` (proportion of aggressive vs basic enemies)
   - `SpawnManager.update_enemy_spawning(dt, current_enemy_count)` -> `list[EnemyShip]` — returns newly spawned enemies
@@ -342,13 +342,13 @@ Extends the existing `SpawnManager` to handle timed enemy spawning during combat
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/managers/spawn_manager.py`**: Add an `_enemy_spawn_timer: float` attribute initialised to 0.0 and an `_enemy_spawn_active: bool` flag. The new `update_enemy_spawning()` method is called each physics step during combat. It checks `difficulty_params.enemy_spawn_enabled` — if False, returns an empty list immediately. If True, it increments the timer by `dt`. When the timer exceeds `difficulty_params.enemy_spawn_interval`, it resets the timer and checks whether `current_enemy_count < difficulty_params.enemy_count_max`. If the cap is not reached, it creates a new `EnemyShip` with an archetype selected by `_select_archetype()` and positions it using `_get_spawn_edge_position()`. The `_get_spawn_edge_position()` method randomly selects one of four screen edges (top, bottom, left, right), places the enemy just off-screen on that edge at a random position along the edge, and assigns an initial velocity vector pointing inward (toward screen centre with some randomness). The velocity magnitude should be the enemy's configured speed. The `_select_archetype()` method uses `difficulty_params.aggressive_ratio` as the probability of spawning an AGGRESSIVE enemy, otherwise spawns BASIC. Add `reset_enemy_spawning()` that resets the timer and is called at each level start.
+- **File: `void-breaker/app/src/managers/spawn_manager.py`**: Add an `_enemy_spawn_timer: float` attribute initialised to 0.0 and an `_enemy_spawn_active: bool` flag. The new `update_enemy_spawning()` method is called each physics step during combat. It checks `difficulty_params.enemy_spawn_enabled` — if False, returns an empty list immediately. If True, it increments the timer by `dt`. When the timer exceeds `difficulty_params.enemy_spawn_interval`, it resets the timer and checks whether `current_enemy_count < difficulty_params.enemy_count_max`. If the cap is not reached, it creates a new `EnemyShip` with an archetype selected by `_select_archetype()` and positions it using `_get_spawn_edge_position()`. The `_get_spawn_edge_position()` method randomly selects one of four screen edges (top, bottom, left, right), places the enemy just off-screen on that edge at a random position along the edge, and assigns an initial velocity vector pointing inward (toward screen centre with some randomness). The velocity magnitude should be the enemy's configured speed. The `_select_archetype()` method uses `difficulty_params.aggressive_ratio` as the probability of spawning an AGGRESSIVE enemy, otherwise spawns BASIC. Add `reset_enemy_spawning()` that resets the timer and is called at each level start.
 
-- **File: `asterax/app/src/config/difficulty_tables.py`**: Extend each level's `DifficultyParams` entry with enemy-specific fields. Levels 1-5: `enemy_spawn_enabled=False`. Level 6+: `enemy_spawn_enabled=True`, `enemy_count_max` starts at 1 and increases to 3 by level 10, then to 5 by level 15, then caps at 8 for level 20+. `enemy_spawn_interval` starts at 8.0 seconds at level 6 and decreases to 3.0 seconds by level 20+. `aggressive_ratio` starts at 0.0 (all basic) at level 6, increases to 0.3 by level 10, 0.5 by level 15, 0.7 by level 25+. `enemy_aggression` is a global multiplier (0.0 to 1.0) that scales enemy fire rate and accuracy — starts at 0.3 at level 6 and reaches 0.9 by level 25+. Note: these are initial values; component 3.6 will refine them for balance.
+- **File: `void-breaker/app/src/config/difficulty_tables.py`**: Extend each level's `DifficultyParams` entry with enemy-specific fields. Levels 1-5: `enemy_spawn_enabled=False`. Level 6+: `enemy_spawn_enabled=True`, `enemy_count_max` starts at 1 and increases to 3 by level 10, then to 5 by level 15, then caps at 8 for level 20+. `enemy_spawn_interval` starts at 8.0 seconds at level 6 and decreases to 3.0 seconds by level 20+. `aggressive_ratio` starts at 0.0 (all basic) at level 6, increases to 0.3 by level 10, 0.5 by level 15, 0.7 by level 25+. `enemy_aggression` is a global multiplier (0.0 to 1.0) that scales enemy fire rate and accuracy — starts at 0.3 at level 6 and reaches 0.9 by level 25+. Note: these are initial values; component 3.6 will refine them for balance.
 
-- **File: `asterax/app/src/config/game_config.py`**: Add the following fields to the `DifficultyParams` dataclass: `enemy_spawn_enabled: bool = False`, `enemy_count_max: int = 0`, `enemy_spawn_interval: float = 10.0`, `enemy_aggression: float = 0.0`, `aggressive_ratio: float = 0.0`. These fields have sensible defaults (no enemies) so that existing Phase 2 code using `DifficultyParams` continues to work without modification.
+- **File: `void-breaker/app/src/config/game_config.py`**: Add the following fields to the `DifficultyParams` dataclass: `enemy_spawn_enabled: bool = False`, `enemy_count_max: int = 0`, `enemy_spawn_interval: float = 10.0`, `enemy_aggression: float = 0.0`, `aggressive_ratio: float = 0.0`. These fields have sensible defaults (no enemies) so that existing Phase 2 code using `DifficultyParams` continues to work without modification.
 
-- **File: `asterax/app/src/states/combat.py`**: In the combat update loop (same area modified by 3.3), add a call to `self.spawn_manager.update_enemy_spawning(dt, len(self.entity_manager.enemies))`. For each returned `EnemyShip`, add it to `self.entity_manager.enemies`. At the start of each new level (in the level transition logic), call `self.spawn_manager.reset_enemy_spawning()`.
+- **File: `void-breaker/app/src/states/combat.py`**: In the combat update loop (same area modified by 3.3), add a call to `self.spawn_manager.update_enemy_spawning(dt, len(self.entity_manager.enemies))`. For each returned `EnemyShip`, add it to `self.entity_manager.enemies`. At the start of each new level (in the level transition logic), call `self.spawn_manager.reset_enemy_spawning()`.
 
 **Test Requirements**:
 - [ ] Unit test: `SpawnManager.update_enemy_spawning()` returns no enemies when `enemy_spawn_enabled=False`
@@ -413,11 +413,11 @@ Implements all visual and audio feedback for combat damage. When the player take
 
 **Technical Details**:
 - **Files to Create**:
-  - `asterax/app/src/rendering/damage_effects.py`
+  - `void-breaker/app/src/rendering/damage_effects.py`
 - **Files to Modify**:
-  - `asterax/app/src/entities/player_ship.py` — add invulnerability state, damage flash **[SERIALISATION CONSTRAINT: shared with Phase 2]**
-  - `asterax/app/src/states/combat.py` — integrate damage effects, invulnerability check **[SERIALISATION CONSTRAINT: shared with 3.3 and 3.4]**
-  - `asterax/app/src/rendering/particle_system.py` — add enemy explosion emitter (if particle system exists from Phase 2; otherwise create it)
+  - `void-breaker/app/src/entities/player_ship.py` — add invulnerability state, damage flash **[SERIALISATION CONSTRAINT: shared with Phase 2]**
+  - `void-breaker/app/src/states/combat.py` — integrate damage effects, invulnerability check **[SERIALISATION CONSTRAINT: shared with 3.3 and 3.4]**
+  - `void-breaker/app/src/rendering/particle_system.py` — add enemy explosion emitter (if particle system exists from Phase 2; otherwise create it)
 - **Key Functions/Classes**:
   - `DamageEffects` class (in `damage_effects.py`):
     - `trigger_damage_flash(sprite)` — starts the red flash effect on a sprite
@@ -433,11 +433,11 @@ Implements all visual and audio feedback for combat damage. When the player take
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/rendering/damage_effects.py`**: Implement a `DamageEffects` class that manages all combat visual effects. It maintains a list of active effects, each with a timer and a target sprite reference. `trigger_damage_flash()` adds an effect that rapidly alternates the target sprite's `color` property between `(255, 0, 0)` (red) and `(255, 255, 255)` (white) 3-4 times over 0.2 seconds, then restores the original colour. `trigger_invulnerability()` starts a timer (default 0.75 seconds) and adds an effect that oscillates the sprite's `alpha` between 255 and 80 at ~8Hz until the timer expires, then restores full alpha. `trigger_explosion()` creates 5-10 small particle sprites at the given position with random outward velocities (100-200 px/s in random directions) and a lifetime of 0.3-0.5 seconds. Each particle starts with full alpha and fades to 0 over its lifetime. Particles use a small solid-colour sprite (4x4 or 8x8 pixels) with a colour matching the destroyed entity (orange/yellow for enemies). `trigger_destruction_sequence()` is a larger version with 15-20 particles, higher velocity (150-300 px/s), and a 0.5-0.8 second lifetime. The `update(dt)` method advances all active effects, removes expired effects, and updates particle positions and alpha values. Particles that have expired their lifetime are removed from the provided SpriteList.
+- **File: `void-breaker/app/src/rendering/damage_effects.py`**: Implement a `DamageEffects` class that manages all combat visual effects. It maintains a list of active effects, each with a timer and a target sprite reference. `trigger_damage_flash()` adds an effect that rapidly alternates the target sprite's `color` property between `(255, 0, 0)` (red) and `(255, 255, 255)` (white) 3-4 times over 0.2 seconds, then restores the original colour. `trigger_invulnerability()` starts a timer (default 0.75 seconds) and adds an effect that oscillates the sprite's `alpha` between 255 and 80 at ~8Hz until the timer expires, then restores full alpha. `trigger_explosion()` creates 5-10 small particle sprites at the given position with random outward velocities (100-200 px/s in random directions) and a lifetime of 0.3-0.5 seconds. Each particle starts with full alpha and fades to 0 over its lifetime. Particles use a small solid-colour sprite (4x4 or 8x8 pixels) with a colour matching the destroyed entity (orange/yellow for enemies). `trigger_destruction_sequence()` is a larger version with 15-20 particles, higher velocity (150-300 px/s), and a 0.5-0.8 second lifetime. The `update(dt)` method advances all active effects, removes expired effects, and updates particle positions and alpha values. Particles that have expired their lifetime are removed from the provided SpriteList.
 
-- **File: `asterax/app/src/entities/player_ship.py`**: Add `_invulnerability_timer: float = 0.0` and `_is_invulnerable: bool = False` attributes. Add a read-only `is_invulnerable` property. Modify `take_damage()` to check `self._is_invulnerable` first — if True, return immediately without applying damage. If False, apply the damage, then set `_is_invulnerable = True` and `_invulnerability_timer = INVULNERABILITY_DURATION` (default 0.75 seconds, defined in `game_config.py`). Add an `update_invulnerability(dt)` method that decrements the timer and clears the flag when expired. This method must be called each physics step from the combat update loop.
+- **File: `void-breaker/app/src/entities/player_ship.py`**: Add `_invulnerability_timer: float = 0.0` and `_is_invulnerable: bool = False` attributes. Add a read-only `is_invulnerable` property. Modify `take_damage()` to check `self._is_invulnerable` first — if True, return immediately without applying damage. If False, apply the damage, then set `_is_invulnerable = True` and `_invulnerability_timer = INVULNERABILITY_DURATION` (default 0.75 seconds, defined in `game_config.py`). Add an `update_invulnerability(dt)` method that decrements the timer and clears the flag when expired. This method must be called each physics step from the combat update loop.
 
-- **File: `asterax/app/src/states/combat.py`**: In the collision processing logic (from 3.3), add an invulnerability check before applying damage: only call `player.take_damage()` if `not player.is_invulnerable`. After damage is applied, call `self.damage_effects.trigger_damage_flash(player)` and `self.damage_effects.trigger_invulnerability(player, INVULNERABILITY_DURATION)`. In the enemy destruction handler, call `self.damage_effects.trigger_explosion(enemy.position, "medium", self.entity_manager.particles)` and `self.audio_manager.play("enemy_explode")`. When the player's shields reach zero, call `self.damage_effects.trigger_destruction_sequence(player.position, self.entity_manager.particles)` and delay the game over transition by 0.8 seconds (the destruction animation duration) before switching to the GameOver state. Add `self.damage_effects.update(dt)` to the update loop. Add `self.player.update_invulnerability(dt)` to the update loop.
+- **File: `void-breaker/app/src/states/combat.py`**: In the collision processing logic (from 3.3), add an invulnerability check before applying damage: only call `player.take_damage()` if `not player.is_invulnerable`. After damage is applied, call `self.damage_effects.trigger_damage_flash(player)` and `self.damage_effects.trigger_invulnerability(player, INVULNERABILITY_DURATION)`. In the enemy destruction handler, call `self.damage_effects.trigger_explosion(enemy.position, "medium", self.entity_manager.particles)` and `self.audio_manager.play("enemy_explode")`. When the player's shields reach zero, call `self.damage_effects.trigger_destruction_sequence(player.position, self.entity_manager.particles)` and delay the game over transition by 0.8 seconds (the destruction animation duration) before switching to the GameOver state. Add `self.damage_effects.update(dt)` to the update loop. Add `self.player.update_invulnerability(dt)` to the update loop.
 
 **Test Requirements**:
 - [ ] Unit test: `PlayerShip.take_damage()` does not reduce shields when `is_invulnerable` is True
@@ -502,7 +502,7 @@ Refines `difficulty_tables.py` with carefully tuned values for 30+ levels, creat
 
 **Technical Details**:
 - **Files to Modify**:
-  - `asterax/app/src/config/difficulty_tables.py` — full rewrite of table values **[SERIALISATION CONSTRAINT: shared with 3.4]**
+  - `void-breaker/app/src/config/difficulty_tables.py` — full rewrite of table values **[SERIALISATION CONSTRAINT: shared with 3.4]**
 - **Files to Create**: None
 - **Key Functions/Classes**:
   - `get_difficulty_params(level: int)` -> `DifficultyParams` — main function, returns params for any level
@@ -512,7 +512,7 @@ Refines `difficulty_tables.py` with carefully tuned values for 30+ levels, creat
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/config/difficulty_tables.py`**: Implement `get_difficulty_params(level)` as the single entry point for difficulty configuration. Instead of a flat list of 30+ hardcoded entries, use a tier-based interpolation system. Define `DIFFICULTY_TIERS` as a dictionary mapping level numbers to `DifficultyParams` instances at key breakpoints: levels 1, 5, 10, 15, 20, 25, and 30. For any level between breakpoints, use linear interpolation between the two nearest tiers. For levels above 30, use the level-30 values (difficulty caps — the game does not become infinitely harder, preventing unfairness). The tier values should be:
+- **File: `void-breaker/app/src/config/difficulty_tables.py`**: Implement `get_difficulty_params(level)` as the single entry point for difficulty configuration. Instead of a flat list of 30+ hardcoded entries, use a tier-based interpolation system. Define `DIFFICULTY_TIERS` as a dictionary mapping level numbers to `DifficultyParams` instances at key breakpoints: levels 1, 5, 10, 15, 20, 25, and 30. For any level between breakpoints, use linear interpolation between the two nearest tiers. For levels above 30, use the level-30 values (difficulty caps — the game does not become infinitely harder, preventing unfairness). The tier values should be:
 
   **Level 1**: asteroid_count=3, asteroid_speed_min=30, asteroid_speed_max=80, enemy_spawn_enabled=False, enemy_count_max=0, enemy_spawn_interval=99, enemy_aggression=0.0, aggressive_ratio=0.0, currency_drop_chance=0.4, currency_value_base=10.
 
@@ -594,13 +594,13 @@ Implements optional buff pickups that rarely drop from destroyed enemies. Buffs 
 
 **Technical Details**:
 - **Files to Create**:
-  - `asterax/app/src/entities/buff_pickup.py`
-  - `asterax/app/src/managers/buff_manager.py`
+  - `void-breaker/app/src/entities/buff_pickup.py`
+  - `void-breaker/app/src/managers/buff_manager.py`
 - **Files to Modify**:
-  - `asterax/app/src/managers/entity_manager.py` — add `buff_pickups: arcade.SpriteList` **[SERIALISATION CONSTRAINT: shared with Phase 2 and 3.3]**
-  - `asterax/app/src/physics/collisions.py` — add player vs buff pickups collision check **[SERIALISATION CONSTRAINT: shared with Phase 2 and 3.3]**
-  - `asterax/app/src/states/combat.py` — add buff pickup collision handling, buff updates **[SERIALISATION CONSTRAINT: shared with 3.3, 3.4, 3.5]**
-  - `asterax/app/src/entities/player_ship.py` — add methods for applying/removing buff stat modifications **[SERIALISATION CONSTRAINT: shared with Phase 2 and 3.5]**
+  - `void-breaker/app/src/managers/entity_manager.py` — add `buff_pickups: arcade.SpriteList` **[SERIALISATION CONSTRAINT: shared with Phase 2 and 3.3]**
+  - `void-breaker/app/src/physics/collisions.py` — add player vs buff pickups collision check **[SERIALISATION CONSTRAINT: shared with Phase 2 and 3.3]**
+  - `void-breaker/app/src/states/combat.py` — add buff pickup collision handling, buff updates **[SERIALISATION CONSTRAINT: shared with 3.3, 3.4, 3.5]**
+  - `void-breaker/app/src/entities/player_ship.py` — add methods for applying/removing buff stat modifications **[SERIALISATION CONSTRAINT: shared with Phase 2 and 3.5]**
 - **Key Functions/Classes**:
   - `BuffType(Enum)` — HEAL, DAMAGE_BOOST, SPEED_BOOST
   - `BuffPickup(arcade.Sprite)` — entity with `buff_type`, `magnitude`, `duration`, `lifetime_remaining`
@@ -615,13 +615,13 @@ Implements optional buff pickups that rarely drop from destroyed enemies. Buffs 
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/app/src/entities/buff_pickup.py`**: Implement `BuffPickup` as a subclass of `arcade.Sprite`. The constructor takes a `BuffType`, `magnitude` (float), `duration` (seconds for timed buffs, 0 for instant like HEAL), and a position. Use `arcade.make_circle_texture()` or a procedurally generated texture with a distinct colour per type: green for HEAL, red/orange for DAMAGE_BOOST, cyan/blue for SPEED_BOOST. The pickup has a `lifetime_remaining` (default 10 seconds) that decrements each update. When lifetime expires, the pickup removes itself from its parent SpriteList. Add a gentle bobbing animation (sinusoidal y-offset of +/- 3 pixels at 2Hz) to visually distinguish from static debris. Default magnitudes: HEAL = 0.25 (restore 25% of max shields), DAMAGE_BOOST = 1.5 (50% more damage), SPEED_BOOST = 1.4 (40% more thrust).
+- **File: `void-breaker/app/src/entities/buff_pickup.py`**: Implement `BuffPickup` as a subclass of `arcade.Sprite`. The constructor takes a `BuffType`, `magnitude` (float), `duration` (seconds for timed buffs, 0 for instant like HEAL), and a position. Use `arcade.make_circle_texture()` or a procedurally generated texture with a distinct colour per type: green for HEAL, red/orange for DAMAGE_BOOST, cyan/blue for SPEED_BOOST. The pickup has a `lifetime_remaining` (default 10 seconds) that decrements each update. When lifetime expires, the pickup removes itself from its parent SpriteList. Add a gentle bobbing animation (sinusoidal y-offset of +/- 3 pixels at 2Hz) to visually distinguish from static debris. Default magnitudes: HEAL = 0.25 (restore 25% of max shields), DAMAGE_BOOST = 1.5 (50% more damage), SPEED_BOOST = 1.4 (40% more thrust).
 
-- **File: `asterax/app/src/managers/buff_manager.py`**: Implement `BuffManager` to track active buffs. Internally, maintain a dictionary mapping `BuffType` to a tuple of `(remaining_duration, magnitude)`. `apply_buff()` adds or refreshes a buff entry. For HEAL, it is instant — directly call `ship.shields = min(ship.shields + magnitude * ship.max_shields, ship.max_shields)` and do not store it as an active buff. For DAMAGE_BOOST and SPEED_BOOST, store the buff and call the appropriate `PlayerShip` method to apply the stat modification. `update(dt)` decrements all active buff timers and calls the removal method on the ship when a buff expires. `get_active_buffs()` returns active buff data for HUD display (Phase 5 will render buff indicators). `clear_all()` removes all buffs and restores ship stats — called on game over.
+- **File: `void-breaker/app/src/managers/buff_manager.py`**: Implement `BuffManager` to track active buffs. Internally, maintain a dictionary mapping `BuffType` to a tuple of `(remaining_duration, magnitude)`. `apply_buff()` adds or refreshes a buff entry. For HEAL, it is instant — directly call `ship.shields = min(ship.shields + magnitude * ship.max_shields, ship.max_shields)` and do not store it as an active buff. For DAMAGE_BOOST and SPEED_BOOST, store the buff and call the appropriate `PlayerShip` method to apply the stat modification. `update(dt)` decrements all active buff timers and calls the removal method on the ship when a buff expires. `get_active_buffs()` returns active buff data for HUD display (Phase 5 will render buff indicators). `clear_all()` removes all buffs and restores ship stats — called on game over.
 
-- **File: `asterax/app/src/entities/player_ship.py`**: Add `_damage_boost_active: bool = False`, `_damage_boost_multiplier: float = 1.0`, `_speed_boost_active: bool = False`, `_speed_boost_multiplier: float = 1.0`. Modify the `effective_damage` property (or wherever effective stats are calculated) to multiply by `_damage_boost_multiplier` when the boost is active. Similarly modify `effective_thrust`. Add `apply_damage_boost(multiplier)`, `remove_damage_boost()`, `apply_speed_boost(multiplier)`, `remove_speed_boost()` methods that set/clear these attributes.
+- **File: `void-breaker/app/src/entities/player_ship.py`**: Add `_damage_boost_active: bool = False`, `_damage_boost_multiplier: float = 1.0`, `_speed_boost_active: bool = False`, `_speed_boost_multiplier: float = 1.0`. Modify the `effective_damage` property (or wherever effective stats are calculated) to multiply by `_damage_boost_multiplier` when the boost is active. Similarly modify `effective_thrust`. Add `apply_damage_boost(multiplier)`, `remove_damage_boost()`, `apply_speed_boost(multiplier)`, `remove_speed_boost()` methods that set/clear these attributes.
 
-- **File: `asterax/app/src/states/combat.py`**: In the enemy destruction handler, after `enemy.on_destroyed()`, roll for buff drop using `enemy_config.buff_drop_chance`. If successful, randomly select a `BuffType` (weighted: HEAL 40%, DAMAGE_BOOST 30%, SPEED_BOOST 30%) and create a `BuffPickup` at the enemy's position, adding it to `self.entity_manager.buff_pickups`. Add a collision check for player vs buff_pickups in the collision processing. On collection, call `self.buff_manager.apply_buff()` with the pickup's type, magnitude, and duration, then remove the pickup. Add `self.buff_manager.update(dt, self.player)` to the update loop.
+- **File: `void-breaker/app/src/states/combat.py`**: In the enemy destruction handler, after `enemy.on_destroyed()`, roll for buff drop using `enemy_config.buff_drop_chance`. If successful, randomly select a `BuffType` (weighted: HEAL 40%, DAMAGE_BOOST 30%, SPEED_BOOST 30%) and create a `BuffPickup` at the enemy's position, adding it to `self.entity_manager.buff_pickups`. Add a collision check for player vs buff_pickups in the collision processing. On collection, call `self.buff_manager.apply_buff()` with the pickup's type, magnitude, and duration, then remove the pickup. Add `self.buff_manager.update(dt, self.player)` to the update loop.
 
 **Test Requirements**:
 - [ ] Unit test: `BuffPickup` creation with each buff type
@@ -690,12 +690,12 @@ The final Phase 3 component writes comprehensive tests for all new functionality
 
 **Technical Details**:
 - **Files to Create**:
-  - `asterax/tests/test_enemy_ship.py`
-  - `asterax/tests/test_enemy_spawning.py`
-  - `asterax/tests/test_enemy_collisions.py`
-  - `asterax/tests/test_difficulty_scaling.py`
-  - `asterax/tests/test_damage_effects.py`
-  - `asterax/tests/test_buff_pickups.py` (if 3.7 implemented)
+  - `void-breaker/tests/test_enemy_ship.py`
+  - `void-breaker/tests/test_enemy_spawning.py`
+  - `void-breaker/tests/test_enemy_collisions.py`
+  - `void-breaker/tests/test_difficulty_scaling.py`
+  - `void-breaker/tests/test_damage_effects.py`
+  - `void-breaker/tests/test_buff_pickups.py` (if 3.7 implemented)
   - `docs/implementation-context-phase-3.md`
   - `docs/components/phase-3-component-3-8-overview.md`
 - **Files to Modify**: None (test-only and documentation-only)
@@ -706,23 +706,23 @@ The final Phase 3 component writes comprehensive tests for all new functionality
 
 **Detailed Implementation Requirements**:
 
-- **File: `asterax/tests/test_enemy_ship.py`**: Test `EnemyShip` creation with both archetypes. Test `update_ai()` moves the enemy toward a known player position (verify distance decreases over multiple steps). Test `try_fire()` respects cooldown (call repeatedly, verify fire rate matches config). Test `try_fire()` respects spawn grace period (verify no fire in first 1.0 second). Test `take_damage()` reduces health correctly and returns True when destroyed. Test BASIC targeting accuracy (aim at current player position +/- accuracy scatter). Test AGGRESSIVE targeting leads the player (with a moving player position, verify the aim point is ahead of the player). Test telegraph state machine transitions (idle -> telegraphing -> fire -> cooldown -> idle cycle).
+- **File: `void-breaker/tests/test_enemy_ship.py`**: Test `EnemyShip` creation with both archetypes. Test `update_ai()` moves the enemy toward a known player position (verify distance decreases over multiple steps). Test `try_fire()` respects cooldown (call repeatedly, verify fire rate matches config). Test `try_fire()` respects spawn grace period (verify no fire in first 1.0 second). Test `take_damage()` reduces health correctly and returns True when destroyed. Test BASIC targeting accuracy (aim at current player position +/- accuracy scatter). Test AGGRESSIVE targeting leads the player (with a moving player position, verify the aim point is ahead of the player). Test telegraph state machine transitions (idle -> telegraphing -> fire -> cooldown -> idle cycle).
 
-- **File: `asterax/tests/test_enemy_spawning.py`**: Test `SpawnManager.update_enemy_spawning()` returns empty list when disabled. Test enemies spawn after the configured interval. Test enemy count cap is enforced. Test `_get_spawn_edge_position()` produces positions just off-screen on all four edges. Test `_select_archetype()` produces expected distribution over many iterations (chi-squared or simple ratio check). Test `reset_enemy_spawning()` resets the timer.
+- **File: `void-breaker/tests/test_enemy_spawning.py`**: Test `SpawnManager.update_enemy_spawning()` returns empty list when disabled. Test enemies spawn after the configured interval. Test enemy count cap is enforced. Test `_get_spawn_edge_position()` produces positions just off-screen on all four edges. Test `_select_archetype()` produces expected distribution over many iterations (chi-squared or simple ratio check). Test `reset_enemy_spawning()` resets the timer.
 
-- **File: `asterax/tests/test_enemy_collisions.py`**: Create test fixtures with positioned sprites. Test player-vs-enemy-projectile collision detects overlap. Test player-projectile-vs-enemy collision detects overlap. Test player-vs-enemy collision detects overlap. Test all three pairs at screen edges using the ghost sprite approach — place entities near edges and verify collision detection works across the wrap boundary. Test that collisions produce the correct results (damage applied, entities removed as expected).
+- **File: `void-breaker/tests/test_enemy_collisions.py`**: Create test fixtures with positioned sprites. Test player-vs-enemy-projectile collision detects overlap. Test player-projectile-vs-enemy collision detects overlap. Test player-vs-enemy collision detects overlap. Test all three pairs at screen edges using the ghost sprite approach — place entities near edges and verify collision detection works across the wrap boundary. Test that collisions produce the correct results (damage applied, entities removed as expected).
 
-- **File: `asterax/tests/test_difficulty_scaling.py`**: Test `get_difficulty_params()` for levels 1, 5, 10, 15, 20, 25, 30. Verify exact values at tier breakpoints. Test interpolation between tiers (level 7 should be between level-5 and level-10 values). Test level > 30 returns level-30 values. Test monotonicity of key parameters across all levels (asteroid_count non-decreasing, enemy_count_max non-decreasing). Test enemy_spawn_enabled transition (False for levels 1-5, True for 6+). Test all values are within sane ranges.
+- **File: `void-breaker/tests/test_difficulty_scaling.py`**: Test `get_difficulty_params()` for levels 1, 5, 10, 15, 20, 25, 30. Verify exact values at tier breakpoints. Test interpolation between tiers (level 7 should be between level-5 and level-10 values). Test level > 30 returns level-30 values. Test monotonicity of key parameters across all levels (asteroid_count non-decreasing, enemy_count_max non-decreasing). Test enemy_spawn_enabled transition (False for levels 1-5, True for 6+). Test all values are within sane ranges.
 
-- **File: `asterax/tests/test_damage_effects.py`**: Test invulnerability prevents damage. Test invulnerability timer expires after configured duration. Test explosion particle creation (correct count). Test particle lifetime expiry.
+- **File: `void-breaker/tests/test_damage_effects.py`**: Test invulnerability prevents damage. Test invulnerability timer expires after configured duration. Test explosion particle creation (correct count). Test particle lifetime expiry.
 
-- **File: `asterax/tests/test_buff_pickups.py`** (if 3.7 implemented): Test `BuffPickup` creation per type. Test lifetime expiry. Test `BuffManager.apply_buff()` for HEAL (shields increase, capped at max). Test DAMAGE_BOOST application and expiry (stat modified, then restored). Test SPEED_BOOST application and expiry. Test same-type buff refresh (duration reset, not stacked). Test `clear_all()` removes all buffs.
+- **File: `void-breaker/tests/test_buff_pickups.py`** (if 3.7 implemented): Test `BuffPickup` creation per type. Test lifetime expiry. Test `BuffManager.apply_buff()` for HEAL (shields increase, capped at max). Test DAMAGE_BOOST application and expiry (stat modified, then restored). Test SPEED_BOOST application and expiry. Test same-type buff refresh (duration reset, not stacked). Test `clear_all()` removes all buffs.
 
 - **File: `docs/implementation-context-phase-3.md`**: Create a structured document with one section per implemented component (max 100 lines per component, max ~700 lines total). Each section includes: component ID and name, what was built, key files created/modified, key design decisions, patterns established, and any gotchas for future phases. Include a summary section at the top listing all components and their status. Note any deviations from the component breakdown specifications.
 
 **Test Requirements**:
 - [ ] All test files pass with `pytest -q`
-- [ ] `pytest --cov=asterax/app/src --cov-report=term-missing` shows 30%+ coverage on all new Phase 3 modules
+- [ ] `pytest --cov=void-breaker/app/src --cov-report=term-missing` shows 30%+ coverage on all new Phase 3 modules
 - [ ] No test requires a live Arcade window (all tests use mock/fixture-based entity creation)
 - [ ] `docs/implementation-context-phase-3.md` exists and is complete
 
@@ -750,32 +750,32 @@ This table lists every file Phase 3 creates or modifies and which components tou
 
 | File | Created/Modified | Components | Serialisation Notes |
 |------|-----------------|------------|---------------------|
-| `asterax/assets/sprites/enemy_basic.png` | Created | 3.1 | Human only |
-| `asterax/assets/sprites/enemy_aggressive.png` | Created | 3.1 | Human only |
-| `asterax/assets/sprites/projectile_enemy.png` | Created | 3.1 | Human only |
-| `asterax/assets/sounds/enemy_fire.wav` | Created | 3.1 | Human only |
-| `asterax/assets/sounds/enemy_explode.wav` | Created | 3.1 | Human only |
-| `asterax/assets/sounds/player_hit.wav` | Created | 3.1 | Human only |
-| `asterax/app/src/entities/enemy_ship.py` | Created | 3.2 | No conflict |
-| `asterax/app/src/config/enemy_config.py` | Created | 3.2 | No conflict |
-| `asterax/app/src/managers/entity_manager.py` | Modified | 3.3, 3.7 | Phase 2 origin. 3.3 adds enemies + enemy_projectiles. 3.7 adds buff_pickups. Sequence: 3.3 before 3.7. |
-| `asterax/app/src/physics/collisions.py` | Modified | 3.3, 3.7 | Phase 2 origin. 3.3 adds 3 collision pairs. 3.7 adds 1 collision pair. Sequence: 3.3 before 3.7. |
-| `asterax/app/src/states/combat.py` | Modified | 3.3, 3.4, 3.5, 3.7 | Phase 2 origin. Most-modified file. Sequence: 3.3 -> 3.4 -> 3.5 -> 3.7. |
-| `asterax/app/src/entities/projectile.py` | Modified (minor) | 3.3 | Phase 2 origin. Ensure ENEMY owner value exists. |
-| `asterax/app/src/managers/spawn_manager.py` | Modified | 3.4 | Phase 2 origin. Adds enemy spawning alongside asteroids. |
-| `asterax/app/src/config/difficulty_tables.py` | Modified | 3.4, 3.6 | Phase 2 origin. 3.4 adds initial enemy values. 3.6 refines all values. Sequence: 3.4 before 3.6. |
-| `asterax/app/src/config/game_config.py` | Modified | 3.4 | Phase 2 origin. Adds enemy fields to DifficultyParams. |
-| `asterax/app/src/rendering/damage_effects.py` | Created | 3.5 | No conflict |
-| `asterax/app/src/entities/player_ship.py` | Modified | 3.5, 3.7 | Phase 2 origin. 3.5 adds invulnerability. 3.7 adds buff stats. Sequence: 3.5 before 3.7. |
-| `asterax/app/src/rendering/particle_system.py` | Modified/Created | 3.5 | May be created in Phase 2 or 3.5. |
-| `asterax/app/src/entities/buff_pickup.py` | Created | 3.7 | No conflict (optional component) |
-| `asterax/app/src/managers/buff_manager.py` | Created | 3.7 | No conflict (optional component) |
-| `asterax/tests/test_enemy_ship.py` | Created | 3.8 | No conflict |
-| `asterax/tests/test_enemy_spawning.py` | Created | 3.8 | No conflict |
-| `asterax/tests/test_enemy_collisions.py` | Created | 3.8 | No conflict |
-| `asterax/tests/test_difficulty_scaling.py` | Created | 3.8 | No conflict |
-| `asterax/tests/test_damage_effects.py` | Created | 3.8 | No conflict |
-| `asterax/tests/test_buff_pickups.py` | Created | 3.8 | No conflict (if 3.7 implemented) |
+| `void-breaker/assets/sprites/enemy_basic.png` | Created | 3.1 | Human only |
+| `void-breaker/assets/sprites/enemy_aggressive.png` | Created | 3.1 | Human only |
+| `void-breaker/assets/sprites/projectile_enemy.png` | Created | 3.1 | Human only |
+| `void-breaker/assets/sounds/enemy_fire.wav` | Created | 3.1 | Human only |
+| `void-breaker/assets/sounds/enemy_explode.wav` | Created | 3.1 | Human only |
+| `void-breaker/assets/sounds/player_hit.wav` | Created | 3.1 | Human only |
+| `void-breaker/app/src/entities/enemy_ship.py` | Created | 3.2 | No conflict |
+| `void-breaker/app/src/config/enemy_config.py` | Created | 3.2 | No conflict |
+| `void-breaker/app/src/managers/entity_manager.py` | Modified | 3.3, 3.7 | Phase 2 origin. 3.3 adds enemies + enemy_projectiles. 3.7 adds buff_pickups. Sequence: 3.3 before 3.7. |
+| `void-breaker/app/src/physics/collisions.py` | Modified | 3.3, 3.7 | Phase 2 origin. 3.3 adds 3 collision pairs. 3.7 adds 1 collision pair. Sequence: 3.3 before 3.7. |
+| `void-breaker/app/src/states/combat.py` | Modified | 3.3, 3.4, 3.5, 3.7 | Phase 2 origin. Most-modified file. Sequence: 3.3 -> 3.4 -> 3.5 -> 3.7. |
+| `void-breaker/app/src/entities/projectile.py` | Modified (minor) | 3.3 | Phase 2 origin. Ensure ENEMY owner value exists. |
+| `void-breaker/app/src/managers/spawn_manager.py` | Modified | 3.4 | Phase 2 origin. Adds enemy spawning alongside asteroids. |
+| `void-breaker/app/src/config/difficulty_tables.py` | Modified | 3.4, 3.6 | Phase 2 origin. 3.4 adds initial enemy values. 3.6 refines all values. Sequence: 3.4 before 3.6. |
+| `void-breaker/app/src/config/game_config.py` | Modified | 3.4 | Phase 2 origin. Adds enemy fields to DifficultyParams. |
+| `void-breaker/app/src/rendering/damage_effects.py` | Created | 3.5 | No conflict |
+| `void-breaker/app/src/entities/player_ship.py` | Modified | 3.5, 3.7 | Phase 2 origin. 3.5 adds invulnerability. 3.7 adds buff stats. Sequence: 3.5 before 3.7. |
+| `void-breaker/app/src/rendering/particle_system.py` | Modified/Created | 3.5 | May be created in Phase 2 or 3.5. |
+| `void-breaker/app/src/entities/buff_pickup.py` | Created | 3.7 | No conflict (optional component) |
+| `void-breaker/app/src/managers/buff_manager.py` | Created | 3.7 | No conflict (optional component) |
+| `void-breaker/tests/test_enemy_ship.py` | Created | 3.8 | No conflict |
+| `void-breaker/tests/test_enemy_spawning.py` | Created | 3.8 | No conflict |
+| `void-breaker/tests/test_enemy_collisions.py` | Created | 3.8 | No conflict |
+| `void-breaker/tests/test_difficulty_scaling.py` | Created | 3.8 | No conflict |
+| `void-breaker/tests/test_damage_effects.py` | Created | 3.8 | No conflict |
+| `void-breaker/tests/test_buff_pickups.py` | Created | 3.8 | No conflict (if 3.7 implemented) |
 | `docs/implementation-context-phase-3.md` | Created | 3.8 | No conflict |
 | `docs/components/phase-3-component-3-2-overview.md` | Created | 3.2 | No conflict |
 | `docs/components/phase-3-component-3-3-overview.md` | Created | 3.3 | No conflict |

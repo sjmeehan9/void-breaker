@@ -198,8 +198,8 @@ Replaces the Phase 1 stub `MainMenuState` with a fully functional main menu. The
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - MODIFY: `asterax/app/src/states/main_menu.py` -- Full implementation replacing stub
-  - CREATE: `asterax/app/src/rendering/menu_renderer.py` -- Menu rendering utilities (text layout, highlight, title). New file -- no prior phase creates this.
+  - MODIFY: `void-breaker/app/src/states/main_menu.py` -- Full implementation replacing stub
+  - CREATE: `void-breaker/app/src/rendering/menu_renderer.py` -- Menu rendering utilities (text layout, highlight, title). New file -- no prior phase creates this.
 - **Key Functions/Classes**:
   - `MainMenuState` class: `on_enter()`, `on_exit()`, `on_update(dt)`, `on_draw()`, `on_key_press(key, modifiers)`
   - `MainMenuState._menu_options: list[tuple[str, str]]` -- List of (display_text, target_state_name) pairs
@@ -214,9 +214,9 @@ Replaces the Phase 1 stub `MainMenuState` with a fully functional main menu. The
 - **Dependencies**: `arcade` (text rendering, key constants)
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/states/main_menu.py`**: Replace the stub implementation with a complete `MainMenuState`. The state stores a list of menu options as `(display_text, target_state_name)` tuples and tracks the currently selected index. `on_enter()` resets any transition animation state and optionally starts a fade-in. `on_key_press()` handles Up/Down for navigation (wrapping at boundaries) and Enter for selection, playing `menu_nav` and `menu_select` sounds via the `AudioManager`. `_select()` reads the target state name from the current option and calls the state machine's transition method. The "Quit" option calls `arcade.close_window()` or `self.window.close()`. `on_draw()` delegates to `MenuRenderer` for title and option rendering. The state should store `_previous_selection` so that returning from a sub-screen preserves the user's last menu position -- set this in `on_enter()` if a return flag is present, otherwise reset to 0.
+- **File: `void-breaker/app/src/states/main_menu.py`**: Replace the stub implementation with a complete `MainMenuState`. The state stores a list of menu options as `(display_text, target_state_name)` tuples and tracks the currently selected index. `on_enter()` resets any transition animation state and optionally starts a fade-in. `on_key_press()` handles Up/Down for navigation (wrapping at boundaries) and Enter for selection, playing `menu_nav` and `menu_select` sounds via the `AudioManager`. `_select()` reads the target state name from the current option and calls the state machine's transition method. The "Quit" option calls `arcade.close_window()` or `self.window.close()`. `on_draw()` delegates to `MenuRenderer` for title and option rendering. The state should store `_previous_selection` so that returning from a sub-screen preserves the user's last menu position -- set this in `on_enter()` if a return flag is present, otherwise reset to 0.
 
-- **File: `asterax/app/src/rendering/menu_renderer.py`**: Provide utility functions/class for rendering menu screens consistently across all UI states (main menu, pause, settings). `draw_title()` renders the game title ("VoidBreaker" or whatever the final name is) centred near the top of the screen using the game font at a large size. `draw_menu_options()` renders a vertical list of text options, highlighting the selected one with a distinct colour (e.g., bright yellow vs dim white) and optionally a cursor indicator ("> " prefix or underline). Spacing between options should be configurable. This renderer is reused by the pause menu (5.6) and settings screen (5.4), so keep the API generic. Consider using `arcade.Text` objects cached on the class for performance rather than creating new text objects each frame.
+- **File: `void-breaker/app/src/rendering/menu_renderer.py`**: Provide utility functions/class for rendering menu screens consistently across all UI states (main menu, pause, settings). `draw_title()` renders the game title ("VoidBreaker" or whatever the final name is) centred near the top of the screen using the game font at a large size. `draw_menu_options()` renders a vertical list of text options, highlighting the selected one with a distinct colour (e.g., bright yellow vs dim white) and optionally a cursor indicator ("> " prefix or underline). Spacing between options should be configurable. This renderer is reused by the pause menu (5.6) and settings screen (5.4), so keep the API generic. Consider using `arcade.Text` objects cached on the class for performance rather than creating new text objects each frame.
 
 **Test Requirements**:
 - [ ] Unit tests: `MainMenuState` initialises with 5 menu options
@@ -276,8 +276,8 @@ Implements two informational screens accessible from the main menu. The How-to-P
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - MODIFY: `asterax/app/src/states/how_to_play.py` -- Full implementation replacing stub
-  - MODIFY: `asterax/app/src/states/high_scores.py` -- Full implementation replacing stub
+  - MODIFY: `void-breaker/app/src/states/how_to_play.py` -- Full implementation replacing stub
+  - MODIFY: `void-breaker/app/src/states/high_scores.py` -- Full implementation replacing stub
 - **Key Functions/Classes**:
   - `HowToPlayState` class: `on_enter()`, `on_draw()`, `on_key_press()`
   - `HowToPlayState._build_controls_text() -> list[str]` -- Generates control descriptions from current InputManager bindings
@@ -292,9 +292,9 @@ Implements two informational screens accessible from the main menu. The How-to-P
 - **Dependencies**: `PersistenceManager`, `InputManager`, `MenuRenderer` from 5.2
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/states/how_to_play.py`**: Replace the stub with a multi-section informational screen. Section 1 ("Controls") dynamically reads key bindings from the `InputManager` and displays them as a two-column layout: action name on the left, bound key on the right. This ensures the How-to-Play screen always reflects the player's current bindings, even after remapping. Section 2 ("Gameplay") explains the core loop in 3-4 short paragraphs: "Destroy asteroids and enemies to earn currency. Collect currency crystals by flying over them. Between levels, fly into shop nodes to purchase upgrades. Upgrades improve your weapons, defense, mobility, and economy." Section 3 ("Insurance") explains: "Purchase insurance in the shop to protect your upgrades. Basic insurance retains half your upgrades on death. Premium retains all." Section 4 ("Tips") provides 2-3 short tips. Render using `MenuRenderer` for consistent styling. Escape or a dedicated key returns to MainMenu. If content is too long for one screen, implement simple page scrolling (Up/Down to scroll, or multiple pages with Left/Right).
+- **File: `void-breaker/app/src/states/how_to_play.py`**: Replace the stub with a multi-section informational screen. Section 1 ("Controls") dynamically reads key bindings from the `InputManager` and displays them as a two-column layout: action name on the left, bound key on the right. This ensures the How-to-Play screen always reflects the player's current bindings, even after remapping. Section 2 ("Gameplay") explains the core loop in 3-4 short paragraphs: "Destroy asteroids and enemies to earn currency. Collect currency crystals by flying over them. Between levels, fly into shop nodes to purchase upgrades. Upgrades improve your weapons, defense, mobility, and economy." Section 3 ("Insurance") explains: "Purchase insurance in the shop to protect your upgrades. Basic insurance retains half your upgrades on death. Premium retains all." Section 4 ("Tips") provides 2-3 short tips. Render using `MenuRenderer` for consistent styling. Escape or a dedicated key returns to MainMenu. If content is too long for one screen, implement simple page scrolling (Up/Down to scroll, or multiple pages with Left/Right).
 
-- **File: `asterax/app/src/states/high_scores.py`**: Replace the stub with a leaderboard display. `on_enter()` loads scores from `PersistenceManager` and sorts by score descending. Display the top 10 entries in a table-style layout with columns: Rank (#), Name, Score, Level, Difficulty, Date. If the leaderboard is empty, display "No scores yet -- start a new game!" centred on screen. If difficulty presets are active (check for the existence of multiple difficulty values in stored scores), display a filter indicator at the top (e.g., "Showing: All | [Left/Right to filter]") and allow Left/Right keys to cycle through "all", "casual", "classic", "hard". When filtered, only scores matching the selected difficulty are shown and re-ranked. Escape returns to MainMenu.
+- **File: `void-breaker/app/src/states/high_scores.py`**: Replace the stub with a leaderboard display. `on_enter()` loads scores from `PersistenceManager` and sorts by score descending. Display the top 10 entries in a table-style layout with columns: Rank (#), Name, Score, Level, Difficulty, Date. If the leaderboard is empty, display "No scores yet -- start a new game!" centred on screen. If difficulty presets are active (check for the existence of multiple difficulty values in stored scores), display a filter indicator at the top (e.g., "Showing: All | [Left/Right to filter]") and allow Left/Right keys to cycle through "all", "casual", "classic", "hard". When filtered, only scores matching the selected difficulty are shown and re-ranked. Escape returns to MainMenu.
 
 **Test Requirements**:
 - [ ] Unit tests: `HowToPlayState._build_controls_text()` returns correct strings for default key bindings
@@ -361,7 +361,7 @@ Implements the full Settings screen accessible from the main menu and from the p
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - MODIFY: `asterax/app/src/states/settings_screen.py` -- Full implementation replacing stub
+  - MODIFY: `void-breaker/app/src/states/settings_screen.py` -- Full implementation replacing stub
 - **Key Functions/Classes**:
   - `SettingsScreenState` class: `on_enter()`, `on_exit()`, `on_update(dt)`, `on_draw()`, `on_key_press(key, modifiers)`
   - `SettingsScreenState._settings_items: list[SettingItem]` -- Ordered list of all configurable settings
@@ -381,7 +381,7 @@ Implements the full Settings screen accessible from the main menu and from the p
 - **Dependencies**: `PersistenceManager`, `InputManager`, `AudioManager` (for volume preview), `MenuRenderer` from 5.2
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/states/settings_screen.py`**: Replace the stub with a full settings interface. The screen is organised as a vertical list of settings, each rendered as a row with the setting name on the left and the current value/control on the right. Categories (Controls, Audio, Visual, Gameplay) are rendered as non-selectable header rows with distinct styling. Up/Down navigates between settings. Left/Right adjusts value-based settings (volume, multi-option). Enter toggles boolean settings or initiates key rebinding. Key remapping uses a modal sub-state: when `_is_rebinding` is True, the screen displays "Press a key for [Action]..." overlay text and the next `on_key_press()` call (excluding Escape, which cancels) captures the key. If the key is already bound to another action, that action's binding is cleared and a brief warning is shown (e.g., "[Key] was unbound from [Action]"). After rebinding, `InputManager.rebind(action, new_key)` is called and settings are persisted. Volume controls display as `[=====     ] 50%` style bars. All changes call `_save_settings()` immediately, which serialises the current `GameSettings` to JSON via `PersistenceManager.save_settings()`. A "Reset to Defaults" item at the bottom of the list, when selected, restores all settings to their default values (from `GameSettings` defaults), updates the `InputManager`, and persists. The `_return_to` attribute tracks whether to return to the main menu or the pause menu on exit.
+- **File: `void-breaker/app/src/states/settings_screen.py`**: Replace the stub with a full settings interface. The screen is organised as a vertical list of settings, each rendered as a row with the setting name on the left and the current value/control on the right. Categories (Controls, Audio, Visual, Gameplay) are rendered as non-selectable header rows with distinct styling. Up/Down navigates between settings. Left/Right adjusts value-based settings (volume, multi-option). Enter toggles boolean settings or initiates key rebinding. Key remapping uses a modal sub-state: when `_is_rebinding` is True, the screen displays "Press a key for [Action]..." overlay text and the next `on_key_press()` call (excluding Escape, which cancels) captures the key. If the key is already bound to another action, that action's binding is cleared and a brief warning is shown (e.g., "[Key] was unbound from [Action]"). After rebinding, `InputManager.rebind(action, new_key)` is called and settings are persisted. Volume controls display as `[=====     ] 50%` style bars. All changes call `_save_settings()` immediately, which serialises the current `GameSettings` to JSON via `PersistenceManager.save_settings()`. A "Reset to Defaults" item at the bottom of the list, when selected, restores all settings to their default values (from `GameSettings` defaults), updates the `InputManager`, and persists. The `_return_to` attribute tracks whether to return to the main menu or the pause menu on exit.
 
 **Test Requirements**:
 - [ ] Unit tests: `_adjust_setting()` correctly increments/decrements volume in 0.1 steps, clamped to 0.0-1.0
@@ -449,7 +449,7 @@ Replaces the basic Phase 2 `GameOver` state with a polished game over screen. Di
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - MODIFY: `asterax/app/src/states/game_over.py` -- Full implementation replacing Phase 2 basic version
+  - MODIFY: `void-breaker/app/src/states/game_over.py` -- Full implementation replacing Phase 2 basic version
 - **Key Functions/Classes**:
   - `GameOverState` class: `on_enter()`, `on_exit()`, `on_update(dt)`, `on_draw()`, `on_key_press(key, modifiers)`
   - `GameOverState._run_summary: RunSummary` -- Dataclass or dict containing all run stats
@@ -466,7 +466,7 @@ Replaces the basic Phase 2 `GameOver` state with a polished game over screen. Di
 - **Dependencies**: `PersistenceManager`, `RunStats` from `GameState`, `InsuranceManager`, `MenuRenderer`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/states/game_over.py`**: Replace the Phase 2 basic game over screen with a multi-phase screen. The state progresses through three sub-phases: "summary" (display run stats), "name_entry" (if qualified, capture initials), and "options" (Play Again / Return to Menu). `on_enter()` receives the run summary data from the `GameState.run_stats` (which must be accumulated during gameplay by the combat phase -- score, enemies destroyed, asteroids destroyed are tracked by `ScoreManager`; currency earned/spent by `CurrencyManager`; insurance tier by `InsuranceManager`). The summary phase renders all stats in a clean two-column layout (label: value). After a brief delay or keypress, if the score qualifies (top 10 by score), transition to name_entry. In name_entry, display "Enter your name:" with the current buffer and a blinking cursor. Accept A-Z, 0-9, and Backspace. Minimum 3 characters required; Enter is ignored until 3 characters are entered. Maximum 10 characters. On Enter with valid name, create a `HighScoreEntry` with all fields populated (score, level, difficulty from current `GameSettings.difficulty`, enemies_destroyed, currency stats, ISO 8601 date from `datetime.now().isoformat()`), save via `PersistenceManager.save_high_score(entry)`, and transition to "options". The options phase shows "Play Again" and "Return to Menu" with keyboard navigation identical to main menu. Play `game_over.wav` on `on_enter()`.
+- **File: `void-breaker/app/src/states/game_over.py`**: Replace the Phase 2 basic game over screen with a multi-phase screen. The state progresses through three sub-phases: "summary" (display run stats), "name_entry" (if qualified, capture initials), and "options" (Play Again / Return to Menu). `on_enter()` receives the run summary data from the `GameState.run_stats` (which must be accumulated during gameplay by the combat phase -- score, enemies destroyed, asteroids destroyed are tracked by `ScoreManager`; currency earned/spent by `CurrencyManager`; insurance tier by `InsuranceManager`). The summary phase renders all stats in a clean two-column layout (label: value). After a brief delay or keypress, if the score qualifies (top 10 by score), transition to name_entry. In name_entry, display "Enter your name:" with the current buffer and a blinking cursor. Accept A-Z, 0-9, and Backspace. Minimum 3 characters required; Enter is ignored until 3 characters are entered. Maximum 10 characters. On Enter with valid name, create a `HighScoreEntry` with all fields populated (score, level, difficulty from current `GameSettings.difficulty`, enemies_destroyed, currency stats, ISO 8601 date from `datetime.now().isoformat()`), save via `PersistenceManager.save_high_score(entry)`, and transition to "options". The options phase shows "Play Again" and "Return to Menu" with keyboard navigation identical to main menu. Play `game_over.wav` on `on_enter()`.
 
 **Test Requirements**:
 - [ ] Unit tests: `_check_qualification()` returns True when score exceeds the 10th entry, False otherwise
@@ -527,9 +527,9 @@ Implements the pause system as a state stack overlay that can activate during bo
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - MODIFY: `asterax/app/src/states/pause.py` -- Full implementation replacing stub
-  - MODIFY: `asterax/app/src/states/combat.py` -- Add pause trigger on key press (minor modification)
-  - MODIFY: `asterax/app/src/states/shop.py` -- Add pause trigger on key press (minor modification)
+  - MODIFY: `void-breaker/app/src/states/pause.py` -- Full implementation replacing stub
+  - MODIFY: `void-breaker/app/src/states/combat.py` -- Add pause trigger on key press (minor modification)
+  - MODIFY: `void-breaker/app/src/states/shop.py` -- Add pause trigger on key press (minor modification)
 - **Key Functions/Classes**:
   - `PauseState` class: `on_enter()`, `on_exit()`, `on_update(dt)`, `on_draw()`, `on_key_press(key, modifiers)`
   - `PauseState._menu_options: list[tuple[str, str]]` -- [(display_text, action_name)]
@@ -545,11 +545,11 @@ Implements the pause system as a state stack overlay that can activate during bo
 - **Dependencies**: State machine overlay stack (Phase 1), `MenuRenderer` (5.2), `InputManager` (Phase 1)
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/states/pause.py`**: Replace the stub with a full overlay state. The pause state is pushed onto the state stack (not a state transition), so the underlying state (CombatPhase or ShopPhase) remains on the stack and does not receive `on_exit()`. Since the pause state is an overlay, `on_draw()` must first call the underlying state's `on_draw()` to render the game world, then draw a semi-transparent dark rectangle (e.g., `arcade.draw_lrtb_rectangle_filled()` with RGBA `(0, 0, 0, 150)` covering the full window), then draw the pause menu on top. The underlying state's `on_update()` is NOT called while paused -- the state machine must skip update calls for states below an overlay. `on_enter()` records the paused state for Resume to return to. Menu navigation uses the same pattern as MainMenuState (Up/Down, Enter, wrapping). Resume pops the PauseState from the stack. Restart clears the stack and pushes a fresh game init. Settings pushes `SettingsScreenState` with `return_to="pause"`. Exit clears the stack and pushes MainMenuState. Pressing the pause key (Escape) while in the pause menu calls `_resume()` as a shortcut.
+- **File: `void-breaker/app/src/states/pause.py`**: Replace the stub with a full overlay state. The pause state is pushed onto the state stack (not a state transition), so the underlying state (CombatPhase or ShopPhase) remains on the stack and does not receive `on_exit()`. Since the pause state is an overlay, `on_draw()` must first call the underlying state's `on_draw()` to render the game world, then draw a semi-transparent dark rectangle (e.g., `arcade.draw_lrtb_rectangle_filled()` with RGBA `(0, 0, 0, 150)` covering the full window), then draw the pause menu on top. The underlying state's `on_update()` is NOT called while paused -- the state machine must skip update calls for states below an overlay. `on_enter()` records the paused state for Resume to return to. Menu navigation uses the same pattern as MainMenuState (Up/Down, Enter, wrapping). Resume pops the PauseState from the stack. Restart clears the stack and pushes a fresh game init. Settings pushes `SettingsScreenState` with `return_to="pause"`. Exit clears the stack and pushes MainMenuState. Pressing the pause key (Escape) while in the pause menu calls `_resume()` as a shortcut.
 
-- **File: `asterax/app/src/states/combat.py`** (minor modification): In `on_key_press()`, add a check for the pause key. When pressed, push `PauseState` onto the state stack. This is a 3-5 line change. Example: `if key == self.input_manager.get_key("pause"): self.state_machine.push_state(PauseState(...))`.
+- **File: `void-breaker/app/src/states/combat.py`** (minor modification): In `on_key_press()`, add a check for the pause key. When pressed, push `PauseState` onto the state stack. This is a 3-5 line change. Example: `if key == self.input_manager.get_key("pause"): self.state_machine.push_state(PauseState(...))`.
 
-- **File: `asterax/app/src/states/shop.py`** (minor modification): Same as combat.py -- add pause key check in `on_key_press()` to push PauseState. 3-5 line change.
+- **File: `void-breaker/app/src/states/shop.py`** (minor modification): Same as combat.py -- add pause key check in `on_key_press()` to push PauseState. 3-5 line change.
 
 **Test Requirements**:
 - [ ] Unit tests: Pushing PauseState does not call underlying state's `on_exit()`
@@ -615,15 +615,15 @@ Integrates all sound effects with their corresponding game events and implements
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - MODIFY: `asterax/app/src/audio/audio_manager.py` -- Add event-specific convenience methods, verify all sounds load
-  - MODIFY: `asterax/app/src/rendering/particle_system.py` -- Full implementation replacing Phase 2 basic version
-  - MODIFY: `asterax/app/src/states/combat.py` -- Wire sound triggers to combat events
-  - MODIFY: `asterax/app/src/states/shop.py` -- Wire sound triggers to shop events
-  - MODIFY: `asterax/app/src/states/game_over.py` -- Wire game_over sound (may already be done in 5.5)
-  - MODIFY: `asterax/app/src/entities/player_ship.py` -- Wire fire sound, thrust particle emission
-  - MODIFY: `asterax/app/src/entities/asteroid.py` -- Wire explosion sound on destroy
-  - MODIFY: `asterax/app/src/entities/enemy_ship.py` -- Wire enemy_explode sound on destroy
-  - MODIFY: `asterax/app/src/physics/collisions.py` -- Wire hit sound on ship damage, pickup sounds on collection
+  - MODIFY: `void-breaker/app/src/audio/audio_manager.py` -- Add event-specific convenience methods, verify all sounds load
+  - MODIFY: `void-breaker/app/src/rendering/particle_system.py` -- Full implementation replacing Phase 2 basic version
+  - MODIFY: `void-breaker/app/src/states/combat.py` -- Wire sound triggers to combat events
+  - MODIFY: `void-breaker/app/src/states/shop.py` -- Wire sound triggers to shop events
+  - MODIFY: `void-breaker/app/src/states/game_over.py` -- Wire game_over sound (may already be done in 5.5)
+  - MODIFY: `void-breaker/app/src/entities/player_ship.py` -- Wire fire sound, thrust particle emission
+  - MODIFY: `void-breaker/app/src/entities/asteroid.py` -- Wire explosion sound on destroy
+  - MODIFY: `void-breaker/app/src/entities/enemy_ship.py` -- Wire enemy_explode sound on destroy
+  - MODIFY: `void-breaker/app/src/physics/collisions.py` -- Wire hit sound on ship damage, pickup sounds on collection
 - **Key Functions/Classes**:
   - `AudioManager.play_fire()` -- Plays `fire.wav`
   - `AudioManager.play_hit()` -- Plays `hit.wav`
@@ -652,9 +652,9 @@ Integrates all sound effects with their corresponding game events and implements
 - **Dependencies**: `arcade` (Sound, SpriteList), all entity and collision modules from Phases 2-4
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/audio/audio_manager.py`**: Extend the Phase 1 skeleton with convenience methods for each sound event. Each method calls `self.play(sound_name)` internally. The convenience methods provide a clean API for game code (e.g., `audio.play_explosion("large")` instead of `audio.play("explode_large")`). Verify that `_load_all_sounds()` successfully loads all 16 WAV files from `assets/sounds/`. If a sound file is missing, log a warning and continue (graceful degradation, matching Phase 1 behaviour). Add `play_explosion(size: str)` that maps "small"/"medium"/"large" to the corresponding file stem. All other methods are simple wrappers. Ensure volume is applied correctly: `effective_volume = sfx_volume * master_volume`.
+- **File: `void-breaker/app/src/audio/audio_manager.py`**: Extend the Phase 1 skeleton with convenience methods for each sound event. Each method calls `self.play(sound_name)` internally. The convenience methods provide a clean API for game code (e.g., `audio.play_explosion("large")` instead of `audio.play("explode_large")`). Verify that `_load_all_sounds()` successfully loads all 16 WAV files from `assets/sounds/`. If a sound file is missing, log a warning and continue (graceful degradation, matching Phase 1 behaviour). Add `play_explosion(size: str)` that maps "small"/"medium"/"large" to the corresponding file stem. All other methods are simple wrappers. Ensure volume is applied correctly: `effective_volume = sfx_volume * master_volume`.
 
-- **File: `asterax/app/src/rendering/particle_system.py`**: Replace the Phase 2 basic explosion particles with a full pooled particle system. Pre-allocate `max_particles` (default 300) `Particle` objects, each containing an `arcade.Sprite` using the `particle_dot.png` texture. All sprites are added to a single `SpriteList` for batch rendering but are hidden (alpha=0 or moved off-screen) when inactive. `emit_*()` methods activate particles from the pool by setting their position, velocity (randomised within a cone for explosions, backward from ship angle for thrust), colour tint, lifetime, scale, and `active=True`. If the pool is exhausted, the oldest active particle is recycled. `update(dt)` iterates all active particles: update position (`x += vx * dt`), decrement lifetime, apply fade (alpha decreases as lifetime approaches 0), deactivate expired particles. `draw()` calls `self.sprite_list.draw()` which batch-renders all visible particles in one GPU call. Effect specifications: Explosion small: 8 particles, speed 50-150 px/s, lifetime 0.3-0.6s, colour from asteroid tint. Explosion medium: 15 particles, speed 80-200, lifetime 0.4-0.8s. Explosion large: 25 particles, speed 100-250, lifetime 0.5-1.0s. Thrust trail: 1 particle per frame while thrusting, speed 30-80 opposite to ship heading, lifetime 0.2-0.4s, colour blue-white. Pickup sparkle: 6 particles, speed 20-60 radial, lifetime 0.3-0.5s, colour gold. Damage flash: 4 particles, speed 40-100, lifetime 0.15-0.3s, colour red-white. Purchase burst: 10 particles, speed 30-80 radial, lifetime 0.3-0.6s, colour matching node category.
+- **File: `void-breaker/app/src/rendering/particle_system.py`**: Replace the Phase 2 basic explosion particles with a full pooled particle system. Pre-allocate `max_particles` (default 300) `Particle` objects, each containing an `arcade.Sprite` using the `particle_dot.png` texture. All sprites are added to a single `SpriteList` for batch rendering but are hidden (alpha=0 or moved off-screen) when inactive. `emit_*()` methods activate particles from the pool by setting their position, velocity (randomised within a cone for explosions, backward from ship angle for thrust), colour tint, lifetime, scale, and `active=True`. If the pool is exhausted, the oldest active particle is recycled. `update(dt)` iterates all active particles: update position (`x += vx * dt`), decrement lifetime, apply fade (alpha decreases as lifetime approaches 0), deactivate expired particles. `draw()` calls `self.sprite_list.draw()` which batch-renders all visible particles in one GPU call. Effect specifications: Explosion small: 8 particles, speed 50-150 px/s, lifetime 0.3-0.6s, colour from asteroid tint. Explosion medium: 15 particles, speed 80-200, lifetime 0.4-0.8s. Explosion large: 25 particles, speed 100-250, lifetime 0.5-1.0s. Thrust trail: 1 particle per frame while thrusting, speed 30-80 opposite to ship heading, lifetime 0.2-0.4s, colour blue-white. Pickup sparkle: 6 particles, speed 20-60 radial, lifetime 0.3-0.5s, colour gold. Damage flash: 4 particles, speed 40-100, lifetime 0.15-0.3s, colour red-white. Purchase burst: 10 particles, speed 30-80 radial, lifetime 0.3-0.6s, colour matching node category.
 
 - **Sound trigger wiring** (modifications to combat.py, shop.py, collisions.py, entities): Each game event that requires audio is already handled by a callback or method. Add `audio_manager.play_*()` calls at the point of each event. Fire: in `PlayerShip.fire()` or the combat state's fire handler. Hit: in the collision handler for ship damage. Explosion: in `Asteroid.on_destroyed()` and `EnemyShip.on_destroyed()`, passing the size. Pickup: in the collision handler for currency and buff collection. Shop purchase/denied: in `ShopNode.on_purchased()` and the denied handler. Level clear: in the combat state's level completion check. Game over: in `GameOverState.on_enter()`. Menu nav/select: already wired in 5.2. These are small (1-3 line) additions to existing methods.
 
@@ -725,13 +725,13 @@ Adds visual polish across the entire game. Level transitions use a brief fade-to
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - MODIFY: `asterax/app/src/rendering/transitions.py` -- Full implementation (level transition effects)
-  - MODIFY: `asterax/app/src/rendering/hud.py` -- Polish layout, add icons, improve readability
-  - MODIFY: `asterax/app/src/rendering/particle_system.py` -- Add damage flash as sprite tint (minor extension)
-  - MODIFY: `asterax/app/src/states/combat.py` -- Integrate screen shake and level transition
-  - MODIFY: `asterax/app/src/entities/shop_node.py` -- Add pulsing animation
-  - MODIFY: `asterax/app/src/entities/player_ship.py` -- Add damage flash tint
-  - MODIFY: `asterax/app/src/window.py` -- Screen shake viewport offset
+  - MODIFY: `void-breaker/app/src/rendering/transitions.py` -- Full implementation (level transition effects)
+  - MODIFY: `void-breaker/app/src/rendering/hud.py` -- Polish layout, add icons, improve readability
+  - MODIFY: `void-breaker/app/src/rendering/particle_system.py` -- Add damage flash as sprite tint (minor extension)
+  - MODIFY: `void-breaker/app/src/states/combat.py` -- Integrate screen shake and level transition
+  - MODIFY: `void-breaker/app/src/entities/shop_node.py` -- Add pulsing animation
+  - MODIFY: `void-breaker/app/src/entities/player_ship.py` -- Add damage flash tint
+  - MODIFY: `void-breaker/app/src/window.py` -- Screen shake viewport offset
 - **Key Functions/Classes**:
   - `TransitionEffect` class: manages fade and text overlay
   - `TransitionEffect.start_level_transition(level: int)` -- Begins fade-out, text display, fade-in sequence
@@ -747,11 +747,11 @@ Adds visual polish across the entire game. Level transitions use a brief fade-to
 - **Dependencies**: `arcade`, `GameSettings.screen_shake`, `GameSettings.colorblind_mode`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/rendering/transitions.py`**: Implement `TransitionEffect` as a self-contained animation controller. The level transition sequence is: (1) fade out over 0.3s (draw a black rectangle with alpha increasing from 0 to 255), (2) hold for 0.8s (full black + "Level X" text centred in white), (3) fade in over 0.3s (alpha decreasing from 255 to 0). Total duration: ~1.4 seconds. The `start_level_transition(level)` method records the target level and starts the timer. `update(dt)` advances the timer and calculates the current phase and alpha. `draw()` renders the overlay rectangle and text. The CombatPhase calls `start_level_transition()` when a level clears and waits until `is_active` is False before spawning the next level's entities. During the transition, no game logic runs (entities are frozen).
+- **File: `void-breaker/app/src/rendering/transitions.py`**: Implement `TransitionEffect` as a self-contained animation controller. The level transition sequence is: (1) fade out over 0.3s (draw a black rectangle with alpha increasing from 0 to 255), (2) hold for 0.8s (full black + "Level X" text centred in white), (3) fade in over 0.3s (alpha decreasing from 255 to 0). Total duration: ~1.4 seconds. The `start_level_transition(level)` method records the target level and starts the timer. `update(dt)` advances the timer and calculates the current phase and alpha. `draw()` renders the overlay rectangle and text. The CombatPhase calls `start_level_transition()` when a level clears and waits until `is_active` is False before spawning the next level's entities. During the transition, no game logic runs (entities are frozen).
 
-- **File: `asterax/app/src/rendering/hud.py`**: Polish the Phase 2 HUD. Position elements consistently: shields bar at top-left (coloured bar: green > yellow > red based on percentage), score at top-centre (large text), level at top-right, currency at top-left below shields (with a small currency icon if available). Use `arcade.Text` objects cached on the HUD class, updated only when values change (lazy rendering per solution-design.md optimisation strategy). Add visual polish: shields bar has a border/outline, score has a slight text shadow for readability, currency amount flashes briefly when it changes.
+- **File: `void-breaker/app/src/rendering/hud.py`**: Polish the Phase 2 HUD. Position elements consistently: shields bar at top-left (coloured bar: green > yellow > red based on percentage), score at top-centre (large text), level at top-right, currency at top-left below shields (with a small currency icon if available). Use `arcade.Text` objects cached on the HUD class, updated only when values change (lazy rendering per solution-design.md optimisation strategy). Add visual polish: shields bar has a border/outline, score has a slight text shadow for readability, currency amount flashes briefly when it changes.
 
-- **File: `asterax/app/src/window.py`** (screen shake): Implement screen shake as a viewport offset. When triggered, apply a random offset to the camera/viewport position (`self.camera.move()` or manual offset in draw coordinates) that decays exponentially over 0.3-0.5 seconds. Intensity levels: "off" = no offset, "low" = max 3px offset, "medium" = max 8px offset. Read the `screen_shake` setting from `GameSettings`. The `ScreenShake` class tracks current intensity, applies random x/y offsets each frame, and decays toward zero. Reset to zero when shake is complete.
+- **File: `void-breaker/app/src/window.py`** (screen shake): Implement screen shake as a viewport offset. When triggered, apply a random offset to the camera/viewport position (`self.camera.move()` or manual offset in draw coordinates) that decays exponentially over 0.3-0.5 seconds. Intensity levels: "off" = no offset, "low" = max 3px offset, "medium" = max 8px offset. Read the `screen_shake` setting from `GameSettings`. The `ScreenShake` class tracks current intensity, applies random x/y offsets each frame, and decays toward zero. Reset to zero when shake is complete.
 
 - **Colorblind palette**: Define a `ColorblindPalette` dict mapping default entity colours to deuteranopia-safe alternatives (e.g., red -> orange, green -> blue, using a well-known colourblind palette). When `GameSettings.colorblind_mode` is True, apply colour tints to entity sprites during rendering setup. This can be done by setting `sprite.color` on each entity's sprite to the palette-mapped colour. Apply on state enter and when the setting is toggled.
 
@@ -820,10 +820,10 @@ Implements three difficulty presets that modify the base `DifficultyParams` used
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - MODIFY: `asterax/app/src/config/difficulty_tables.py` -- Add difficulty preset multipliers
-  - MODIFY: `asterax/app/src/managers/difficulty_scaler.py` -- Apply preset multipliers to base params
-  - MODIFY: `asterax/app/src/states/main_menu.py` -- Add difficulty selection sub-prompt on New Game
-  - MODIFY: `asterax/app/src/persistence/schemas.py` -- Ensure HighScoreEntry includes difficulty field
+  - MODIFY: `void-breaker/app/src/config/difficulty_tables.py` -- Add difficulty preset multipliers
+  - MODIFY: `void-breaker/app/src/managers/difficulty_scaler.py` -- Apply preset multipliers to base params
+  - MODIFY: `void-breaker/app/src/states/main_menu.py` -- Add difficulty selection sub-prompt on New Game
+  - MODIFY: `void-breaker/app/src/persistence/schemas.py` -- Ensure HighScoreEntry includes difficulty field
 - **Key Functions/Classes**:
   - `DifficultyPreset` enum: `CASUAL`, `CLASSIC`, `HARD`
   - `DIFFICULTY_PRESET_MULTIPLIERS: dict[DifficultyPreset, DifficultyMultipliers]` -- Multiplier sets per preset
@@ -836,13 +836,13 @@ Implements three difficulty presets that modify the base `DifficultyParams` used
 - **Dependencies**: `DifficultyParams`, `DifficultyScaler`, `PersistenceManager`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/config/difficulty_tables.py`**: Add `DifficultyPreset` enum and `DifficultyMultipliers` dataclass. Define `DIFFICULTY_PRESET_MULTIPLIERS` as a dict mapping each preset to its multiplier set. Casual multipliers reduce challenge: `asteroid_count=0.7`, `enemy_aggression=0.6`, `currency_drop_chance=1.5`, `damage_received=0.7`, `enemy_spawn_interval=1.4` (slower spawns). Classic is all 1.0. Hard increases challenge: `asteroid_count=1.4`, `enemy_aggression=1.3`, `currency_drop_chance=0.7`, `damage_received=1.3`, `enemy_spawn_interval=0.7` (faster spawns). These multipliers are applied to the per-level base parameters from the existing difficulty tables -- they do not replace the level scaling, they modify its baseline.
+- **File: `void-breaker/app/src/config/difficulty_tables.py`**: Add `DifficultyPreset` enum and `DifficultyMultipliers` dataclass. Define `DIFFICULTY_PRESET_MULTIPLIERS` as a dict mapping each preset to its multiplier set. Casual multipliers reduce challenge: `asteroid_count=0.7`, `enemy_aggression=0.6`, `currency_drop_chance=1.5`, `damage_received=0.7`, `enemy_spawn_interval=1.4` (slower spawns). Classic is all 1.0. Hard increases challenge: `asteroid_count=1.4`, `enemy_aggression=1.3`, `currency_drop_chance=0.7`, `damage_received=1.3`, `enemy_spawn_interval=0.7` (faster spawns). These multipliers are applied to the per-level base parameters from the existing difficulty tables -- they do not replace the level scaling, they modify its baseline.
 
-- **File: `asterax/app/src/managers/difficulty_scaler.py`**: Add `apply_preset()` method that takes the base `DifficultyParams` for a given level (from the existing difficulty table lookup) and multiplies relevant fields by the preset multipliers. Return a new `DifficultyParams` instance with modified values. Floor asteroid_count to at least 1. Clamp enemy_aggression to 0.0-1.0 range after multiplying. This method is called by the CombatPhase when initialising each level.
+- **File: `void-breaker/app/src/managers/difficulty_scaler.py`**: Add `apply_preset()` method that takes the base `DifficultyParams` for a given level (from the existing difficulty table lookup) and multiplies relevant fields by the preset multipliers. Return a new `DifficultyParams` instance with modified values. Floor asteroid_count to at least 1. Clamp enemy_aggression to 0.0-1.0 range after multiplying. This method is called by the CombatPhase when initialising each level.
 
-- **File: `asterax/app/src/states/main_menu.py`**: Modify the "New Game" action to show a brief difficulty selection sub-prompt before starting the game. This can be a simple overlay with three options (Casual / Classic / Hard) and a description line for each. The currently selected difficulty (from settings) is pre-highlighted. After selection, store the choice in `GameSettings.difficulty` (persist via PersistenceManager) and proceed to game init. Alternatively, the difficulty can default to the settings value and skip the prompt -- implement the prompt but make it skippable (Enter on the pre-selected default proceeds immediately).
+- **File: `void-breaker/app/src/states/main_menu.py`**: Modify the "New Game" action to show a brief difficulty selection sub-prompt before starting the game. This can be a simple overlay with three options (Casual / Classic / Hard) and a description line for each. The currently selected difficulty (from settings) is pre-highlighted. After selection, store the choice in `GameSettings.difficulty` (persist via PersistenceManager) and proceed to game init. Alternatively, the difficulty can default to the settings value and skip the prompt -- implement the prompt but make it skippable (Enter on the pre-selected default proceeds immediately).
 
-- **File: `asterax/app/src/persistence/schemas.py`**: Verify that `HighScoreEntry` includes a `difficulty: str` field. If it was already added in Phase 1 (per the solution-design.md data model), no change is needed. If not, add it with a default of `"classic"` for backward compatibility with any existing entries. The high scores screen (5.3) already supports filtering by this field.
+- **File: `void-breaker/app/src/persistence/schemas.py`**: Verify that `HighScoreEntry` includes a `difficulty: str` field. If it was already added in Phase 1 (per the solution-design.md data model), no change is needed. If not, add it with a default of `"classic"` for backward compatibility with any existing entries. The high scores screen (5.3) already supports filtering by this field.
 
 **Test Requirements**:
 - [ ] Unit tests: `apply_preset()` with CASUAL produces lower asteroid counts and higher currency drop chance
@@ -908,11 +908,11 @@ Implements a low-stakes sandbox mode for learning controls and mechanics. Access
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - MODIFY: `asterax/app/src/states/main_menu.py` -- Add "Practice" option to menu
-  - CREATE: `asterax/app/src/states/practice_config.py` -- Practice mode configuration screen
-  - MODIFY: `asterax/app/src/states/combat.py` -- Accept `is_practice: bool` flag, skip score recording
-  - MODIFY: `asterax/app/src/states/game_over.py` -- Skip high score entry in practice mode
-  - MODIFY: `asterax/app/src/rendering/hud.py` -- Display "PRACTICE" indicator when in practice mode
+  - MODIFY: `void-breaker/app/src/states/main_menu.py` -- Add "Practice" option to menu
+  - CREATE: `void-breaker/app/src/states/practice_config.py` -- Practice mode configuration screen
+  - MODIFY: `void-breaker/app/src/states/combat.py` -- Accept `is_practice: bool` flag, skip score recording
+  - MODIFY: `void-breaker/app/src/states/game_over.py` -- Skip high score entry in practice mode
+  - MODIFY: `void-breaker/app/src/rendering/hud.py` -- Display "PRACTICE" indicator when in practice mode
 - **Key Functions/Classes**:
   - `PracticeConfigState` class: `on_enter()`, `on_draw()`, `on_key_press()`
   - `PracticeConfigState._toggles: dict[str, bool]` -- Toggle states: `asteroids_only`, `infinite_shields`, `reduced_count`
@@ -927,15 +927,15 @@ Implements a low-stakes sandbox mode for learning controls and mechanics. Access
 - **Dependencies**: `CombatPhase`, `DifficultyParams`, `MainMenuState`, `GameOverState`
 
 **Detailed Implementation Requirements**:
-- **File: `asterax/app/src/states/practice_config.py`**: New state for practice mode configuration. Displays a screen with the heading "Practice Mode" and three toggleable options, each showing its current state as [ON] or [OFF]. Up/Down navigates between toggles; Enter or Space flips the selected toggle. A "Start Practice" button at the bottom launches the practice session. `_build_practice_params()` creates a `DifficultyParams` by taking the Level 1 base params and applying modifications: if `asteroids_only`, set `enemy_spawn_enabled=False` and `enemy_count_max=0`; if `infinite_shields`, this is handled by setting a flag on `GameState` (shields are set to 999999 and damage is suppressed); if `reduced_count`, multiply `asteroid_count` by 0.5 (minimum 1). The modified params and `is_practice=True` flag are passed to the CombatPhase when it initialises.
+- **File: `void-breaker/app/src/states/practice_config.py`**: New state for practice mode configuration. Displays a screen with the heading "Practice Mode" and three toggleable options, each showing its current state as [ON] or [OFF]. Up/Down navigates between toggles; Enter or Space flips the selected toggle. A "Start Practice" button at the bottom launches the practice session. `_build_practice_params()` creates a `DifficultyParams` by taking the Level 1 base params and applying modifications: if `asteroids_only`, set `enemy_spawn_enabled=False` and `enemy_count_max=0`; if `infinite_shields`, this is handled by setting a flag on `GameState` (shields are set to 999999 and damage is suppressed); if `reduced_count`, multiply `asteroid_count` by 0.5 (minimum 1). The modified params and `is_practice=True` flag are passed to the CombatPhase when it initialises.
 
-- **File: `asterax/app/src/states/main_menu.py`**: Add "Practice" to the `_menu_options` list, positioned after "New Game". When selected, transition to `PracticeConfigState`. This is a 2-3 line change (append to the options list and add the state mapping).
+- **File: `void-breaker/app/src/states/main_menu.py`**: Add "Practice" to the `_menu_options` list, positioned after "New Game". When selected, transition to `PracticeConfigState`. This is a 2-3 line change (append to the options list and add the state mapping).
 
-- **File: `asterax/app/src/states/combat.py`**: Accept an `is_practice: bool = False` parameter. When `is_practice` is True: (1) do not record score to the leaderboard on game over, (2) do not deduct insurance costs, (3) on death, either respawn the ship (reset shields to full, brief invulnerability) instead of triggering game over, or trigger a simplified game over that skips high score entry. The respawn approach is preferred -- set shields to `max_shields` and grant 2 seconds of invulnerability. If `infinite_shields` is active, damage is suppressed entirely. Display "PRACTICE" on the HUD.
+- **File: `void-breaker/app/src/states/combat.py`**: Accept an `is_practice: bool = False` parameter. When `is_practice` is True: (1) do not record score to the leaderboard on game over, (2) do not deduct insurance costs, (3) on death, either respawn the ship (reset shields to full, brief invulnerability) instead of triggering game over, or trigger a simplified game over that skips high score entry. The respawn approach is preferred -- set shields to `max_shields` and grant 2 seconds of invulnerability. If `infinite_shields` is active, damage is suppressed entirely. Display "PRACTICE" on the HUD.
 
-- **File: `asterax/app/src/states/game_over.py`**: Accept `is_practice: bool = False`. When True, skip the high score qualification check and name entry phase. Display the run summary but with a note: "Practice Mode -- Score not recorded." Proceed directly to the options phase (Play Again / Return to Menu). "Play Again" in practice mode should return to the practice config screen, not start a regular game.
+- **File: `void-breaker/app/src/states/game_over.py`**: Accept `is_practice: bool = False`. When True, skip the high score qualification check and name entry phase. Display the run summary but with a note: "Practice Mode -- Score not recorded." Proceed directly to the options phase (Play Again / Return to Menu). "Play Again" in practice mode should return to the practice config screen, not start a regular game.
 
-- **File: `asterax/app/src/rendering/hud.py`**: When `GameState.is_practice` is True, display "PRACTICE" text in a distinct colour (e.g., bright yellow) at the top-centre of the screen, above or alongside the score.
+- **File: `void-breaker/app/src/rendering/hud.py`**: When `GameState.is_practice` is True, display "PRACTICE" text in a distinct colour (e.g., bright yellow) at the top-centre of the screen, above or alongside the score.
 
 **Test Requirements**:
 - [ ] Unit tests: `_build_practice_params()` with all toggles off returns default Level 1 params
@@ -1004,15 +1004,15 @@ The final component of Phase 5. Writes comprehensive E2E tests covering all new 
 
 **Technical Details**:
 - **Files to Create/Modify**:
-  - CREATE: `asterax/tests/test_phase5_menus.py` -- Tests for main menu, how-to-play, high scores navigation
-  - CREATE: `asterax/tests/test_phase5_settings.py` -- Tests for settings screen, persistence, key remapping
-  - CREATE: `asterax/tests/test_phase5_pause.py` -- Tests for pause system freeze/resume
-  - CREATE: `asterax/tests/test_phase5_game_over.py` -- Tests for game over screen and high score entry
-  - CREATE: `asterax/tests/test_phase5_audio.py` -- Tests for audio trigger wiring
-  - CREATE: `asterax/tests/test_phase5_particles.py` -- Tests for particle system pooling and performance
-  - CREATE: `asterax/tests/test_phase5_difficulty.py` -- Tests for difficulty presets
-  - CREATE: `asterax/tests/test_phase5_practice.py` -- Tests for practice mode
-  - CREATE: `asterax/tests/test_phase5_e2e.py` -- Full game loop E2E test
+  - CREATE: `void-breaker/tests/test_phase5_menus.py` -- Tests for main menu, how-to-play, high scores navigation
+  - CREATE: `void-breaker/tests/test_phase5_settings.py` -- Tests for settings screen, persistence, key remapping
+  - CREATE: `void-breaker/tests/test_phase5_pause.py` -- Tests for pause system freeze/resume
+  - CREATE: `void-breaker/tests/test_phase5_game_over.py` -- Tests for game over screen and high score entry
+  - CREATE: `void-breaker/tests/test_phase5_audio.py` -- Tests for audio trigger wiring
+  - CREATE: `void-breaker/tests/test_phase5_particles.py` -- Tests for particle system pooling and performance
+  - CREATE: `void-breaker/tests/test_phase5_difficulty.py` -- Tests for difficulty presets
+  - CREATE: `void-breaker/tests/test_phase5_practice.py` -- Tests for practice mode
+  - CREATE: `void-breaker/tests/test_phase5_e2e.py` -- Full game loop E2E test
   - CREATE: `docs/implementation-context-phase-5.md` -- Phase implementation context
   - CREATE: `docs/components/phase-5-component-5-1-overview.md` through `phase-5-component-5-11-overview.md` -- Component overviews
 - **Key Functions/Classes**:
@@ -1026,23 +1026,23 @@ The final component of Phase 5. Writes comprehensive E2E tests covering all new 
 **Detailed Implementation Requirements**:
 - **Test files**: Each test file focuses on a specific area of Phase 5 functionality. Tests operate on game logic objects without requiring an Arcade window (headless testing). Use `unittest.mock.patch` or `pytest.monkeypatch` to mock Arcade rendering and sound calls. Test fixtures in `conftest.py` provide pre-configured `GameState`, `PersistenceManager` (using temp directories), `InputManager` (with default bindings), and `AudioManager` (mocked).
 
-- **File: `asterax/tests/test_phase5_menus.py`**: Test `MainMenuState` has 5 options (6 with practice mode). Test navigation wraps correctly. Test each option triggers the correct state transition. Test `HowToPlayState` builds correct controls text from InputManager. Test `HighScoresState` sorts by score, filters by difficulty, handles empty leaderboard.
+- **File: `void-breaker/tests/test_phase5_menus.py`**: Test `MainMenuState` has 5 options (6 with practice mode). Test navigation wraps correctly. Test each option triggers the correct state transition. Test `HowToPlayState` builds correct controls text from InputManager. Test `HighScoresState` sorts by score, filters by difficulty, handles empty leaderboard.
 
-- **File: `asterax/tests/test_phase5_settings.py`**: Test volume adjustment in 0.1 increments with clamping. Test toggle operations for boolean settings. Test key remapping updates InputManager. Test duplicate key detection clears old binding. Test reset to defaults. Test settings round-trip (save, reload, compare).
+- **File: `void-breaker/tests/test_phase5_settings.py`**: Test volume adjustment in 0.1 increments with clamping. Test toggle operations for boolean settings. Test key remapping updates InputManager. Test duplicate key detection clears old binding. Test reset to defaults. Test settings round-trip (save, reload, compare).
 
-- **File: `asterax/tests/test_phase5_pause.py`**: Test PauseState does not call underlying state's on_exit. Test resume pops PauseState. Test that underlying state's on_update is not called while paused. Test restart clears state stack. Test exit to menu transitions correctly.
+- **File: `void-breaker/tests/test_phase5_pause.py`**: Test PauseState does not call underlying state's on_exit. Test resume pops PauseState. Test that underlying state's on_update is not called while paused. Test restart clears state stack. Test exit to menu transitions correctly.
 
-- **File: `asterax/tests/test_phase5_game_over.py`**: Test run summary data accuracy. Test qualification check against top 10. Test name buffer accepts alphanumeric only, respects 3 char minimum and 10 char max. Test high score entry is saved correctly. Test practice mode skips name entry.
+- **File: `void-breaker/tests/test_phase5_game_over.py`**: Test run summary data accuracy. Test qualification check against top 10. Test name buffer accepts alphanumeric only, respects 3 char minimum and 10 char max. Test high score entry is saved correctly. Test practice mode skips name entry.
 
-- **File: `asterax/tests/test_phase5_audio.py`**: Test that each game event calls the correct AudioManager method. Mock AudioManager and simulate: fire event -> `play_fire()` called, asteroid destroyed -> `play_explosion(size)` called, etc. Verify all 16 sounds are mapped.
+- **File: `void-breaker/tests/test_phase5_audio.py`**: Test that each game event calls the correct AudioManager method. Mock AudioManager and simulate: fire event -> `play_fire()` called, asteroid destroyed -> `play_explosion(size)` called, etc. Verify all 16 sounds are mapped.
 
-- **File: `asterax/tests/test_phase5_particles.py`**: Test pool pre-allocates exactly max_particles. Test emit methods activate correct number of particles. Test update deactivates expired particles. Test pool exhaustion recycles oldest. Test active count never exceeds max.
+- **File: `void-breaker/tests/test_phase5_particles.py`**: Test pool pre-allocates exactly max_particles. Test emit methods activate correct number of particles. Test update deactivates expired particles. Test pool exhaustion recycles oldest. Test active count never exceeds max.
 
-- **File: `asterax/tests/test_phase5_difficulty.py`**: Test apply_preset with each preset produces expected parameter modifications. Test value clamping. Test multipliers are multiplicative (not additive).
+- **File: `void-breaker/tests/test_phase5_difficulty.py`**: Test apply_preset with each preset produces expected parameter modifications. Test value clamping. Test multipliers are multiplicative (not additive).
 
-- **File: `asterax/tests/test_phase5_practice.py`**: Test practice params with each toggle. Test CombatPhase with is_practice does not record scores. Test GameOverState with is_practice skips name entry.
+- **File: `void-breaker/tests/test_phase5_practice.py`**: Test practice params with each toggle. Test CombatPhase with is_practice does not record scores. Test GameOverState with is_practice skips name entry.
 
-- **File: `asterax/tests/test_phase5_e2e.py`**: Integration test simulating a full game session. Create all managers, initialise state machine, simulate key presses to navigate menu, start game, play through multiple levels (simulate combat by directly destroying asteroids), enter shop, purchase upgrade, continue, die (set shields to 0), verify game over screen, enter initials, verify high score saved, return to menu.
+- **File: `void-breaker/tests/test_phase5_e2e.py`**: Integration test simulating a full game session. Create all managers, initialise state machine, simulate key presses to navigate menu, start game, play through multiple levels (simulate combat by directly destroying asteroids), enter shop, purchase upgrade, continue, die (set shields to 0), verify game over screen, enter initials, verify high score saved, return to menu.
 
 - **File: `docs/implementation-context-phase-5.md`**: Summarise all 11 components in max 100 lines per component. Document key decisions: particle pooling approach, screen shake implementation, colorblind palette choice, practice mode design (reuses CombatPhase), difficulty preset multiplier approach. Note any deviations from the original phase plan.
 
@@ -1074,9 +1074,9 @@ The `conftest.py` for Phase 5 tests should extend (not duplicate) the existing t
 Run the full validation sequence before considering Phase 5 complete:
 ```bash
 source .venv/bin/activate
-black --check asterax/app/src/
-isort --check-only asterax/app/src/
-pytest -q --cov=asterax/app/src --cov-report=term-missing
+black --check void-breaker/app/src/
+isort --check-only void-breaker/app/src/
+pytest -q --cov=void-breaker/app/src --cov-report=term-missing
 python scripts/evals.py
 ```
 
