@@ -31,3 +31,12 @@
 - **Design decisions**: Used dataclasses for `GameSettings` and `HighScoreEntry` with explicit `to_dict`/`from_dict`; persisted key bindings as readable string names; capped saved high score entries to 100 to avoid unbounded file growth; used `NamedTemporaryFile` + `os.replace` + `fsync` for atomic writes.
 - **Verification**: Added focused tests for defaults, schema round-trips, corrupt JSON fallback, missing-key defaulting, future-version fallback, high-score persistence, and atomic write behavior with `tmp_path`.
 - **Deviations**: No functional deviations from the Component 1.4 specification.
+
+## Component 1.5: Input Manager
+- **Status**: Completed
+- **What was built**: Implemented the input management layer that captures keyboard events, maintains a set of currently-held keys, and provides configurable key bindings. The InputManager translates between string key names (from settings JSON) and Arcade integer key constants.
+- **Key files created**: `app/src/input/input_manager.py`, `tests/test_input.py`, `docs/components/phase-1-component-1-5-overview.md`.
+- **Key files modified**: `app/src/input/__init__.py` (added InputManager export), `app/src/window.py` (wired InputManager into key event handlers, instantiated from persisted settings), `tests/test_window.py` (updated for new initialization and delegation behavior).
+- **Design decisions**: Stored key bindings as human-readable string names in JSON ("LEFT", "SPACE") rather than integer codes for persistence decoupling; used `set.discard()` in `on_key_release` to avoid KeyError on window focus loss; routed events through InputManager first (to update `keys_held`) then StateMachine (to route to active state); invalid key names log warning and fall back to defaults.
+- **Verification**: Added focused input-manager tests for key tracking, action queries, binding updates, key-map coverage, and invalid-key fallback behavior. Updated window tests verify initialization order and input delegation sequence.
+- **Deviations**: None from the Component 1.5 specification.

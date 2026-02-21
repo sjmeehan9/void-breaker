@@ -63,6 +63,22 @@ def test_window_initializes_state_machine_and_main_menu(monkeypatch) -> None:
         del width, height, title, resizable
         call_order.append("window_init")
 
+    class FakePersistenceManager:
+        def __init__(self, base_dir=None):
+            del base_dir
+            call_order.append("persistence_init")
+
+        def load_settings(self):
+            from asterax.app.src.persistence.schemas import GameSettings
+
+            call_order.append("load_settings")
+            return GameSettings()
+
+    class FakeInputManager:
+        def __init__(self, settings):
+            del settings
+            call_order.append("input_init")
+
     class FakeStateMachine:
         def __init__(self) -> None:
             call_order.append("machine_init")
@@ -77,6 +93,8 @@ def test_window_initializes_state_machine_and_main_menu(monkeypatch) -> None:
             call_order.append("main_menu_init")
 
     monkeypatch.setattr(window_module.arcade.Window, "__init__", fake_window_init)
+    monkeypatch.setattr(window_module, "PersistenceManager", FakePersistenceManager)
+    monkeypatch.setattr(window_module, "InputManager", FakeInputManager)
     monkeypatch.setattr(window_module, "StateMachine", FakeStateMachine)
     monkeypatch.setattr(window_module, "MainMenuState", FakeMainMenuState)
     monkeypatch.setattr(
@@ -89,6 +107,9 @@ def test_window_initializes_state_machine_and_main_menu(monkeypatch) -> None:
 
     assert call_order == [
         "window_init",
+        "persistence_init",
+        "load_settings",
+        "input_init",
         "machine_init",
         "main_menu_init",
         "switch_state",
@@ -100,6 +121,13 @@ def test_window_delegates_draw_update_and_input_to_state_machine() -> None:
     """Window should delegate simulation and input methods to state machine."""
     window = object.__new__(VoidBreakerWindow)
     calls: list[str] = []
+
+    class FakeInputManager:
+        def on_key_press(self, key: int, modifiers: int) -> None:
+            calls.append(f"input_press:{key}:{modifiers}")
+
+        def on_key_release(self, key: int, modifiers: int) -> None:
+            calls.append(f"input_release:{key}:{modifiers}")
 
     class FakeStateMachine:
         def update(self, dt: float) -> None:
@@ -114,6 +142,7 @@ def test_window_delegates_draw_update_and_input_to_state_machine() -> None:
         def on_key_release(self, key: int, modifiers: int) -> None:
             calls.append(f"release:{key}:{modifiers}")
 
+    window.input_manager = FakeInputManager()  # type: ignore[assignment]
     window.state_machine = FakeStateMachine()  # type: ignore[assignment]
     window.clear = lambda: calls.append("clear")
 
@@ -126,6 +155,8 @@ def test_window_delegates_draw_update_and_input_to_state_machine() -> None:
         f"update:{PHYSICS_DT}",
         "clear",
         "draw",
+        "input_press:10:20",
         "press:10:20",
+        "input_release:30:40",
         "release:30:40",
     ]
