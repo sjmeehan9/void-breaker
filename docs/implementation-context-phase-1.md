@@ -22,3 +22,12 @@
 - **Design decisions**: Kept transition imports local inside handlers to avoid circular import issues between concrete states. Implemented pause as a pushed overlay that dims the full window while preserving underlying draw order via stack draw bottom-to-top. Kept GameInit as an immediate handoff to Combat to match the placeholder flow expected for Phase 1.
 - **Verification**: Added focused unit coverage for transition ordering, stack behavior, delegation rules, and empty-stack no-op behavior. Added window-level tests to verify state machine bootstrap and delegation hooks.
 - **Deviations**: None from the component spec.
+
+## Component 1.4: Persistence Layer
+- **Status**: Completed
+- **What was built**: Added a file-based persistence subsystem that stores settings and high scores as versioned JSON under a resolved user-data directory, with atomic writes and safe fallbacks.
+- **Key files created**: `app/src/persistence/schemas.py`, `app/src/persistence/persistence_manager.py`, `app/config/settings_defaults.yaml`, `tests/test_persistence.py`, `docs/components/phase-1-component-1-4-overview.md`.
+- **Key files modified**: `app/src/persistence/__init__.py`.
+- **Design decisions**: Used dataclasses for `GameSettings` and `HighScoreEntry` with explicit `to_dict`/`from_dict`; persisted key bindings as readable string names; capped saved high score entries to 100 to avoid unbounded file growth; used `NamedTemporaryFile` + `os.replace` + `fsync` for atomic writes.
+- **Verification**: Added focused tests for defaults, schema round-trips, corrupt JSON fallback, missing-key defaulting, future-version fallback, high-score persistence, and atomic write behavior with `tmp_path`.
+- **Deviations**: No functional deviations from the Component 1.4 specification.
