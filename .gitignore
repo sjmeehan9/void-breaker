@@ -1,6 +1,6 @@
 # AI
-.claude/
-.github/
+# .claude/
+# .github/
 
 # Other
 .DS_Store
