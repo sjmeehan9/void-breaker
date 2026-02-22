@@ -144,6 +144,15 @@ class CollisionConfig:
     ship_asteroid_damage: float = 25.0
 
 
+@dataclass(frozen=True, slots=True)
+class CurrencyConfig:
+    """Configuration values used for currency pickup behavior."""
+
+    pickup_value: int = 10
+    pickup_lifetime: float = 10.0
+    pickup_drift_speed_range: tuple[float, float] = (10.0, 30.0)
+
+
 class UpgradeEffectDefinition(Protocol):
     """Protocol for upgrade definitions consumed by `ShipState`."""
 
@@ -296,3 +305,4 @@ GAME_CONFIG: Final[GameConfig] = GameConfig()
 PHYSICS_CONFIG: Final[PhysicsConfig] = PhysicsConfig()
 ASTEROID_CONFIG: Final[AsteroidConfig] = AsteroidConfig()
 COLLISION_CONFIG: Final[CollisionConfig] = CollisionConfig()
+CURRENCY_CONFIG: Final[CurrencyConfig] = CurrencyConfig()

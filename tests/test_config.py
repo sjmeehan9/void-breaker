@@ -2,6 +2,7 @@
 
 from asterax.app.src.config.difficulty_tables import get_difficulty
 from asterax.app.src.config.game_config import (
+    CURRENCY_CONFIG,
     GAME_CONFIG,
     AsteroidSize,
     DifficultyParams,
@@ -34,6 +35,8 @@ def test_game_config_defaults_match_component_spec() -> None:
     assert GAME_CONFIG.base_shields == 100.0
     assert GAME_CONFIG.max_high_scores == 100
     assert GAME_CONFIG.max_player_projectiles == 15
+    assert CURRENCY_CONFIG.pickup_value == 10
+    assert CURRENCY_CONFIG.pickup_lifetime == 10.0
 
 
 def test_upgrade_definitions_are_valid() -> None:
