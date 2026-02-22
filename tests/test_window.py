@@ -1,17 +1,7 @@
 """Tests for fixed timestep behaviour in the game window."""
 
-import sys
-from pathlib import Path
-from types import ModuleType
-
-import pytest
-
-repo_root = Path(__file__).resolve().parents[1]
-asterax_module = ModuleType("asterax")
-asterax_module.__path__ = [str(repo_root)]  # type: ignore[attr-defined]
-sys.modules.setdefault("asterax", asterax_module)
-
 import asterax.app.src.window as window_module
+import pytest
 from asterax.app.src.window import MAX_FRAME_TIME, PHYSICS_DT, VoidBreakerWindow
 
 

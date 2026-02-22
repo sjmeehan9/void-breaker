@@ -1,16 +1,6 @@
 """Tests for input manager keyboard event handling and key bindings."""
 
-import sys
-from pathlib import Path
-from types import ModuleType
-
 import arcade
-
-repo_root = Path(__file__).resolve().parents[1]
-asterax_module = ModuleType("asterax")
-asterax_module.__path__ = [str(repo_root)]  # type: ignore[attr-defined]
-sys.modules.setdefault("asterax", asterax_module)
-
 from asterax.app.src.input.input_manager import KEY_NAME_MAP, InputManager
 from asterax.app.src.persistence.schemas import GameSettings
 

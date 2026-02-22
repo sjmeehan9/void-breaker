@@ -1,14 +1,7 @@
 """Tests for persistence schemas and file-backed persistence manager."""
 
 import json
-import sys
 from pathlib import Path
-from types import ModuleType
-
-repo_root = Path(__file__).resolve().parents[1]
-asterax_module = ModuleType("asterax")
-asterax_module.__path__ = [str(repo_root)]  # type: ignore[attr-defined]
-sys.modules.setdefault("asterax", asterax_module)
 
 from asterax.app.src.persistence.persistence_manager import PersistenceManager
 from asterax.app.src.persistence.schemas import GameSettings, HighScoreEntry

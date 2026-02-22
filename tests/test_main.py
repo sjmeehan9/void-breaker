@@ -1,14 +1,5 @@
 """Tests for the top-level application entry point."""
 
-import sys
-from pathlib import Path
-from types import ModuleType
-
-repo_root = Path(__file__).resolve().parents[1]
-asterax_module = ModuleType("asterax")
-asterax_module.__path__ = [str(repo_root)]  # type: ignore[attr-defined]
-sys.modules.setdefault("asterax", asterax_module)
-
 import asterax.app.src.main as main_module
 
 
