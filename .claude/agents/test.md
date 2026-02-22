@@ -1,7 +1,7 @@
 ---
 name: test
 description: "Use this agent when the user needs a completed component rigorously tested — functional, integration, real-user simulation, and adversarial testing. Specify the phase and component (e.g., 'Component 1.3 of Phase 1').\n\nExamples:\n\n- Example 1:\n  user: \"Test Component 1.3 of Phase 1.\"\n  assistant: \"I'll use the test agent to rigorously validate this component.\"\n\n- Example 2:\n  user: \"Can you verify the authentication flow works end-to-end?\"\n  assistant: \"I'll use the test agent to exercise the auth flow as a real user would.\""
-model: opus
+model: sonnet
 memory: project
 ---
 

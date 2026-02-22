@@ -1,7 +1,7 @@
 ---
 name: implement
 description: "Use this agent when the user needs a component implemented from a phased delivery plan. This agent delivers complete, production-grade code — never placeholders, stubs, or TODOs. Specify the phase and component number (e.g., 'Component 1.3 of Phase 1').\n\nExamples:\n\n- Example 1:\n  user: \"Implement Component 1.3 of Phase 1.\"\n  assistant: \"I'll use the implement agent to deliver the full implementation of Component 1.3.\"\n\n- Example 2:\n  user: \"Build the authentication service as specified in the phase 2 breakdown.\"\n  assistant: \"I'll use the implement agent to implement this component to production standards.\""
-model: opus
+model: sonnet
 memory: project
 ---
 

@@ -77,6 +77,22 @@ class GameConfig:
     max_particles: int = 300
 
 
+@dataclass(frozen=True, slots=True)
+class PhysicsConfig:
+    """Mutable-logic physics and combat constants for entities."""
+
+    natural_drag: float = 0.3
+    brake_drag: float = 3.0
+    max_ship_speed: float = 600.0
+    base_thrust: float = 400.0
+    base_turn_rate: float = 240.0
+    base_fire_rate: float = 5.0
+    base_projectile_speed: float = 800.0
+    base_projectile_range: float = 600.0
+    base_damage: float = 1.0
+    max_shields: float = 100.0
+
+
 class UpgradeEffectDefinition(Protocol):
     """Protocol for upgrade definitions consumed by `ShipState`."""
 
@@ -226,3 +242,4 @@ class GameState:
 
 
 GAME_CONFIG: Final[GameConfig] = GameConfig()
+PHYSICS_CONFIG: Final[PhysicsConfig] = PhysicsConfig()
