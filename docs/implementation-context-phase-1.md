@@ -59,3 +59,11 @@
 - **Design decisions**: Kept `AudioManager.play()` and loading logic exception-safe for missing assets/headless environments; used deterministic `random.Random(42)` star generation and pre-built `ShapeElementList` for one-time star geometry creation; implemented HUD value caching with `arcade.Text` objects keyed by label/position and refreshed only when values change.
 - **Verification**: Added focused tests for audio no-op behavior and volume updates, starfield determinism/count, HUD rendering/caching, and updated window initialisation/draw order. Ran formatting/lint checks and the full pytest suite successfully.
 - **Deviations**: Implemented `AudioManager.play_music()` as a documented no-op API method to preserve Phase 5 integration points without introducing placeholder exceptions.
+
+## Component 1.8: E2E Testing & Documentation
+- **Status**: Completed
+- **What was built**: Added shared pytest fixtures in `tests/conftest.py` to provide consistent setup primitives for settings, persistence, input, config, game state, and state-machine tests. Finalized phase documentation by adding the Component 1.8 overview.
+- **Key files created**: `tests/conftest.py`, `docs/components/phase-1-component-1-8-overview.md`.
+- **Design decisions**: Reused existing focused test modules (state machine, persistence, input, config, audio/rendering, window) as the authoritative Phase 1 validation suite and introduced fixture centralization without rewriting stable tests.
+- **Verification**: Confirmed formatting/import checks pass, pytest suite passes, coverage remains above the phase target, and `scripts/evals.py` succeeds.
+- **Deviations**: None from the Component 1.8 acceptance criteria.
