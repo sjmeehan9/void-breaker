@@ -137,6 +137,13 @@ class AsteroidConfig:
     child_speed_multiplier_range: tuple[float, float] = (1.2, 1.5)
 
 
+@dataclass(frozen=True, slots=True)
+class CollisionConfig:
+    """Configuration for collision response values."""
+
+    ship_asteroid_damage: float = 25.0
+
+
 class UpgradeEffectDefinition(Protocol):
     """Protocol for upgrade definitions consumed by `ShipState`."""
 
@@ -288,3 +295,4 @@ class GameState:
 GAME_CONFIG: Final[GameConfig] = GameConfig()
 PHYSICS_CONFIG: Final[PhysicsConfig] = PhysicsConfig()
 ASTEROID_CONFIG: Final[AsteroidConfig] = AsteroidConfig()
+COLLISION_CONFIG: Final[CollisionConfig] = CollisionConfig()

@@ -67,3 +67,27 @@
   - Programmatic behavior check: `Asteroid.on_destroyed()` and `SpawnManager.spawn_level_asteroids()` via Python snippet
 - **Deviations**:
   - `Asteroid` stores size metadata as `asteroid_size` (not `size`) to avoid collision with `arcade.Sprite.size` width/height property semantics.
+
+## Component 2.4 — Projectile System & Collision Detection
+- **Status**: Completed
+- **What was built**: Added a production `Projectile` entity, ship firing with cooldown + invulnerability-aware damage handling, a `CollisionSystem` with temporary ghost sprites for seam collisions, and a `ScoreManager` for asteroid point accumulation. `PhysicsEngine` now updates/fires/wraps projectiles each step.
+- **Key files created**:
+  - `app/src/entities/projectile.py` — projectile movement/range-expiry entity
+  - `app/src/physics/collisions.py` — collision orchestration with ghost sprite support
+  - `app/src/managers/score_manager.py` — asteroid scoring manager
+  - `tests/test_projectile_collisions.py` — focused projectile/collision/ghost seam tests
+  - `docs/components/phase-2-component-2-4-overview.md` — component summary
+- **Key files modified**:
+  - `app/src/entities/player_ship.py` — `fire()`, `update_cooldown()`, invulnerability timer in `take_damage()`
+  - `app/src/physics/engine.py` — fire action handling + projectile update/wrap loop
+  - `app/src/config/game_config.py` — added `CollisionConfig` and `COLLISION_CONFIG`
+  - `app/src/entities/__init__.py`, `app/src/physics/__init__.py`, `app/src/managers/__init__.py` — export new component classes
+- **Design decisions**:
+  - Ghost sprites are created only inside `CollisionSystem.check_all()` and mapped back to original entities; cleanup is enforced in a `finally` block to prevent leaks.
+  - Collision handling is split into pair-specific private methods (`_check_projectiles_vs_asteroids()`, `_check_ship_vs_asteroids()`) so Phase 3 collision pairs can be appended without restructuring.
+  - `PlayerShip.tick_cooldowns()` was kept as a compatibility wrapper while introducing spec-aligned `update_cooldown()`.
+- **Validation executed**:
+  - `pytest -q tests/test_projectile_collisions.py tests/test_asteroid_system.py tests/test_player_ship_physics.py` (21 passed)
+  - `black --check app/src tests` and `isort --check-only app/src tests` (pass after formatting)
+- **Deviations**:
+  - Currency-drop spawning inside projectile-vs-asteroid collision is intentionally deferred to Component 2.5 because `CurrencyPickup`/`CurrencyManager` are not yet implemented; collision flow is structured to add that hook with localized changes.

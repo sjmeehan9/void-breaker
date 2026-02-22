@@ -13,7 +13,9 @@ from asterax.app.src.physics.wrap import wrap_entity
 class MockEntity:
     """Minimal bounds-based entity used to test wrap logic."""
 
-    def __init__(self, center_x: float, center_y: float, width: float, height: float) -> None:
+    def __init__(
+        self, center_x: float, center_y: float, width: float, height: float
+    ) -> None:
         self.center_x = center_x
         self.center_y = center_y
         self.width = width
@@ -108,7 +110,10 @@ def test_cap_speed_limits_velocity_magnitude() -> None:
 
     ship.cap_speed()
 
-    assert math.hypot(ship.velocity_x, ship.velocity_y) <= ship.physics_config.max_ship_speed
+    assert (
+        math.hypot(ship.velocity_x, ship.velocity_y)
+        <= ship.physics_config.max_ship_speed
+    )
 
 
 def test_rotation_changes_angle_at_turn_rate() -> None:

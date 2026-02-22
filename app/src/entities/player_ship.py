@@ -7,6 +7,7 @@ from pathlib import Path
 
 import arcade
 from asterax.app.src.config.game_config import PhysicsConfig
+from asterax.app.src.entities.projectile import Projectile
 
 
 class PlayerShip(arcade.Sprite):
@@ -34,6 +35,7 @@ class PlayerShip(arcade.Sprite):
         self.shields: float = physics_config.max_shields
         self.max_shields: float = physics_config.max_shields
         self.fire_cooldown_remaining: float = 0.0
+        self.invulnerability_timer: float = 0.0
 
     def apply_thrust(self, dt: float) -> None:
         """Apply forward thrust in the ship's facing direction.
@@ -95,13 +97,44 @@ class PlayerShip(arcade.Sprite):
         self.center_x += self.velocity_x * dt
         self.center_y += self.velocity_y * dt
 
-    def tick_cooldowns(self, dt: float) -> None:
-        """Advance internal cooldown timers.
+    def update_cooldown(self, dt: float) -> None:
+        """Advance internal cooldown and invulnerability timers.
 
         Args:
             dt: Fixed simulation step in seconds.
         """
         self.fire_cooldown_remaining = max(0.0, self.fire_cooldown_remaining - dt)
+        self.invulnerability_timer = max(0.0, self.invulnerability_timer - dt)
+
+    def tick_cooldowns(self, dt: float) -> None:
+        """Backward-compatible cooldown ticking wrapper."""
+        self.update_cooldown(dt)
+
+    def fire(self, projectile_list: arcade.SpriteList) -> Projectile | None:
+        """Spawn a projectile when the fire cooldown allows.
+
+        Args:
+            projectile_list: Sprite list that owns active player projectiles.
+
+        Returns:
+            The created projectile when fired, otherwise None.
+        """
+        if self.fire_cooldown_remaining > 0.0:
+            return None
+
+        angle_radians = math.radians(self.angle + 90.0)
+        nose_offset = self.height / 2
+        projectile = Projectile(
+            center_x=self.center_x + math.cos(angle_radians) * nose_offset,
+            center_y=self.center_y + math.sin(angle_radians) * nose_offset,
+            angle=self.angle,
+            speed=self.physics_config.base_projectile_speed,
+            max_range=self.physics_config.base_projectile_range,
+            damage=self.physics_config.base_damage,
+        )
+        projectile_list.append(projectile)
+        self.fire_cooldown_remaining = 1.0 / self.physics_config.base_fire_rate
+        return projectile
 
     def take_damage(self, amount: float) -> bool:
         """Apply damage to shields and report death state.
@@ -112,5 +145,8 @@ class PlayerShip(arcade.Sprite):
         Returns:
             True when shields are depleted to zero, otherwise False.
         """
+        if self.invulnerability_timer > 0.0:
+            return False
         self.shields = max(0.0, self.shields - amount)
+        self.invulnerability_timer = 0.75
         return self.shields <= 0.0
