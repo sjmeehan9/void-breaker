@@ -41,3 +41,12 @@
 - **Design decisions**: Stored key bindings as human-readable string names in JSON ("LEFT", "SPACE") rather than integer codes for persistence decoupling; used `set.discard()` in `on_key_release` to avoid KeyError on window focus loss; routed events through InputManager first (to update `keys_held`) then StateMachine (to route to active state); invalid key names log warning and fall back to defaults.
 - **Verification**: Added focused input-manager tests for key tracking, action queries, binding updates, key-map coverage, and invalid-key fallback behavior. Updated window tests verify initialization order and input delegation sequence.
 - **Deviations**: None from the Component 1.5 specification.
+
+## Component 1.6: Game Config & Data Models
+- **Status**: Completed
+- **What was built**: Added centralized game configuration constants, core enums, run-state dataclasses, procedural difficulty scaling, and static upgrade definitions.
+- **Key files created**: `app/src/config/game_config.py`, `app/src/config/upgrade_definitions.py`, `app/src/config/difficulty_tables.py`, `tests/test_config.py`, `docs/components/phase-1-component-1-6-overview.md`.
+- **Key files modified**: `app/src/config/__init__.py`.
+- **Design decisions**: Kept all tuning constants in a frozen `GameConfig` singleton (`GAME_CONFIG`) to prevent accidental runtime mutation; implemented `ShipState.recalculate_effective_stats()` as a reusable upgrade-definition driven calculator so later `UpgradeManager` logic can pass the same static definitions; used formulaic difficulty generation with explicit clamps and mode multipliers (`classic`, `casual`, `hard`) to support arbitrarily high levels.
+- **Verification**: Added focused unit coverage for config defaults, upgrade definition validity/cost scaling, procedural difficulty behavior and clamping, dataclass default instantiation, enum membership, and ship stat recalculation.
+- **Deviations**: Added `effective_max_shields` and `effective_projectile_count` fields on `ShipState` to represent persistent effects for `defense_shields` and `weapon_spread` upgrades from the component specification.
