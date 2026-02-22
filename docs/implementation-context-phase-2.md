@@ -42,3 +42,28 @@
   - `python scripts/evals.py` (pass)
 - **Deviations**:
   - `PhysicsConfig` uses the component-spec defaults (`base_fire_rate=5.0`, `base_projectile_range=600.0`) while existing `GameConfig` ship defaults remain unchanged for backward compatibility with prior phase assumptions. Future components can migrate remaining consumers to `PhysicsConfig`.
+
+## Component 2.3 — Asteroid System
+- **Status**: Completed
+- **What was built**: Added a production asteroid entity system with three size tiers, per-size score/drop metadata, movement + rotation updates, split behavior, and level-start spawning away from the player. Difficulty tables were extended with a dedicated `get_difficulty_params(level)` entry point for Phase 2 asteroid-only progression. `PhysicsEngine` now updates/wraps asteroid entities when an entity manager exposes an `asteroids` collection.
+- **Key files created**:
+  - `app/src/entities/asteroid.py` — `Asteroid` entity with `split()` and `on_destroyed()`
+  - `app/src/managers/spawn_manager.py` — `SpawnManager` for level and child asteroid spawning
+  - `tests/test_asteroid_system.py` — focused tests for movement, splitting, spawning, and scaling
+  - `docs/components/phase-2-component-2-3-overview.md` — implementation summary
+- **Key files modified**:
+  - `app/src/config/game_config.py` — added `AsteroidConfig` and singleton `ASTEROID_CONFIG`
+  - `app/src/config/difficulty_tables.py` — added `get_difficulty_params()` and aligned `get_difficulty()` with asteroid-only Phase 2 behavior
+  - `app/src/entities/__init__.py` — exports `Asteroid` and `AsteroidSize`
+  - `app/src/managers/__init__.py` — exports `SpawnManager`
+  - `app/src/physics/engine.py` — updates + wraps asteroids in fixed-step simulation
+  - `tests/test_config.py` — updated expectations for Phase 2 enemy-disabled difficulty behavior
+- **Design decisions**:
+  - Reused the existing `AsteroidSize` enum from `game_config.py` to avoid duplicate size models.
+  - Added optional RNG injection (`random.Random`) for deterministic unit tests and reproducible split/spawn behavior.
+  - Avoided tight coupling in `PhysicsEngine` by conditionally updating asteroids only when present.
+- **Validation executed**:
+  - `pytest -q tests/test_asteroid_system.py tests/test_config.py` (16 passed)
+  - Programmatic behavior check: `Asteroid.on_destroyed()` and `SpawnManager.spawn_level_asteroids()` via Python snippet
+- **Deviations**:
+  - `Asteroid` stores size metadata as `asteroid_size` (not `size`) to avoid collision with `arcade.Sprite.size` width/height property semantics.

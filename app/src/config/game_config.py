@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
 from typing import Final, Protocol
 
 
@@ -91,6 +92,49 @@ class PhysicsConfig:
     base_projectile_range: float = 600.0
     base_damage: float = 1.0
     max_shields: float = 100.0
+
+
+@dataclass(frozen=True, slots=True)
+class AsteroidConfig:
+    """Configuration values used by the asteroid entity system."""
+
+    large_sprite: Path = field(
+        default_factory=lambda: Path(__file__).resolve().parents[3]
+        / "assets"
+        / "sprites"
+        / "asteroid_large.png"
+    )
+    medium_sprite: Path = field(
+        default_factory=lambda: Path(__file__).resolve().parents[3]
+        / "assets"
+        / "sprites"
+        / "asteroid_medium.png"
+    )
+    small_sprite: Path = field(
+        default_factory=lambda: Path(__file__).resolve().parents[3]
+        / "assets"
+        / "sprites"
+        / "asteroid_small.png"
+    )
+    large_scale: float = 1.0
+    medium_scale: float = 1.0
+    small_scale: float = 1.0
+    point_values: dict[AsteroidSize, int] = field(
+        default_factory=lambda: {
+            AsteroidSize.LARGE: 20,
+            AsteroidSize.MEDIUM: 50,
+            AsteroidSize.SMALL: 100,
+        }
+    )
+    currency_drop_chances: dict[AsteroidSize, float] = field(
+        default_factory=lambda: {
+            AsteroidSize.LARGE: 0.2,
+            AsteroidSize.MEDIUM: 0.35,
+            AsteroidSize.SMALL: 0.5,
+        }
+    )
+    child_count_range: tuple[int, int] = (2, 3)
+    child_speed_multiplier_range: tuple[float, float] = (1.2, 1.5)
 
 
 class UpgradeEffectDefinition(Protocol):
@@ -243,3 +287,4 @@ class GameState:
 
 GAME_CONFIG: Final[GameConfig] = GameConfig()
 PHYSICS_CONFIG: Final[PhysicsConfig] = PhysicsConfig()
+ASTEROID_CONFIG: Final[AsteroidConfig] = AsteroidConfig()
