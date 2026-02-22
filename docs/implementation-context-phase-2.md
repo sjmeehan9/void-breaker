@@ -160,3 +160,29 @@
 - **Deviations**:
   - Initials entry is currently minimal and auto-saves as `AAA` for qualifying scores (the planned interactive 3-character input remains a later-phase polish item).
   - Headless sandbox lacks EGL, so runtime screenshot capture for UI verification could not be produced in this environment.
+
+## Component 2.8 — E2E Testing & Documentation
+- **Status**: Completed
+- **What was built**: Added the Phase 2 test modules requested by the component spec (`test_physics`, `test_collisions`, `test_entities`, `test_scoring`, `test_currency`, `test_difficulty`) and extended shared pytest fixtures for Phase 2 gameplay systems. Documentation was finalized with this component entry and a dedicated component overview file.
+- **Key files created**:
+  - `tests/test_physics.py` — thrust/drag/brake/speed-cap and wrap-edge assertions
+  - `tests/test_collisions.py` — projectile hit/miss and seam ghost-collision checks
+  - `tests/test_entities.py` — asteroid splitting and pickup lifetime expiry checks
+  - `tests/test_scoring.py` — per-asteroid score values and reset behavior
+  - `tests/test_currency.py` — pickup collection + currency manager earn/spend rules
+  - `tests/test_difficulty.py` — level 1-30 difficulty progression validity checks
+  - `docs/components/phase-2-component-2-8-overview.md` — component summary
+- **Key files modified**:
+  - `tests/conftest.py` — added Phase 2 fixtures (`physics_config`, `asteroid_config`, `player_ship`, `entity_manager`, `collision_system`, `score_manager`, `currency_manager`)
+- **Design decisions**:
+  - Kept new tests focused and additive, reusing existing component behaviors instead of refactoring prior test modules.
+  - Added fixtures in `conftest.py` so future Phase 3+ gameplay tests can reuse the same setup primitives.
+  - Preserved existing `test_combat_phase_state.py` lifecycle assertions as the primary integration coverage while adding the requested component-specific test modules.
+- **Validation executed**:
+  - `python3 -m pytest -q tests/test_physics.py tests/test_collisions.py tests/test_entities.py tests/test_scoring.py tests/test_currency.py tests/test_difficulty.py`
+  - `python3 -m black --check app/src tests`
+  - `python3 -m isort --check-only app/src tests`
+  - `python3 -m pytest -q --cov=app/src --cov-report=term-missing`
+  - `python3 scripts/evals.py`
+- **Deviations**:
+  - Runtime UI screenshot capture remains constrained by headless EGL limitations in this sandbox; validation stayed programmatic.

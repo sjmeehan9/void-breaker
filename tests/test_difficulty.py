@@ -1,0 +1,23 @@
+"""Phase 2 procedural difficulty progression tests."""
+
+from __future__ import annotations
+
+from asterax.app.src.config.difficulty_tables import get_difficulty_params
+
+
+def test_difficulty_scaling_levels_1_to_30() -> None:
+    """Difficulty parameters should remain valid and progressively tougher."""
+    asteroid_counts: list[int] = []
+    asteroid_speed_max_values: list[float] = []
+
+    for level in range(1, 31):
+        params = get_difficulty_params(level)
+        asteroid_counts.append(params.asteroid_count)
+        asteroid_speed_max_values.append(params.asteroid_speed_max)
+        assert params.asteroid_count >= 1
+        assert params.asteroid_speed_min >= 0.0
+        assert params.asteroid_speed_max >= params.asteroid_speed_min
+        assert params.enemy_spawn_enabled is False
+
+    assert asteroid_counts == sorted(asteroid_counts)
+    assert asteroid_speed_max_values == sorted(asteroid_speed_max_values)
