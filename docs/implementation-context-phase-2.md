@@ -115,3 +115,26 @@
   - `black app/src tests` and `isort app/src tests` (pass)
 - **Deviations**:
   - `CurrencyManager.earn()`/`spend()` reject negative values via `ValueError` as an extra safety guard; this is additive and does not alter expected phase behavior.
+
+## Component 2.6 — Entity Manager & Rendering Pipeline
+- **Status**: Completed
+- **What was built**: Added an `EntityManager` that owns all core Phase 2 entity collections and enforces a stable draw pipeline. Added a sprite-based `ParticleSystem` for explosion bursts with short lifetime and fade-out. Collision resolution now optionally emits explosion particles on asteroid destruction.
+- **Key files created**:
+  - `app/src/managers/entity_manager.py` — typed SpriteList ownership (`asteroids`, `player_projectiles`, `currency_pickups`, `particles`) + player/background handling + clear helpers
+  - `app/src/rendering/particle_system.py` — explosion particle spawning, update, fade, and cleanup
+  - `tests/test_entity_manager_rendering.py` — focused tests for manager operations, draw order, particle spawn/update lifecycle
+  - `docs/components/phase-2-component-2-6-overview.md` — component summary
+- **Key files modified**:
+  - `app/src/managers/__init__.py` — export `EntityManager`
+  - `app/src/rendering/__init__.py` — export `ParticleSystem`
+  - `app/src/physics/collisions.py` — optional `particle_system` integration via `check_all(..., particle_system=...)`
+- **Design decisions**:
+  - Added `player` as the canonical field and kept `player_ship` as a property alias to preserve compatibility with existing physics/collision integrations.
+  - Kept `CollisionSystem` API backward compatible by adding `particle_system` as an optional parameter.
+  - Allowed optional `background_renderer` on `EntityManager` so draw order can include starfield without hard coupling to a specific renderer implementation.
+- **Validation executed**:
+  - `python -m pytest -q tests/test_entity_manager_rendering.py tests/test_projectile_collisions.py` (pass)
+  - `python -m black --check app/src tests` (pass)
+  - `python -m isort --check-only app/src tests` (pass)
+- **Deviations**:
+  - Particle spawning is hooked into collision flow now, while full state-level wiring of `EntityManager`/`ParticleSystem` remains for Component 2.7 integration work.
