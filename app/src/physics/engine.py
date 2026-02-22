@@ -72,3 +72,7 @@ class PhysicsEngine:
         ship.update_position(dt)
         ship.tick_cooldowns(dt)
         wrap_entity(ship, width, height)
+
+        for asteroid in getattr(self.entity_manager, "asteroids", ()):
+            asteroid.update(dt)
+            wrap_entity(asteroid, width, height)

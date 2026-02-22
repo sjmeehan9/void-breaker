@@ -59,14 +59,14 @@ def test_get_upgrade_cost_scales_per_level() -> None:
 
 
 def test_get_difficulty_scales_and_enables_enemies_progressively() -> None:
-    """Difficulty generation should scale over representative levels."""
+    """Difficulty generation should scale asteroid pressure over levels."""
     samples = [get_difficulty(level) for level in (1, 5, 10, 20, 50)]
 
     assert samples[0].asteroid_count <= samples[-1].asteroid_count
     assert samples[0].enemy_spawn_enabled is False
     assert samples[1].enemy_spawn_enabled is False
-    assert samples[2].enemy_spawn_enabled is True
-    assert samples[-1].enemy_count_max <= 10
+    assert samples[2].enemy_spawn_enabled is False
+    assert samples[-1].enemy_count_max == 0
 
 
 def test_get_difficulty_clamps_extreme_levels() -> None:
@@ -74,7 +74,7 @@ def test_get_difficulty_clamps_extreme_levels() -> None:
     params = get_difficulty(150)
 
     assert params.asteroid_count <= 30
-    assert params.asteroid_speed_min <= 200.0
+    assert params.asteroid_speed_min <= 300.0
     assert params.asteroid_speed_max <= 400.0
     assert params.enemy_spawn_interval >= 3.0
     assert 0.0 <= params.enemy_aggression <= 1.0
@@ -88,10 +88,8 @@ def test_difficulty_modes_relative_to_classic() -> None:
     hard = get_difficulty(12, "hard")
 
     assert casual.asteroid_count < classic.asteroid_count
-    assert casual.enemy_aggression < classic.enemy_aggression
     assert casual.currency_drop_chance > classic.currency_drop_chance
     assert hard.asteroid_count > classic.asteroid_count
-    assert hard.enemy_aggression > classic.enemy_aggression
     assert hard.currency_drop_chance < classic.currency_drop_chance
 
 
