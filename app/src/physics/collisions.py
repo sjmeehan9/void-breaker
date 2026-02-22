@@ -2,14 +2,19 @@
 
 from __future__ import annotations
 
+import random
 from typing import TYPE_CHECKING
 
 import arcade
+from asterax.app.src.config.game_config import CURRENCY_CONFIG
+from asterax.app.src.entities.pickups import CurrencyPickup
 
 if TYPE_CHECKING:
+    from asterax.app.src.audio.audio_manager import AudioManager
     from asterax.app.src.entities.asteroid import Asteroid
     from asterax.app.src.entities.player_ship import PlayerShip
     from asterax.app.src.entities.projectile import Projectile
+    from asterax.app.src.managers.currency_manager import CurrencyManager
     from asterax.app.src.managers.score_manager import ScoreManager
     from asterax.app.src.managers.spawn_manager import SpawnManager
 
@@ -30,9 +35,10 @@ class CollisionSystem:
         score_manager: ScoreManager,
         screen_width: float,
         screen_height: float,
+        currency_manager: CurrencyManager | None = None,
+        audio_manager: AudioManager | None = None,
     ) -> None:
         """Run collision checks for current frame and dispatch responses."""
-        del game_state
         (
             ghost_projectile_map,
             ghost_ship_map,
@@ -53,6 +59,12 @@ class CollisionSystem:
                 ghost_ship_map=ghost_ship_map,
                 ghost_asteroid_map=ghost_asteroid_map,
                 ghost_asteroids=ghost_asteroids,
+            )
+            self._check_ship_vs_pickups(
+                entity_manager=entity_manager,
+                game_state=game_state,
+                currency_manager=currency_manager,
+                audio_manager=audio_manager,
             )
         finally:
             self._cleanup_ghost_sprites()
@@ -131,7 +143,26 @@ class CollisionSystem:
             asteroid.kill()
             for child in children:
                 entity_manager.asteroids.append(child)
+            self._spawn_currency_pickup(entity_manager, asteroid)
             break
+
+    def _spawn_currency_pickup(
+        self, entity_manager: object, asteroid: Asteroid
+    ) -> None:
+        pickup_list = getattr(entity_manager, "currency_pickups", None)
+        if pickup_list is None:
+            return
+        if random.random() >= asteroid.currency_drop_chance:
+            return
+        pickup_list.append(
+            CurrencyPickup(
+                center_x=asteroid.center_x,
+                center_y=asteroid.center_y,
+                value=CURRENCY_CONFIG.pickup_value,
+                lifetime=CURRENCY_CONFIG.pickup_lifetime,
+                drift_speed_range=CURRENCY_CONFIG.pickup_drift_speed_range,
+            )
+        )
 
     def _check_ship_vs_asteroids(
         self,
@@ -161,6 +192,31 @@ class CollisionSystem:
 
     def _ship_collides(self, ship: arcade.Sprite, targets: arcade.SpriteList) -> bool:
         return bool(arcade.check_for_collision_with_list(ship, targets))
+
+    def _check_ship_vs_pickups(
+        self,
+        entity_manager: object,
+        game_state: object,
+        currency_manager: CurrencyManager | None,
+        audio_manager: AudioManager | None,
+    ) -> None:
+        pickup_list = getattr(entity_manager, "currency_pickups", None)
+        ship = getattr(entity_manager, "player_ship", None)
+        if pickup_list is None or ship is None:
+            return
+
+        for pickup in arcade.check_for_collision_with_list(ship, pickup_list):
+            value = int(getattr(pickup, "value", 0))
+            if value <= 0:
+                pickup.kill()
+                continue
+            if hasattr(game_state, "currency"):
+                game_state.currency += value
+            if currency_manager is not None:
+                currency_manager.earn(value)
+            if audio_manager is not None:
+                audio_manager.play("pickup_currency")
+            pickup.kill()
 
     def _create_ghost_sprites(
         self,

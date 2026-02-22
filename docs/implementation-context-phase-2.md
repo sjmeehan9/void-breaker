@@ -91,3 +91,27 @@
   - `black --check app/src tests` and `isort --check-only app/src tests` (pass after formatting)
 - **Deviations**:
   - Currency-drop spawning inside projectile-vs-asteroid collision is intentionally deferred to Component 2.5 because `CurrencyPickup`/`CurrencyManager` are not yet implemented; collision flow is structured to add that hook with localized changes.
+
+## Component 2.5 — Currency Pickups & Collection
+- **Status**: Completed
+- **What was built**: Added a production `CurrencyPickup` entity (slow random drift, timeout expiry), a run-scoped `CurrencyManager`, and collision/physics integration so destroyed asteroids can spawn pickups and the ship can collect them. Collection now updates both `GameState.currency` and `CurrencyManager` totals.
+- **Key files created**:
+  - `app/src/entities/pickups.py` — `CurrencyPickup` implementation
+  - `app/src/managers/currency_manager.py` — earn/spend/reset currency ledger
+  - `tests/test_currency_pickups.py` — focused tests for movement, expiry, drop-roll spawning, and collection
+  - `docs/components/phase-2-component-2-5-overview.md` — component summary
+- **Key files modified**:
+  - `app/src/physics/collisions.py` — pickup drop roll on asteroid destruction and ship-vs-pickup collection handling
+  - `app/src/physics/engine.py` — pickup update + wrap integration
+  - `app/src/config/game_config.py` — added `CurrencyConfig` and singleton `CURRENCY_CONFIG`
+  - `app/src/entities/__init__.py`, `app/src/managers/__init__.py` — export new component classes
+  - `tests/test_config.py` — added currency config default checks
+- **Design decisions**:
+  - Kept pickup spawning localized inside `CollisionSystem._resolve_projectile_hits()` via `_spawn_currency_pickup()` to preserve existing collision flow and keep changes surgical.
+  - Extended `CollisionSystem.check_all()` with optional `currency_manager` and `audio_manager` parameters for backward-compatible adoption.
+  - Stored drift velocity directly on `CurrencyPickup` (`velocity_x`, `velocity_y`) matching existing entity patterns.
+- **Validation executed**:
+  - `pytest -q tests/test_currency_pickups.py tests/test_projectile_collisions.py tests/test_config.py` (21 passed)
+  - `black app/src tests` and `isort app/src tests` (pass)
+- **Deviations**:
+  - `CurrencyManager.earn()`/`spend()` reject negative values via `ValueError` as an extra safety guard; this is additive and does not alter expected phase behavior.

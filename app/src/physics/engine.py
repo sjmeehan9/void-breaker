@@ -85,3 +85,7 @@ class PhysicsEngine:
         for projectile in list(getattr(self.entity_manager, "player_projectiles", ())):
             projectile.update(dt)
             wrap_entity(projectile, width, height)
+
+        for pickup in list(getattr(self.entity_manager, "currency_pickups", ())):
+            pickup.update(dt)
+            wrap_entity(pickup, width, height)
