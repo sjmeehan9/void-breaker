@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Any
 
 import arcade
 from asterax.app.src.config.game_config import ASTEROID_CONFIG, AsteroidSize
@@ -101,7 +100,7 @@ class Asteroid(arcade.Sprite):
 
         return children
 
-    def on_destroyed(self) -> dict[str, Any]:
+    def on_destroyed(self) -> dict[str, int | float | list[Asteroid]]:
         """Return split and scoring data used by collision handling."""
         return {
             "point_value": self.point_value,
