@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from asterax.app.src.managers.currency_manager import CurrencyManager
     from asterax.app.src.managers.score_manager import ScoreManager
     from asterax.app.src.managers.spawn_manager import SpawnManager
+    from asterax.app.src.rendering.particle_system import ParticleSystem
 
 
 class CollisionSystem:
@@ -37,6 +38,7 @@ class CollisionSystem:
         screen_height: float,
         currency_manager: CurrencyManager | None = None,
         audio_manager: AudioManager | None = None,
+        particle_system: ParticleSystem | None = None,
     ) -> None:
         """Run collision checks for current frame and dispatch responses."""
         (
@@ -53,6 +55,7 @@ class CollisionSystem:
                 ghost_asteroids=ghost_asteroids,
                 spawn_manager=spawn_manager,
                 score_manager=score_manager,
+                particle_system=particle_system,
             )
             self._check_ship_vs_asteroids(
                 entity_manager=entity_manager,
@@ -77,6 +80,7 @@ class CollisionSystem:
         ghost_asteroids: arcade.SpriteList,
         spawn_manager: SpawnManager,
         score_manager: ScoreManager,
+        particle_system: ParticleSystem | None,
     ) -> None:
         processed_asteroids: set[Asteroid] = set()
         projectiles = list(getattr(entity_manager, "player_projectiles", ()))
@@ -89,6 +93,7 @@ class CollisionSystem:
                 ghost_asteroids=ghost_asteroids,
                 spawn_manager=spawn_manager,
                 score_manager=score_manager,
+                particle_system=particle_system,
                 processed_asteroids=processed_asteroids,
             )
 
@@ -105,6 +110,7 @@ class CollisionSystem:
                 ghost_asteroids=ghost_asteroids,
                 spawn_manager=spawn_manager,
                 score_manager=score_manager,
+                particle_system=particle_system,
                 processed_asteroids=processed_asteroids,
             )
 
@@ -117,6 +123,7 @@ class CollisionSystem:
         ghost_asteroids: arcade.SpriteList,
         spawn_manager: SpawnManager,
         score_manager: ScoreManager,
+        particle_system: ParticleSystem | None,
         processed_asteroids: set[Asteroid],
     ) -> None:
         if source_projectile not in getattr(entity_manager, "player_projectiles", ()):
@@ -140,6 +147,10 @@ class CollisionSystem:
             source_projectile.kill()
             score_manager.award_asteroid_points(asteroid.asteroid_size)
             children = spawn_manager.spawn_child_asteroids(asteroid)
+            if particle_system is not None:
+                particle_system.spawn_explosion(
+                    (asteroid.center_x, asteroid.center_y), asteroid.asteroid_size
+                )
             asteroid.kill()
             for child in children:
                 entity_manager.asteroids.append(child)
