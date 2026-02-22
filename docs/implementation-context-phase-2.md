@@ -138,3 +138,25 @@
   - `python -m isort --check-only app/src tests` (pass)
 - **Deviations**:
   - Particle spawning is hooked into collision flow now, while full state-level wiring of `EntityManager`/`ParticleSystem` remains for Component 2.7 integration work.
+
+## Component 2.7 — Combat Phase State & Level Progression
+- **Status**: Completed
+- **What was built**: Replaced the combat and game-over stubs with functional Phase 2 loop orchestration. `CombatPhaseState` now owns fixed-timestep accumulation, manager wiring (entity/physics/collision/spawn/score/currency/particles), asteroid level progression, and game-over transition with run stats. `GameOverState` now renders a run summary and persists qualifying high scores. HUD rendering now supports a lazy-updated combat overlay (`Score`, `Level`, `Shields`, `Credits`) using cached `arcade.Text` objects.
+- **Key files modified**:
+  - `app/src/states/combat.py` — full fixed-step combat loop, `_check_level_clear()`, `_advance_level()`, `_trigger_game_over()`, HUD sync
+  - `app/src/states/game_over.py` — run-summary model, high-score qualification + save, functional draw/return flow
+  - `app/src/rendering/hud.py` — combat HUD value update API and lazy cached draw path
+  - `tests/test_combat_phase_state.py` — new focused unit tests for accumulator, level progression, and game-over payload/high-score persistence
+- **Design decisions**:
+  - Kept `PhysicsEngine` and `CollisionSystem` integration additive by orchestrating them in `CombatPhaseState._physics_step()` rather than restructuring lower-level systems.
+  - Used a lightweight `RunSummary` dataclass in `GameOverState` for explicit render/persistence fields without changing persistence schema contracts.
+  - Preserved existing `HUDRenderer.draw_text()` / `draw_value()` behavior and layered combat-specific cached text rendering on top.
+- **Validation executed**:
+  - `python -m pytest -q tests/test_combat_phase_state.py tests/test_audio_rendering.py tests/test_window.py`
+  - `python -m black --check app/src tests`
+  - `python -m isort --check-only app/src tests`
+  - `python -m pytest -q`
+  - `python scripts/evals.py`
+- **Deviations**:
+  - Initials entry is currently minimal and auto-saves as `AAA` for qualifying scores (the planned interactive 3-character input remains a later-phase polish item).
+  - Headless sandbox lacks EGL, so runtime screenshot capture for UI verification could not be produced in this environment.
