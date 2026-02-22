@@ -69,6 +69,21 @@ def test_window_initializes_state_machine_and_main_menu(monkeypatch) -> None:
             del settings
             call_order.append("input_init")
 
+    class FakeAudioManager:
+        def __init__(self, settings, sound_dir):
+            del settings, sound_dir
+            call_order.append("audio_init")
+
+    class FakeStarfieldRenderer:
+        def __init__(self, width: int, height: int):
+            del width, height
+            call_order.append("starfield_init")
+
+    class FakeHUDRenderer:
+        def __init__(self, window_width: int, window_height: int):
+            del window_width, window_height
+            call_order.append("hud_init")
+
     class FakeStateMachine:
         def __init__(self) -> None:
             call_order.append("machine_init")
@@ -85,6 +100,9 @@ def test_window_initializes_state_machine_and_main_menu(monkeypatch) -> None:
     monkeypatch.setattr(window_module.arcade.Window, "__init__", fake_window_init)
     monkeypatch.setattr(window_module, "PersistenceManager", FakePersistenceManager)
     monkeypatch.setattr(window_module, "InputManager", FakeInputManager)
+    monkeypatch.setattr(window_module, "AudioManager", FakeAudioManager)
+    monkeypatch.setattr(window_module, "StarfieldRenderer", FakeStarfieldRenderer)
+    monkeypatch.setattr(window_module, "HUDRenderer", FakeHUDRenderer)
     monkeypatch.setattr(window_module, "StateMachine", FakeStateMachine)
     monkeypatch.setattr(window_module, "MainMenuState", FakeMainMenuState)
     monkeypatch.setattr(
@@ -100,6 +118,9 @@ def test_window_initializes_state_machine_and_main_menu(monkeypatch) -> None:
         "persistence_init",
         "load_settings",
         "input_init",
+        "audio_init",
+        "starfield_init",
+        "hud_init",
         "machine_init",
         "main_menu_init",
         "switch_state",
@@ -132,7 +153,12 @@ def test_window_delegates_draw_update_and_input_to_state_machine() -> None:
         def on_key_release(self, key: int, modifiers: int) -> None:
             calls.append(f"release:{key}:{modifiers}")
 
+    class FakeStarfield:
+        def draw(self) -> None:
+            calls.append("starfield")
+
     window.input_manager = FakeInputManager()  # type: ignore[assignment]
+    window.starfield = FakeStarfield()  # type: ignore[assignment]
     window.state_machine = FakeStateMachine()  # type: ignore[assignment]
     window.clear = lambda: calls.append("clear")
 
@@ -144,6 +170,7 @@ def test_window_delegates_draw_update_and_input_to_state_machine() -> None:
     assert calls == [
         f"update:{PHYSICS_DT}",
         "clear",
+        "starfield",
         "draw",
         "input_press:10:20",
         "press:10:20",

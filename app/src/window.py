@@ -1,10 +1,15 @@
 """Arcade window implementation for VoidBreaker."""
 
+from pathlib import Path
 from typing import Final
 
 import arcade
+from asterax.app.src.audio.audio_manager import AudioManager
+from asterax.app.src.config.game_config import GAME_CONFIG
 from asterax.app.src.input.input_manager import InputManager
 from asterax.app.src.persistence.persistence_manager import PersistenceManager
+from asterax.app.src.rendering.hud import HUDRenderer
+from asterax.app.src.rendering.starfield import StarfieldRenderer
 from asterax.app.src.states.main_menu import MainMenuState
 from asterax.app.src.states.state_machine import StateMachine
 
@@ -17,9 +22,9 @@ class VoidBreakerWindow(arcade.Window):
 
     def __init__(
         self,
-        width: int = 1280,
-        height: int = 960,
-        title: str = "VoidBreaker",
+        width: int = GAME_CONFIG.window_width,
+        height: int = GAME_CONFIG.window_height,
+        title: str = GAME_CONFIG.window_title,
     ) -> None:
         """Initialize the game window and fixed-step timing state."""
         super().__init__(width=width, height=height, title=title, resizable=False)
@@ -28,6 +33,10 @@ class VoidBreakerWindow(arcade.Window):
         self.persistence = PersistenceManager()
         settings = self.persistence.load_settings()
         self.input_manager = InputManager(settings)
+        sound_dir = Path(__file__).resolve().parents[2] / "assets" / "sounds"
+        self.audio_manager = AudioManager(settings, sound_dir)
+        self.starfield = StarfieldRenderer(width=width, height=height)
+        self.hud_renderer = HUDRenderer(window_width=width, window_height=height)
 
         self.state_machine = StateMachine()
         self.state_machine.switch_state(MainMenuState(self.state_machine))
@@ -49,6 +58,7 @@ class VoidBreakerWindow(arcade.Window):
     def on_draw(self) -> None:
         """Render a cleared black frame."""
         self.clear()
+        self.starfield.draw()
         self.state_machine.draw()
 
     def on_key_press(self, key: int, modifiers: int) -> None:

@@ -50,3 +50,12 @@
 - **Design decisions**: Kept all tuning constants in a frozen `GameConfig` singleton (`GAME_CONFIG`) to prevent accidental runtime mutation; implemented `ShipState.recalculate_effective_stats()` as a reusable upgrade-definition driven calculator so later `UpgradeManager` logic can pass the same static definitions; used formulaic difficulty generation with explicit clamps and mode multipliers (`classic`, `casual`, `hard`) to support arbitrarily high levels.
 - **Verification**: Added focused unit coverage for config defaults, upgrade definition validity/cost scaling, procedural difficulty behavior and clamping, dataclass default instantiation, enum membership, and ship stat recalculation.
 - **Deviations**: Added `effective_max_shields` and `effective_projectile_count` fields on `ShipState` to represent persistent effects for `defense_shields` and `weapon_spread` upgrades from the component specification.
+
+## Component 1.7: Audio Manager Skeleton & Rendering Foundation
+- **Status**: Completed
+- **What was built**: Implemented `AudioManager` sound loading/playback, deterministic static starfield rendering, and cached HUD text/value rendering utilities. Wired all three systems into `VoidBreakerWindow` so the starfield now renders before state content each frame.
+- **Key files created**: `app/src/audio/audio_manager.py`, `app/src/rendering/starfield.py`, `app/src/rendering/hud.py`, `tests/test_audio_rendering.py`, `docs/components/phase-1-component-1-7-overview.md`.
+- **Key files modified**: `app/src/audio/__init__.py`, `app/src/rendering/__init__.py`, `app/src/window.py`, `tests/test_window.py`.
+- **Design decisions**: Kept `AudioManager.play()` and loading logic exception-safe for missing assets/headless environments; used deterministic `random.Random(42)` star generation and pre-built `ShapeElementList` for one-time star geometry creation; implemented HUD value caching with `arcade.Text` objects keyed by label/position and refreshed only when values change.
+- **Verification**: Added focused tests for audio no-op behavior and volume updates, starfield determinism/count, HUD rendering/caching, and updated window initialisation/draw order. Ran formatting/lint checks and the full pytest suite successfully.
+- **Deviations**: Implemented `AudioManager.play_music()` as a documented no-op API method to preserve Phase 5 integration points without introducing placeholder exceptions.
