@@ -70,9 +70,18 @@ class PhysicsEngine:
         ship.apply_drag(dt)
         ship.cap_speed()
         ship.update_position(dt)
-        ship.tick_cooldowns(dt)
+        ship.update_cooldown(dt)
         wrap_entity(ship, width, height)
+
+        if input_manager.is_action_held("fire") and hasattr(
+            self.entity_manager, "player_projectiles"
+        ):
+            ship.fire(getattr(self.entity_manager, "player_projectiles"))
 
         for asteroid in getattr(self.entity_manager, "asteroids", ()):
             asteroid.update(dt)
             wrap_entity(asteroid, width, height)
+
+        for projectile in list(getattr(self.entity_manager, "player_projectiles", ())):
+            projectile.update(dt)
+            wrap_entity(projectile, width, height)
