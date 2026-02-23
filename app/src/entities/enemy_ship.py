@@ -8,7 +8,7 @@ import random
 import arcade
 from asterax.app.src.config.enemy_config import EnemyArchetype, EnemyConfig
 from asterax.app.src.config.game_config import GAME_CONFIG
-from asterax.app.src.entities.projectile import Projectile
+from asterax.app.src.entities.projectile import Projectile, ProjectileOwner
 
 
 class EnemyShip(arcade.Sprite):
@@ -206,7 +206,7 @@ class EnemyShip(arcade.Sprite):
             damage=self.config.projectile_damage,
         )
         projectile.texture = self._enemy_projectile_texture
-        projectile.owner = "enemy"
+        projectile.owner = ProjectileOwner.ENEMY
         self.fire_cooldown_remaining = self.config.fire_cooldown
         return projectile
 

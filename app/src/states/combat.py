@@ -13,6 +13,7 @@ from asterax.app.src.config.game_config import (
     PHYSICS_CONFIG,
 )
 from asterax.app.src.config.game_config import GameState as RunGameState
+from asterax.app.src.entities.enemy_ship import EnemyShip
 from asterax.app.src.entities.player_ship import PlayerShip
 from asterax.app.src.managers.currency_manager import CurrencyManager
 from asterax.app.src.managers.entity_manager import EntityManager
@@ -20,6 +21,7 @@ from asterax.app.src.managers.score_manager import ScoreManager
 from asterax.app.src.managers.spawn_manager import SpawnManager
 from asterax.app.src.physics.collisions import CollisionSystem
 from asterax.app.src.physics.engine import PhysicsEngine
+from asterax.app.src.physics.wrap import wrap_entity
 from asterax.app.src.rendering.hud import HUDRenderer
 from asterax.app.src.rendering.particle_system import ParticleSystem
 from asterax.app.src.states.base_state import BaseState
@@ -82,6 +84,7 @@ class CombatPhaseState(BaseState):
         self.score_manager.reset()
         self.currency_manager.reset()
         self.entity_manager.clear_projectiles()
+        self.entity_manager.clear_enemies()
         self.entity_manager.currency_pickups.clear()
         self.entity_manager.asteroids.clear()
 
@@ -129,6 +132,15 @@ class CombatPhaseState(BaseState):
             audio_manager=window.audio_manager,
             particle_system=self.particle_system,
         )
+        self._update_enemies(
+            dt=dt,
+            screen_width=window.width,
+            screen_height=window.height,
+        )
+        self._process_enemy_collisions(
+            screen_width=window.width,
+            screen_height=window.height,
+        )
         self.particle_system.update(dt)
         self._check_level_clear()
         if self.player_ship.shields <= 0.0:
@@ -162,6 +174,7 @@ class CombatPhaseState(BaseState):
         window = arcade.get_window()
         self.current_level += 1
         self.entity_manager.clear_projectiles()
+        self.entity_manager.clear_enemies()
         self.entity_manager.currency_pickups.clear()
         ship = self.player_ship
         ship.center_x = window.width / 2
@@ -211,6 +224,74 @@ class CombatPhaseState(BaseState):
                 persistence=persistence,
             )
         )
+
+    def _update_enemies(
+        self,
+        dt: float,
+        screen_width: float,
+        screen_height: float,
+    ) -> None:
+        """Advance enemy movement/firing and maintain enemy projectile lifetimes."""
+        player = self.player_ship
+        player_position = (player.center_x, player.center_y)
+        player_velocity = (player.velocity_x, player.velocity_y)
+
+        for enemy in list(self.entity_manager.enemies):
+            enemy.update_ai(dt=dt, player_position=player_position)
+            wrap_entity(enemy, screen_width, screen_height)
+            projectile = enemy.try_fire(
+                dt=dt,
+                player_position=player_position,
+                player_velocity=player_velocity,
+            )
+            if projectile is not None:
+                self.entity_manager.enemy_projectiles.append(projectile)
+
+        for projectile in list(self.entity_manager.enemy_projectiles):
+            projectile.update(dt)
+            wrap_entity(projectile, screen_width, screen_height)
+
+    def _handle_enemy_destroyed(self, enemy: EnemyShip) -> None:
+        """Apply score/stat updates and remove a destroyed enemy sprite."""
+        rewards = enemy.on_destroyed()
+        self.score_manager.score += int(rewards.get("point_value", 0))
+        self.game_state.run_stats.enemies_destroyed += 1
+        enemy.kill()
+
+    def _process_enemy_collisions(
+        self,
+        screen_width: float,
+        screen_height: float,
+    ) -> None:
+        """Resolve enemy-related collisions after movement updates."""
+        collision_pairs = self.collision_system.check_all_combat(
+            entity_manager=self.entity_manager,
+            screen_width=screen_width,
+            screen_height=screen_height,
+        )
+        for player, enemy_projectile in collision_pairs["player_vs_enemy_projectiles"]:
+            if enemy_projectile in self.entity_manager.enemy_projectiles:
+                player.take_damage(enemy_projectile.damage)
+                enemy_projectile.kill()
+
+        for projectile, enemy in collision_pairs["player_projectiles_vs_enemies"]:
+            if (
+                projectile not in self.entity_manager.player_projectiles
+                or enemy not in self.entity_manager.enemies
+            ):
+                continue
+            destroyed = enemy.take_damage(projectile.damage)
+            projectile.kill()
+            if destroyed:
+                self._handle_enemy_destroyed(enemy)
+
+        for player, enemy in collision_pairs["player_vs_enemies"]:
+            if enemy not in self.entity_manager.enemies:
+                continue
+            player.take_damage(self.collision_system.collision_damage)
+            destroyed = enemy.take_damage(self.collision_system.collision_damage)
+            if destroyed:
+                self._handle_enemy_destroyed(enemy)
 
     def on_draw(self) -> None:
         """Draw combat scene entities, particles, and HUD."""

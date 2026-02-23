@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import arcade
 from asterax.app.src.entities.asteroid import Asteroid
+from asterax.app.src.entities.enemy_ship import EnemyShip
 from asterax.app.src.entities.pickups import CurrencyPickup
 from asterax.app.src.entities.player_ship import PlayerShip
 from asterax.app.src.entities.projectile import Projectile
@@ -19,6 +20,8 @@ class EntityManager:
         self.asteroids: arcade.SpriteList[Asteroid] = arcade.SpriteList(
             use_spatial_hash=True
         )
+        self.enemies: arcade.SpriteList[EnemyShip] = arcade.SpriteList()
+        self.enemy_projectiles: arcade.SpriteList[Projectile] = arcade.SpriteList()
         self.player_projectiles: arcade.SpriteList[Projectile] = arcade.SpriteList()
         self.currency_pickups: arcade.SpriteList[CurrencyPickup] = arcade.SpriteList()
         self.particles: arcade.SpriteList[arcade.Sprite] = arcade.SpriteList()
@@ -73,6 +76,8 @@ class EntityManager:
         self.asteroids.draw()
         self.currency_pickups.draw()
         self.particles.draw()
+        self.enemies.draw()
+        self.enemy_projectiles.draw()
         self.player_projectiles.draw()
         if self.player is not None:
             self.player.draw()
@@ -84,7 +89,13 @@ class EntityManager:
     def clear_all(self) -> None:
         """Clear all managed entities for level transitions or teardown."""
         self.asteroids.clear()
+        self.clear_enemies()
         self.player_projectiles.clear()
         self.currency_pickups.clear()
         self.particles.clear()
         self.player = None
+
+    def clear_enemies(self) -> None:
+        """Clear active enemies and enemy projectiles."""
+        self.enemies.clear()
+        self.enemy_projectiles.clear()
