@@ -191,3 +191,43 @@ def test_game_over_saves_high_score_when_qualifying(monkeypatch) -> None:
     assert len(persistence.saved_entries) == 1
     assert persistence.saved_entries[0].name == "AAA"
     assert persistence.saved_entries[0].score == 999
+
+
+def test_combat_multi_level_session_with_enemy_updates_no_crash(monkeypatch) -> None:
+    """Simulate multi-level combat progression and verify enemy systems stay stable."""
+
+    class _InputStub:
+        def __init__(self) -> None:
+            self.keys_held: set[int] = set()
+
+        def is_action_held(self, action: str) -> bool:
+            del action
+            return False
+
+    window = SimpleNamespace(
+        width=1280,
+        height=960,
+        input_manager=_InputStub(),
+        audio_manager=SimpleNamespace(play=lambda name: None),
+        persistence=SimpleNamespace(),
+    )
+    monkeypatch.setattr(combat_module.arcade, "get_window", lambda: window)
+    state = CombatPhaseState(state_machine=SimpleNamespace())
+    state.on_enter()
+    state.collision_system = SimpleNamespace(check_all=lambda **kwargs: None)  # type: ignore[assignment]
+    state._process_enemy_collisions = lambda **kwargs: None  # type: ignore[method-assign]
+
+    for _ in range(14):
+        state.entity_manager.asteroids.clear()
+        state._physics_step(combat_module.PHYSICS_DT)
+
+    assert state.current_level == 15
+
+    enemy_activity_samples = 0
+    for _ in range(int(12.0 / combat_module.PHYSICS_DT)):
+        state._physics_step(combat_module.PHYSICS_DT)
+        enemy_activity_samples += len(state.entity_manager.enemies)
+        enemy_activity_samples += len(state.entity_manager.enemy_projectiles)
+
+    assert enemy_activity_samples > 0
+    assert state._game_over_triggered is False  # noqa: SLF001
