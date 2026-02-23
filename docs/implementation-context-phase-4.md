@@ -2,7 +2,7 @@
 
 ## Component Status Summary
 - 4.1 Human Setup & Shop Assets — Completed
-- 4.2 Shop Phase State & Layout — Not Started
+- 4.2 Shop Phase State & Layout — Completed
 - 4.3 Shop Node Entities & Interaction — Not Started
 - 4.4 Upgrade Manager & Stat Application — Not Started
 - 4.5 Insurance Manager & Death Retention — Not Started
@@ -28,3 +28,17 @@
   - `assets/sounds/shop_purchase.wav`, `assets/sounds/shop_denied.wav`
 - **Design decisions**: Extended existing Pillow sprite generation script rather than creating a separate Phase 4 script, consistent with the Phase 3 approach. Orb sprites use a three-layer design (outer glow ring, main fill circle, inner highlight) for visual depth while remaining placeholder-appropriate. Continue node uses a chevron/arrow shape in green to be visually distinct from the coloured orbs.
 - **Deviations**: None from component requirements. All acceptance criteria met.
+
+## Component 4.2 — Shop Phase State & Layout
+- **Status**: Completed
+- **What was built**: Replaced the Phase 1 shop stub with a functional `ShopPhaseState` that centres the ship on entry, preserves thrust/rotation movement, disables wrap by clamping to screen bounds, and generates a circular shop-node layout with a dedicated continue node at the bottom. Added transition wiring so cleared combat waves now route to shop, and shop transitions back to combat with incremented level/difficulty context.
+- **Key files created**:
+  - `tests/test_shop_phase_state.py` — targeted shop-phase tests for entry setup, circular layout geometry, clamp behaviour, and enter-to-combat transition.
+  - `docs/components/phase-4-component-4-2-overview.md` — component summary for future implementation context.
+- **Key files modified**:
+  - `app/src/states/shop.py` — full implementation of shop state lifecycle, node layout, shop movement, continue collision/key transition, and HUD labels.
+  - `app/src/states/combat.py` — changed level-clear behaviour to transition into shop; added state handoff payload (level, score, currency, run stats, ship snapshot) for shop/combat round-trip.
+  - `app/src/config/game_config.py` — added `ShopLayoutConfig` and `SHOP_LAYOUT_CONFIG` constant for configurable layout radius/continue offset.
+  - `tests/test_combat_phase_state.py` — adjusted level-clear assertion to validate shop transition path.
+- **Design decisions**: Kept shop layout values centralized in config (radius fraction + continue offset) for later Phase 5 tuning. Used lightweight shop-node view models in `shop.py` to avoid blocking on Component 4.3 entity work while still enabling layout, rendering, and collision checks in 4.2.
+- **Deviations**: Deferred node affordability/max-state logic to Component 4.3 as planned; 4.2 currently provides static node labels/cost text to satisfy layout/state requirements without overlapping upcoming entity responsibilities.

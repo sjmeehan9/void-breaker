@@ -25,17 +25,31 @@ def test_combat_on_update_uses_fixed_timestep_accumulator(monkeypatch) -> None:
     assert state.accumulator == pytest.approx(combat_module.PHYSICS_DT * 0.5)
 
 
-def test_check_level_clear_advances_when_asteroids_empty(monkeypatch) -> None:
-    """Level-clear check should advance only when no asteroids remain."""
-    state = CombatPhaseState(state_machine=SimpleNamespace())
+def test_check_level_clear_transitions_to_shop_when_asteroids_empty(
+    monkeypatch,
+) -> None:
+    """Level-clear check should transition to shop when no asteroids remain."""
+    state = CombatPhaseState(
+        state_machine=SimpleNamespace(switch_state=lambda next_state: None)
+    )
     state.entity_manager.asteroids = []  # type: ignore[assignment]
+    state.entity_manager.player_ship = SimpleNamespace(
+        center_x=640.0,
+        center_y=480.0,
+        velocity_x=0.0,
+        velocity_y=0.0,
+        angle=0.0,
+        shields=100.0,
+        max_shields=100.0,
+    )  # type: ignore[assignment]
+    state._play_sound = lambda sound_name: None  # type: ignore[method-assign]
 
-    advanced: list[bool] = []
-    monkeypatch.setattr(state, "_advance_level", lambda: advanced.append(True))
+    transitioned: list[bool] = []
+    monkeypatch.setattr(state, "_transition_to_shop", lambda: transitioned.append(True))
 
     state._check_level_clear()
 
-    assert advanced == [True]
+    assert transitioned == [True]
 
 
 def test_advance_level_resets_and_spawns(monkeypatch) -> None:
@@ -212,10 +226,13 @@ def test_combat_multi_level_session_with_enemy_updates_no_crash(monkeypatch) -> 
         persistence=SimpleNamespace(),
     )
     monkeypatch.setattr(combat_module.arcade, "get_window", lambda: window)
-    state = CombatPhaseState(state_machine=SimpleNamespace())
+    state = CombatPhaseState(
+        state_machine=SimpleNamespace(switch_state=lambda next_state: None)
+    )
     state.on_enter()
     state.collision_system = SimpleNamespace(check_all=lambda **kwargs: None)  # type: ignore[assignment]
     state._process_enemy_collisions = lambda **kwargs: None  # type: ignore[method-assign]
+    state._transition_to_shop = state._advance_level  # type: ignore[method-assign]
 
     for _ in range(14):
         state.entity_manager.asteroids.clear()
