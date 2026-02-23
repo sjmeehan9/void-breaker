@@ -62,3 +62,25 @@
   - Spawn interval timer is unconditional (always advances when enabled) but spawn only occurs when under cap, allowing natural spawn behavior without complex state tracking.
   - Enemy spawning is independent of asteroid spawning (both run in same `_physics_step()`) to maintain Phase 2 asteroid behavior unchanged.
 - **Deviations**: None from component requirements. All acceptance criteria met: spawn manager supports enemies alongside asteroids, spawning disabled for levels 1-5, enemies spawn at screen edges moving inward, spawn interval decreases with level, aggressive enemies introduced via `aggressive_ratio`, count cap enforced, `DifficultyParams` includes all enemy fields.
+
+## Component 3.5 — Damage Feedback & Visual Effects
+- **Status**: Completed
+- **What was built**: Added a dedicated damage-effects subsystem for player hit flash/flicker and burst-style explosion particles, then integrated it into combat damage and enemy death flows. Player damage now triggers `player_hit` sound + visual feedback, enemy destruction triggers particle burst + `enemy_explode`, and player death plays a larger destruction burst with a 0.8s transition delay.
+- **Key files created**:
+  - `app/src/rendering/damage_effects.py` — `DamageEffects` implementation for damage flash, invulnerability flicker, enemy explosion bursts, and player destruction bursts.
+  - `tests/test_damage_effects.py` — focused tests for flash restoration, particle spawn counts, and particle expiry via `ParticleSystem`.
+- **Key files modified**:
+  - `app/src/entities/player_ship.py` — switched to config-driven invulnerability duration (`GAME_CONFIG.invulnerability_duration`), added `is_invulnerable` property, and added explicit `update_invulnerability(dt)`.
+  - `app/src/config/game_config.py` — set `invulnerability_duration` to `0.75` seconds for spec-aligned fairness window.
+  - `app/src/states/combat.py` — integrated `DamageEffects` update loop, enemy explosion hooks, player hit feedback hooks, invulnerability update call, and 0.8-second delayed game-over transition with destruction sequence.
+  - `app/src/rendering/particle_system.py` — generalized particle update logic to support additional particle types exposing `update_particle(dt)`.
+  - `app/src/rendering/__init__.py` — exported `DamageEffects`.
+  - `tests/test_player_ship_physics.py` — added invulnerability behavior tests.
+  - `tests/test_enemy_projectile_collisions.py` — added combat-level test for hit audio + invulnerability gating.
+  - `tests/test_combat_phase_state.py` — added delay test for player-destruction transition.
+- **Design decisions**:
+  - Kept changes additive and localized: particle ownership/rendering remains with existing `EntityManager` + `ParticleSystem`, while `DamageEffects` only manages effect state and particle emission.
+  - Avoided changing existing collision contracts by adding post-collision shield-delta feedback for asteroid hits and explicit `_apply_player_damage()` for enemy-driven hits.
+  - Added `_play_sound()` guard in combat to keep tests and headless flows stable when no Arcade window is active.
+- **Deviations**:
+  - The implementation applies player damage flash directly to ship sprite tint (red/white alternation) rather than full-screen tint, matching existing sprite-centric rendering architecture and avoiding unrelated rendering-pipeline changes.
