@@ -191,3 +191,28 @@ def test_combat_update_enemies_spawns_then_expires_enemy_projectiles() -> None:
 
     state._update_enemies(dt=0.2, screen_width=1280.0, screen_height=960.0)
     assert fired_projectile not in state.entity_manager.enemy_projectiles
+
+
+def test_apply_player_damage_triggers_hit_feedback_and_invulnerability(
+    monkeypatch,
+) -> None:
+    """Applying damage should play hit audio and block immediate follow-up damage."""
+    state = CombatPhaseState(state_machine=SimpleNamespace())
+    ship = _make_ship()
+    state.entity_manager.player_ship = ship
+    audio_calls: list[str] = []
+    monkeypatch.setattr(
+        arcade,
+        "get_window",
+        lambda: SimpleNamespace(audio_manager=SimpleNamespace(play=audio_calls.append)),
+    )
+
+    starting_shields = ship.shields
+    state._apply_player_damage(ship, 10.0)
+    shields_after_hit = ship.shields
+    state._apply_player_damage(ship, 10.0)
+
+    assert shields_after_hit < starting_shields
+    assert ship.shields == shields_after_hit
+    assert ship.is_invulnerable is True
+    assert audio_calls == ["player_hit"]

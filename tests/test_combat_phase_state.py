@@ -117,6 +117,49 @@ def test_trigger_game_over_switches_with_run_stats() -> None:
     )  # noqa: SLF001
 
 
+def test_physics_step_delays_game_over_for_destruction_sequence(monkeypatch) -> None:
+    """Shields reaching zero should delay game-over transition by 0.8s."""
+    state = CombatPhaseState(state_machine=SimpleNamespace())
+    ship = SimpleNamespace(
+        center_x=100.0,
+        center_y=120.0,
+        velocity_x=0.0,
+        velocity_y=0.0,
+        shields=0.0,
+        max_shields=100.0,
+        update_invulnerability=lambda dt: None,
+    )
+    state.entity_manager.player_ship = ship  # type: ignore[assignment]
+    state.physics_engine = SimpleNamespace(update=lambda **kwargs: None)  # type: ignore[assignment]
+    state._check_level_clear = lambda: None  # type: ignore[method-assign]
+    state._spawn_enemies = lambda **kwargs: None  # type: ignore[method-assign]
+    state._update_enemies = lambda **kwargs: None  # type: ignore[method-assign]
+    state._process_enemy_collisions = lambda **kwargs: None  # type: ignore[method-assign]
+    state.collision_system = SimpleNamespace(check_all=lambda **kwargs: None)  # type: ignore[assignment]
+    state.particle_system = SimpleNamespace(update=lambda dt: None)  # type: ignore[assignment]
+    state.damage_effects = SimpleNamespace(
+        update=lambda dt: None, trigger_destruction_sequence=lambda *args: None
+    )  # type: ignore[assignment]
+    triggered: list[bool] = []
+    state._trigger_game_over = lambda persistence: triggered.append(True)  # type: ignore[method-assign]
+    monkeypatch.setattr(
+        combat_module.arcade,
+        "get_window",
+        lambda: SimpleNamespace(
+            width=1280,
+            height=960,
+            input_manager=SimpleNamespace(keys_held=set()),
+            audio_manager=SimpleNamespace(play=lambda name: None),
+            persistence=SimpleNamespace(),
+        ),
+    )
+
+    state._physics_step(0.1)
+    state._physics_step(0.71)
+
+    assert triggered == [True]
+
+
 def test_game_over_saves_high_score_when_qualifying(monkeypatch) -> None:
     """Qualifying scores should be persisted with fallback initials."""
 

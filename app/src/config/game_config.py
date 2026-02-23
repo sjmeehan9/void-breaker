@@ -70,7 +70,7 @@ class GameConfig:
     base_projectile_range: float = 500.0
     base_damage: float = 1.0
     base_shields: float = 100.0
-    invulnerability_duration: float = 1.0
+    invulnerability_duration: float = 0.75
     shop_recentre_duration: float = 0.3
     currency_pickup_lifetime: float = 10.0
     max_high_scores: int = 100

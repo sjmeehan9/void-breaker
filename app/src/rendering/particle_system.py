@@ -88,8 +88,9 @@ class ParticleSystem:
     def update(self, dt: float) -> None:
         """Advance particle simulation and remove expired sprites."""
         for particle in list(self._particles):
-            if isinstance(particle, _ExplosionParticle):
-                particle.update_particle(dt)
+            update_particle = getattr(particle, "update_particle", None)
+            if callable(update_particle):
+                update_particle(dt)
             else:
                 particle.update()
             if particle not in self._particles:

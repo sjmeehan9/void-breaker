@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from pathlib import Path
 
-from asterax.app.src.config.game_config import PhysicsConfig
+from asterax.app.src.config.game_config import GAME_CONFIG, PhysicsConfig
 from asterax.app.src.entities.player_ship import PlayerShip
 from asterax.app.src.physics.wrap import wrap_entity
 
@@ -155,3 +155,26 @@ def test_take_damage_reduces_shields_and_reports_death() -> None:
 
     assert ship.shields == 0.0
     assert dead is True
+
+
+def test_take_damage_ignores_hits_while_invulnerable() -> None:
+    """Damage should be ignored while invulnerability is active."""
+    ship = _make_ship()
+    ship.take_damage(5.0)
+    shields_after_first_hit = ship.shields
+
+    dead = ship.take_damage(10.0)
+
+    assert dead is False
+    assert ship.shields == shields_after_first_hit
+
+
+def test_update_invulnerability_expires_after_configured_duration() -> None:
+    """Invulnerability should clear once its configured duration elapses."""
+    ship = _make_ship()
+    ship.take_damage(5.0)
+    assert ship.is_invulnerable is True
+
+    ship.update_invulnerability(GAME_CONFIG.invulnerability_duration)
+
+    assert ship.is_invulnerable is False

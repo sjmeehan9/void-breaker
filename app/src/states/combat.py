@@ -22,6 +22,7 @@ from asterax.app.src.managers.spawn_manager import SpawnManager
 from asterax.app.src.physics.collisions import CollisionSystem
 from asterax.app.src.physics.engine import PhysicsEngine
 from asterax.app.src.physics.wrap import wrap_entity
+from asterax.app.src.rendering.damage_effects import DamageEffects
 from asterax.app.src.rendering.hud import HUDRenderer
 from asterax.app.src.rendering.particle_system import ParticleSystem
 from asterax.app.src.states.base_state import BaseState
@@ -49,11 +50,13 @@ class CombatPhaseState(BaseState):
         self.score_manager = ScoreManager()
         self.currency_manager = CurrencyManager()
         self.particle_system = ParticleSystem(self.entity_manager.particles)
+        self.damage_effects = DamageEffects()
         self.hud: HUDRenderer | None = None
         self.game_state = RunGameState()
         self.current_level = 1
         self.accumulator = 0.0
         self._game_over_triggered = False
+        self._game_over_delay_remaining = 0.0
 
     @property
     def player_ship(self) -> PlayerShip:
@@ -81,6 +84,7 @@ class CombatPhaseState(BaseState):
         self.current_level = 1
         self.accumulator = 0.0
         self._game_over_triggered = False
+        self._game_over_delay_remaining = 0.0
         self.score_manager.reset()
         self.currency_manager.reset()
         self.entity_manager.clear_projectiles()
@@ -115,6 +119,7 @@ class CombatPhaseState(BaseState):
             return
 
         window = arcade.get_window()
+        shields_before_collisions = self.player_ship.shields
         self.physics_engine.update(
             dt=dt,
             keys_held=window.input_manager.keys_held,
@@ -133,6 +138,12 @@ class CombatPhaseState(BaseState):
             audio_manager=window.audio_manager,
             particle_system=self.particle_system,
         )
+        if self.player_ship.shields < shields_before_collisions:
+            self.damage_effects.trigger_damage_flash(self.player_ship)
+            self.damage_effects.trigger_invulnerability(
+                self.player_ship, GAME_CONFIG.invulnerability_duration
+            )
+            self._play_sound("player_hit")
         self._spawn_enemies(
             dt=dt, screen_width=window.width, screen_height=window.height
         )
@@ -145,10 +156,22 @@ class CombatPhaseState(BaseState):
             screen_width=window.width,
             screen_height=window.height,
         )
+        self.player_ship.update_invulnerability(dt)
+        self.damage_effects.update(dt)
         self.particle_system.update(dt)
         self._check_level_clear()
         if self.player_ship.shields <= 0.0:
-            self._trigger_game_over(window.persistence)
+            if self._game_over_delay_remaining <= 0.0:
+                self._game_over_delay_remaining = 0.8
+                self.damage_effects.trigger_destruction_sequence(
+                    (self.player_ship.center_x, self.player_ship.center_y),
+                    self.entity_manager.particles,
+                )
+            self._game_over_delay_remaining = max(
+                0.0, self._game_over_delay_remaining - dt
+            )
+            if self._game_over_delay_remaining <= 0.0:
+                self._trigger_game_over(window.persistence)
             return
         self._sync_state_for_hud()
 
@@ -279,6 +302,12 @@ class CombatPhaseState(BaseState):
         rewards = enemy.on_destroyed()
         self.score_manager.score += int(rewards.get("point_value", 0))
         self.game_state.run_stats.enemies_destroyed += 1
+        self.damage_effects.trigger_explosion(
+            (enemy.center_x, enemy.center_y),
+            "medium",
+            self.entity_manager.particles,
+        )
+        self._play_sound("enemy_explode")
         enemy.kill()
 
     def _process_enemy_collisions(
@@ -294,7 +323,7 @@ class CombatPhaseState(BaseState):
         )
         for player, enemy_projectile in collision_pairs["player_vs_enemy_projectiles"]:
             if enemy_projectile in self.entity_manager.enemy_projectiles:
-                player.take_damage(enemy_projectile.damage)
+                self._apply_player_damage(player, enemy_projectile.damage)
                 enemy_projectile.kill()
 
         for projectile, enemy in collision_pairs["player_projectiles_vs_enemies"]:
@@ -311,10 +340,31 @@ class CombatPhaseState(BaseState):
         for player, enemy in collision_pairs["player_vs_enemies"]:
             if enemy not in self.entity_manager.enemies:
                 continue
-            player.take_damage(self.collision_system.collision_damage)
+            self._apply_player_damage(player, self.collision_system.collision_damage)
             destroyed = enemy.take_damage(self.collision_system.collision_damage)
             if destroyed:
                 self._handle_enemy_destroyed(enemy)
+
+    def _apply_player_damage(self, player: PlayerShip, amount: float) -> None:
+        """Apply player damage and trigger associated audiovisual feedback."""
+        if player.is_invulnerable:
+            return
+        took_damage = player.shields
+        player.take_damage(amount)
+        if player.shields < took_damage:
+            self.damage_effects.trigger_damage_flash(player)
+            self.damage_effects.trigger_invulnerability(
+                player, GAME_CONFIG.invulnerability_duration
+            )
+            self._play_sound("player_hit")
+
+    def _play_sound(self, sound_name: str) -> None:
+        """Play a sound effect when a game window and audio manager are available."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return
+        window.audio_manager.play(sound_name)
 
     def on_draw(self) -> None:
         """Draw combat scene entities, particles, and HUD."""

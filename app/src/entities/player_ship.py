@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 
 import arcade
-from asterax.app.src.config.game_config import PhysicsConfig
+from asterax.app.src.config.game_config import GAME_CONFIG, PhysicsConfig
 from asterax.app.src.entities.projectile import Projectile
 
 
@@ -35,7 +35,17 @@ class PlayerShip(arcade.Sprite):
         self.shields: float = physics_config.max_shields
         self.max_shields: float = physics_config.max_shields
         self.fire_cooldown_remaining: float = 0.0
-        self.invulnerability_timer: float = 0.0
+        self._invulnerability_timer: float = 0.0
+
+    @property
+    def invulnerability_timer(self) -> float:
+        """Return remaining invulnerability time in seconds."""
+        return self._invulnerability_timer
+
+    @property
+    def is_invulnerable(self) -> bool:
+        """Return whether the ship is currently invulnerable."""
+        return self._invulnerability_timer > 0.0
 
     def apply_thrust(self, dt: float) -> None:
         """Apply forward thrust in the ship's facing direction.
@@ -104,7 +114,7 @@ class PlayerShip(arcade.Sprite):
             dt: Fixed simulation step in seconds.
         """
         self.fire_cooldown_remaining = max(0.0, self.fire_cooldown_remaining - dt)
-        self.invulnerability_timer = max(0.0, self.invulnerability_timer - dt)
+        self.update_invulnerability(dt)
 
     def tick_cooldowns(self, dt: float) -> None:
         """Backward-compatible cooldown ticking wrapper."""
@@ -145,8 +155,12 @@ class PlayerShip(arcade.Sprite):
         Returns:
             True when shields are depleted to zero, otherwise False.
         """
-        if self.invulnerability_timer > 0.0:
+        if self.is_invulnerable:
             return False
         self.shields = max(0.0, self.shields - amount)
-        self.invulnerability_timer = 0.75
+        self._invulnerability_timer = GAME_CONFIG.invulnerability_duration
         return self.shields <= 0.0
+
+    def update_invulnerability(self, dt: float) -> None:
+        """Advance the invulnerability timer by elapsed simulation time."""
+        self._invulnerability_timer = max(0.0, self._invulnerability_timer - dt)
