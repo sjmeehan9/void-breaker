@@ -72,3 +72,82 @@ Phase 1 established the layered architecture from the solution design: the appli
 ## Phase Readiness
 
 All eight components passed formatting checks (`black`, `isort`), focused unit tests (`pytest`), and quality evals (`scripts/evals.py`). Phase 1 is complete and provides the architectural foundation for Phase 2 (Core Game Loop).
+
+---
+
+## Phase 2 Overview
+
+Phase 2 delivered the minimum playable game loop: a player ship with inertial physics, three-tier asteroids that spawn/split/wrap, projectiles with cooldown, collision detection (including wrap-around ghost sprites), currency pickups, score accumulation, level progression with difficulty scaling, game-over flow with high-score recording, and a particle-based explosion system. After this phase a player can fly, shoot, clear levels of increasing difficulty, die, and land on the high-score table.
+
+## Components Delivered
+
+### Component 2.1 — Human Setup & Asset Preparation
+- **What was built:** Placeholder geometric sprite assets (ship, three asteroid sizes, projectile, currency pickup, explosion particle) generated via a Pillow script, plus real `.wav` sound stubs provided by the developer.
+- **Key files:** `assets/sprites/ship.png`, `assets/sprites/asteroid_large.png`, `assets/sprites/asteroid_medium.png`, `assets/sprites/asteroid_small.png`, `assets/sprites/projectile_player.png`, `assets/sprites/currency_pickup.png`, `assets/sprites/explosion_particle.png`, `scripts/generate_placeholder_sprites.py`, `scripts/verify_assets.py`
+- **Design decisions:** Used a Pillow generation script for reproducibility. Asteroid sprites include 4px padding for visual margin.
+
+### Component 2.2 — Player Ship Entity & Physics
+- **What was built:** `PlayerShip` entity with inertial movement (thrust, rotation, drag, brake, speed cap), shield tracking, cooldown ticking, and a `PhysicsEngine` orchestrating per-tick simulation updates. Shared `wrap_entity()` utility for screen-edge wrapping.
+- **Key files:** `app/src/entities/player_ship.py`, `app/src/physics/wrap.py`, `app/src/physics/engine.py`, `app/src/config/game_config.py` (added `PhysicsConfig`)
+- **Design decisions:** Explicit `velocity_x`/`velocity_y` on the entity to avoid conflicts with Arcade physics helpers. Dedicated `PhysicsConfig` dataclass for gameplay constants.
+
+### Component 2.3 — Asteroid System
+- **What was built:** `Asteroid` entity with three size tiers, per-size score/drop metadata, movement/rotation updates, split behaviour, and level-start spawning away from the player. `SpawnManager` for level and child asteroid spawning. Difficulty tables extended with `get_difficulty_params()`.
+- **Key files:** `app/src/entities/asteroid.py`, `app/src/managers/spawn_manager.py`, `app/src/config/difficulty_tables.py`, `app/src/config/game_config.py` (added `AsteroidConfig`)
+- **Design decisions:** Reused existing `AsteroidSize` enum. Optional RNG injection for deterministic tests. `asteroid_size` field avoids collision with `arcade.Sprite.size`.
+
+### Component 2.4 — Projectile System & Collision Detection
+- **What was built:** `Projectile` entity with velocity and range-based expiry, ship firing with cooldown, invulnerability-aware damage handling, `CollisionSystem` with temporary ghost sprites for seam collisions, and `ScoreManager` for point accumulation.
+- **Key files:** `app/src/entities/projectile.py`, `app/src/physics/collisions.py`, `app/src/managers/score_manager.py`, `app/src/entities/player_ship.py` (added `fire()`, `take_damage()`)
+- **Design decisions:** Ghost sprites created/cleaned per collision check to prevent leaks. Collision handling split into pair-specific private methods for Phase 3 extensibility.
+
+### Component 2.5 — Currency Pickups & Collection
+- **What was built:** `CurrencyPickup` entity with slow random drift and timeout expiry, run-scoped `CurrencyManager` ledger, and collision/physics integration so destroyed asteroids spawn pickups and the ship collects them.
+- **Key files:** `app/src/entities/pickups.py`, `app/src/managers/currency_manager.py`, `app/src/config/game_config.py` (added `CurrencyConfig`)
+- **Design decisions:** Pickup spawning localized inside collision resolution. `CurrencyManager.earn()`/`spend()` reject negative values as a safety guard.
+
+### Component 2.6 — Entity Manager & Rendering Pipeline
+- **What was built:** `EntityManager` with typed `SpriteList` collections (asteroids, projectiles, pickups, particles) and stable draw-order pipeline. Sprite-based `ParticleSystem` for explosion bursts with fade-out.
+- **Key files:** `app/src/managers/entity_manager.py`, `app/src/rendering/particle_system.py`
+- **Design decisions:** `player` as canonical field with `player_ship` property alias for backward compatibility. Optional `background_renderer` on `EntityManager` for draw-order control.
+
+### Component 2.7 — Combat Phase State & Level Progression
+- **What was built:** Functional `CombatPhaseState` with fixed-timestep accumulation, full manager wiring, asteroid level progression, and game-over transition with run stats. `GameOverState` renders run summary and persists qualifying high scores. HUD overlay with cached `arcade.Text` for Score, Level, Shields, and Credits.
+- **Key files:** `app/src/states/combat.py`, `app/src/states/game_over.py`, `app/src/rendering/hud.py`
+- **Design decisions:** Physics/collision orchestrated in `CombatPhaseState._physics_step()` to avoid restructuring lower-level systems. Lightweight `RunSummary` dataclass for explicit render/persistence fields.
+
+### Component 2.8 — E2E Testing & Documentation
+- **What was built:** Six focused test modules (physics, collisions, entities, scoring, currency, difficulty) and extended shared pytest fixtures for Phase 2 gameplay systems.
+- **Key files:** `tests/test_physics.py`, `tests/test_collisions.py`, `tests/test_entities.py`, `tests/test_scoring.py`, `tests/test_currency.py`, `tests/test_difficulty.py`, `tests/conftest.py`
+- **Design decisions:** Kept tests additive and reused existing component behaviours. Fixtures added to `conftest.py` for Phase 3+ reuse.
+
+## Architecture & Integration
+
+Phase 2 layered gameplay systems on top of the Phase 1 scaffold. `CombatPhaseState` owns the per-frame loop and delegates to `PhysicsEngine` (ship, asteroids, projectiles, pickups), `CollisionSystem` (projectile-vs-asteroid, ship-vs-asteroid, ship-vs-pickup with ghost-sprite seam handling), `SpawnManager` (level-start and split-child asteroid placement), `ScoreManager`, `CurrencyManager`, and `ParticleSystem`. `EntityManager` centralises typed `SpriteList` ownership and enforces a stable draw order: starfield → asteroids → pickups → projectiles → particles → ship → HUD. On game over, `CombatPhaseState` packages a `RunSummary` and transitions to `GameOverState`, which checks high-score qualification and persists via the Phase 1 `PersistenceManager`.
+
+## Deviations from Spec
+
+- Asteroid sprites include 4px padding (68/44/24 instead of 64/40/20) for drawing margin — functionally equivalent.
+- Developer-provided `.wav` files are stereo/varying formats rather than strictly mono 16-bit PCM; Arcade handles all standard WAV formats.
+- `PhysicsConfig` carries physics defaults separately from the existing `GameConfig` ship defaults for backward compatibility; future phases can consolidate.
+- `Asteroid` stores size as `asteroid_size` (not `size`) to avoid collision with `arcade.Sprite.size` property semantics.
+- High-score initials entry auto-saves as "AAA" — interactive 3-character input deferred to a later phase.
+- Developer provided additional sound files (`player_hit.wav`, `enemy_explode.wav`, `enemy_fire.wav`, `shop_purchase.wav`, `shop_denied.wav`) beyond the Phase 2 spec for future phase use.
+
+## Dependencies & Configuration
+
+- **No new runtime dependencies** added beyond Phase 1 (`arcade`, `platformdirs`, `pyyaml`).
+- **Dev dependency** (`pyproject.toml`): `Pillow` used by `scripts/generate_placeholder_sprites.py` for asset generation (not a runtime dependency).
+- **New config singletons** (`app/src/config/game_config.py`): `PhysicsConfig`/`PHYSICS_CONFIG`, `AsteroidConfig`/`ASTEROID_CONFIG`, `CollisionConfig`/`COLLISION_CONFIG`, `CurrencyConfig`/`CURRENCY_CONFIG`.
+- **Asset directories populated:** `assets/sprites/` (7 PNG files), `assets/sounds/` (14 WAV files).
+
+## Known Limitations
+
+- High-score initials default to "AAA" — no interactive character-by-character entry yet.
+- No shop phase between levels — combat advances directly to the next level.
+- Runtime UI screenshots could not be captured in the headless sandbox; all validation was programmatic.
+- Enemy collision pairs not yet present — `CollisionSystem` handles only asteroid and pickup pairs.
+
+## Phase Readiness
+
+All eight components passed formatting checks (`black`, `isort`), focused unit tests (`pytest`), quality evals (`scripts/evals.py`), and coverage validation. Phase 2 is complete and provides the playable core game loop for Phase 3 (Combat Depth & Enemies).
