@@ -151,3 +151,81 @@ Phase 2 layered gameplay systems on top of the Phase 1 scaffold. `CombatPhaseSta
 ## Phase Readiness
 
 All eight components passed formatting checks (`black`, `isort`), focused unit tests (`pytest`), quality evals (`scripts/evals.py`), and coverage validation. Phase 2 is complete and provides the playable core game loop for Phase 3 (Combat Depth & Enemies).
+
+---
+
+## Phase 3 Overview
+
+Phase 3 delivered the full enemy combat expansion: two enemy ship archetypes (Basic Shooter, Aggressive) with steering AI and telegraphed attacks, enemy projectile management, three new collision pairs with seam-aware ghost sprites, timed enemy spawning at screen edges, damage feedback effects (flash, invulnerability flicker, explosion particles, destruction sequence), tiered difficulty scaling across 30 levels with interpolation, and optional buff pickups (HEAL, DAMAGE_BOOST, SPEED_BOOST) dropped by destroyed enemies. After this phase the combat experience is feature-complete — players face both asteroids and enemies with smoothly escalating challenge.
+
+## Components Delivered
+
+### Component 3.1 — Human Setup & Enemy Assets
+- **What was built:** Placeholder enemy sprites (Basic Shooter diamond, Aggressive chevron, enemy projectile dot) generated via Pillow, plus developer-provided `.wav` sound effects for enemy fire, enemy explosion, and player hit.
+- **Key files:** `assets/sprites/enemy_basic.png`, `assets/sprites/enemy_aggressive.png`, `assets/sprites/projectile_enemy.png`, `assets/sounds/enemy_fire.wav`, `assets/sounds/enemy_explode.wav`, `assets/sounds/player_hit.wav`
+- **Design decisions:** Extended existing Pillow sprite generation script. Red/orange palette for enemies distinguishes from player (white) and asteroids (grey).
+
+### Component 3.2 — Enemy Ship Entities & AI
+- **What was built:** `EnemyShip` entity with BASIC and AGGRESSIVE archetypes, steering AI with jittered pursuit, telegraphed firing (alpha flash), spawn grace period, lead-prediction aiming for aggressive enemies, and `EnemyConfig` dataclass with factory functions.
+- **Key files:** `app/src/entities/enemy_ship.py`, `app/src/config/enemy_config.py`, `tests/test_enemy_ship.py`
+- **Design decisions:** Enemy config isolated in its own module to keep Phase 2 `game_config.py` contract stable. Telegraph uses alpha flash rather than scale pulse.
+
+### Component 3.3 — Enemy Projectile System & Expanded Collisions
+- **What was built:** Enemy/enemy-projectile SpriteLists in EntityManager, `ProjectileOwner` enum on Projectile, three new collision pairs (player vs enemy projectiles, player projectiles vs enemies, player vs enemies), seam-aware ghost collision support, and combat state integration.
+- **Key files:** `app/src/managers/entity_manager.py`, `app/src/physics/collisions.py`, `app/src/states/combat.py`, `app/src/entities/projectile.py`, `tests/test_enemy_projectile_collisions.py`
+- **Design decisions:** Kept existing Phase 2 `check_all()` unchanged, layered enemy collision processing through dedicated methods.
+
+### Component 3.4 — Spawn Manager & Enemy Waves
+- **What was built:** Extended SpawnManager with timed enemy spawning, screen-edge positioning with inward velocity, archetype selection via `aggressive_ratio`, count cap enforcement. DifficultyParams extended with enemy fields.
+- **Key files:** `app/src/managers/spawn_manager.py`, `app/src/config/difficulty_tables.py`, `app/src/config/game_config.py`, `tests/test_spawn_manager_enemies.py`
+- **Design decisions:** Interval-based spawning (not wave-based) for simplicity. Enemy spawning independent of asteroid spawning.
+
+### Component 3.5 — Damage Feedback & Visual Effects
+- **What was built:** `DamageEffects` class for player hit flash/flicker, enemy explosion particles, and player destruction burst. PlayerShip extended with config-driven invulnerability (0.75s). Combat state wired with audio feedback and 0.8s game-over delay.
+- **Key files:** `app/src/rendering/damage_effects.py`, `app/src/entities/player_ship.py`, `app/src/states/combat.py`, `tests/test_damage_effects.py`
+- **Design decisions:** Damage flash applied to sprite tint rather than full-screen tint. Invulnerability prevents all damage sources.
+
+### Component 3.6 — Difficulty Scaling & Balance
+- **What was built:** Tier-based interpolation system with breakpoints at levels 1, 5, 10, 15, 20, 25, 30. Level-30 cap prevents infinite scaling. Level-6 bridge for enemy activation. All tier values match spec.
+- **Key files:** `app/src/config/difficulty_tables.py`, `tests/test_difficulty.py`
+- **Design decisions:** Interpolation between tiers rather than 30 hardcoded rows. Cloned DifficultyParams for exact tier hits to avoid shared-instance mutation.
+
+### Component 3.7 — Buff Pickups (Optional)
+- **What was built:** `BuffPickup` entity (HEAL, DAMAGE_BOOST, SPEED_BOOST) with procedural textures, bobbing animation, and lifetime expiry. `BuffManager` for apply/update/expiry/clear with non-stacking refresh semantics. PlayerShip extended with effective damage/thrust properties.
+- **Key files:** `app/src/entities/buff_pickup.py`, `app/src/managers/buff_manager.py`, `app/src/entities/player_ship.py`, `tests/test_buff_pickups.py`
+- **Design decisions:** Buffs isolated to BuffManager. Same-type refresh replaces timer. Runtime sound fallback for collection cue.
+
+### Component 3.8 — E2E Testing & Documentation
+- **What was built:** Multi-level combat integration test, implementation context documentation, and component overview. Existing Phase 3 test modules validated all required unit scopes.
+- **Key files:** `tests/test_combat_phase_state.py`, `docs/implementation-context-phase-3.md`, `docs/components/phase-3-component-3-8-overview.md`
+- **Design decisions:** Focused integration test on stability and enemy-system activity rather than visual rendering.
+
+## Architecture & Integration
+
+Phase 3 layered the enemy combat system on top of the Phase 2 core loop. `CombatPhaseState._physics_step()` now orchestrates asteroid collisions, enemy spawning, enemy AI updates, enemy collision processing, buff pickup management, invulnerability tracking, damage effects, and particle updates in a deterministic sequence. `CollisionSystem` gained four new collision pair methods (including buff pickups) using the same seam-aware ghost sprite pattern from Phase 2. `EntityManager` manages five additional SpriteLists (enemies, enemy_projectiles, buff_pickups) with stable z-order rendering. The tier-based difficulty system in `difficulty_tables.py` provides smooth interpolation across 30 levels with a hard cap, replacing the procedural formula from Phase 2.
+
+## Deviations from Spec
+
+- Enemy projectile texture is overridden at fire time rather than using a separate `EnemyProjectile` subclass, keeping the single `Projectile` class approach.
+- Developer-provided `.wav` files are stereo rather than strictly mono 16-bit PCM; Arcade handles all standard WAV formats.
+- Damage flash applied to sprite tint (red/white alternation) rather than full-screen tint, matching existing sprite-centric rendering.
+- Buff pickup visuals use procedurally generated coloured circles instead of authored sprite files.
+- Level-5 tier keeps `enemy_spawn_interval=99` as sentinel; a level-6 bridge ensures smooth enemy activation.
+
+## Dependencies & Configuration
+
+- **No new runtime dependencies** added beyond Phase 2 (`arcade`, `platformdirs`, `pyyaml`).
+- **New config module:** `app/src/config/enemy_config.py` with `EnemyArchetype`, `EnemyConfig`, factory functions.
+- **Extended configs:** `DifficultyParams` gained enemy fields; `GameConfig` gained `invulnerability_duration`.
+- **New asset files:** 3 enemy sprites, 3 sound effects (provided in Phase 3.1).
+
+## Known Limitations
+
+- Enemy-vs-asteroid collisions intentionally disabled (enemies fly through asteroids).
+- Enemy projectile-vs-asteroid collisions disabled for performance.
+- Buff indicators not yet rendered on HUD (deferred to Phase 5).
+- High-score initials still default to "AAA" (Phase 5).
+
+## Phase Readiness
+
+All eight components passed formatting checks (`black`, `isort`), 141 focused unit tests (`pytest`), quality evals (`scripts/evals.py`), and 89% overall code coverage. Phase 3 is complete and provides the full combat experience for Phase 4 (Economy & Progression).

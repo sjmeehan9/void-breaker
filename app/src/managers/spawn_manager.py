@@ -23,7 +23,6 @@ class SpawnManager:
         """Initialize spawn manager with optional deterministic RNG."""
         self._rng = rng if rng is not None else random.Random()
         self._enemy_spawn_timer = 0.0
-        self._enemy_spawn_active = False
 
     def spawn_level_asteroids(
         self,
@@ -210,4 +209,3 @@ class SpawnManager:
     def reset_enemy_spawning(self) -> None:
         """Reset enemy spawn timer for a new level or combat phase start."""
         self._enemy_spawn_timer = 0.0
-        self._enemy_spawn_active = True
