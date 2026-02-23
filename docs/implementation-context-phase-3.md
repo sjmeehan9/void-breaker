@@ -84,3 +84,18 @@
   - Added `_play_sound()` guard in combat to keep tests and headless flows stable when no Arcade window is active.
 - **Deviations**:
   - The implementation applies player damage flash directly to ship sprite tint (red/white alternation) rather than full-screen tint, matching existing sprite-centric rendering architecture and avoiding unrelated rendering-pipeline changes.
+
+## Component 3.6 — Difficulty Scaling & Balance
+- **Status**: Completed
+- **What was built**: Replaced the procedural level-scaling formula with a tiered interpolation model in `difficulty_tables.py`, covering calibrated breakpoints at levels 1, 5, 10, 15, 20, 25, and 30 with a hard cap at level 30. Added focused tests that verify exact tier values, interpolation behaviour, spawn thresholds, cap behaviour, monotonic progression, and numeric bounds.
+- **Key files modified**:
+  - `app/src/config/difficulty_tables.py` — added `DIFFICULTY_TIERS`, `_interpolate_params()`, and capped `get_difficulty_params()` flow; preserved `get_difficulty()` mode multipliers
+  - `tests/test_difficulty.py` — expanded from one broad test to targeted acceptance-style checks for 3.6 requirements
+  - `tests/test_asteroid_system.py` — aligned level-1 and level-30 expectations with the new 3.6 difficulty curve
+  - `tests/test_config.py` — updated late-game enemy spawn interval floor expectation to match the level-30 cap (`2.5s`)
+- **Design decisions**:
+  - Implemented tier-based interpolation to keep balancing editable at a few key breakpoints rather than 30 hardcoded rows.
+  - Added a level-6 enemy-activation bridge for enemy-specific fields so enemies begin spawning immediately after level 5 without inheriting the level-5 sentinel interval (`99s`).
+  - Returned cloned `DifficultyParams` objects for exact tier hits to avoid accidental shared-instance mutation.
+- **Deviations**:
+  - The level-5 tier keeps `enemy_spawn_interval=99` as specified, but interpolation uses a level-6 bridge (`8.0s`, enemy count starts at 1) so levels 6-9 remain playable and aligned with Phase 3.4 spawn expectations.
