@@ -14,3 +14,13 @@
   - `assets/sounds/enemy_fire.wav`, `assets/sounds/enemy_explode.wav`, `assets/sounds/player_hit.wav`
 - **Design decisions**: Extended existing Pillow sprite generation script rather than creating a separate Phase 3 script, maintaining a single source of truth for all placeholder assets. Enemy sprites use red/orange colour palette to visually distinguish from player (white) and asteroids (grey). Basic Shooter uses a diamond shape while Aggressive uses a chevron/arrow to differentiate the two archetypes. Enemy projectile is red-orange vs player's cyan for clear friend/foe distinction.
 - **Deviations**: Developer-provided `.wav` files are stereo rather than strictly mono 16-bit PCM as specified, but Arcade handles all standard WAV formats without issue (consistent with Phase 2 sound handling).
+
+## Component 3.2 — Enemy Ship Entities & AI
+- **Status**: Completed
+- **What was built**: Added a new enemy-configuration module and a new `EnemyShip` entity implementing archetype-specific movement, aiming, telegraphed firing, spawn grace handling, damage/death behaviour, and destruction reward metadata.
+- **Key files created**:
+  - `app/src/config/enemy_config.py` — `EnemyArchetype` (BASIC/AGGRESSIVE), `EnemyConfig` dataclass, and `get_basic_config()` / `get_aggressive_config()` factories with spec-aligned defaults.
+  - `app/src/entities/enemy_ship.py` — `EnemyShip` Arcade sprite subclass with steering AI, jittered pursuit, telegraph windup, cooldown logic, aiming (basic direct aim and aggressive lead prediction), and projectile spawn.
+  - `tests/test_enemy_ship.py` — focused unit tests for configs, instantiation, movement, spawn grace, cooldown/telegraph transitions, damage handling, and archetype aim behaviour.
+- **Design decisions**: Kept enemy tuning isolated in `config/enemy_config.py` to avoid expanding the existing Phase 2 `game_config.py` contract before wave spawning/collision integration (3.3/3.4). Implemented telegraphing as alpha flashing (allowed by spec) rather than scale pulsing to avoid runtime variability in `arcade.Sprite.scale` representation. Enemy projectile texture is overridden to `assets/sprites/projectile_enemy.png` when a shot is created.
+- **Deviations**: `Projectile` in Phase 2 does not yet expose a typed owner enum field despite Phase 3 notes; `EnemyShip` currently annotates ownership as `projectile.owner = \"enemy\"` for immediate compatibility until Component 3.3 formalises enemy projectile ownership in the shared projectile/collision pipeline.
