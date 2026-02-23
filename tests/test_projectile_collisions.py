@@ -6,6 +6,7 @@ import random
 from pathlib import Path
 
 import arcade
+import pytest
 from asterax.app.src.config.game_config import AsteroidSize, PhysicsConfig
 from asterax.app.src.entities.asteroid import Asteroid
 from asterax.app.src.entities.player_ship import PlayerShip
@@ -198,6 +199,3 @@ def test_edge_wrap_ghost_collision_hits_across_screen_seam() -> None:
     assert projectile not in entity_manager.player_projectiles
     assert asteroid not in entity_manager.asteroids
     assert score_manager.score == 100
-
-
-import pytest
