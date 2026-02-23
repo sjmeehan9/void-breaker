@@ -17,7 +17,12 @@ from asterax.app.src.config.game_config import GameState as RunGameState
 from asterax.app.src.config.game_config import (
     ShipState,
 )
+from asterax.app.src.config.upgrade_definitions import (
+    UPGRADE_DEFINITIONS,
+    get_upgrade_by_id,
+)
 from asterax.app.src.entities.player_ship import PlayerShip
+from asterax.app.src.entities.shop_node import ContinueNode, ShopNode
 from asterax.app.src.states.base_state import BaseState
 
 if TYPE_CHECKING:
@@ -28,10 +33,8 @@ if TYPE_CHECKING:
 class _ShopNodeView:
     """View model for rendering and interaction metadata for a shop node."""
 
-    sprite: arcade.Sprite
+    sprite: ShopNode
     label: str
-    level_text: str
-    cost_text: str
     is_continue: bool = False
 
 
@@ -51,7 +54,8 @@ class ShopPhaseState(BaseState):
         self.player_ship: PlayerShip | None = None
         self.shop_nodes = arcade.SpriteList(use_spatial_hash=True)
         self._node_views: list[_ShopNodeView] = []
-        self._continue_node: arcade.Sprite | None = None
+        self._continue_node: ContinueNode | None = None
+        self._interaction_cooldown_seconds = 0.0
         self._transitioning_out = False
 
     def on_enter(self) -> None:
@@ -77,11 +81,15 @@ class ShopPhaseState(BaseState):
         self.shop_nodes.clear()
         self._node_views.clear()
         self._continue_node = None
+        self._interaction_cooldown_seconds = 0.0
 
     def on_update(self, delta_time: float) -> None:
         """Apply shop movement controls and check continue-node transition."""
         if self.player_ship is None:
             return
+        self._interaction_cooldown_seconds = max(
+            0.0, self._interaction_cooldown_seconds - max(0.0, delta_time)
+        )
         window = arcade.get_window()
         input_manager = window.input_manager
         if input_manager.is_action_held(
@@ -101,7 +109,8 @@ class ShopPhaseState(BaseState):
         self.player_ship.update_position(delta_time)
         self.player_ship.update_cooldown(delta_time)
         self._clamp_ship_to_bounds(window.width, window.height)
-        self._check_continue_transition()
+        self._update_node_visual_states(delta_time)
+        self._handle_node_collisions()
 
     def on_draw(self) -> None:
         """Draw shop nodes, player ship, and lightweight node/currency labels."""
@@ -109,18 +118,10 @@ class ShopPhaseState(BaseState):
         if self.player_ship is not None:
             self.player_ship.draw()
         for node_view in self._node_views:
-            y_offset = 54 if node_view.is_continue else -54
-            arcade.draw_text(
-                f"{node_view.label}\n{node_view.level_text}   {node_view.cost_text}",
-                node_view.sprite.center_x,
-                node_view.sprite.center_y + y_offset,
-                arcade.color.WHITE,
-                12,
-                anchor_x="center",
-                multiline=True,
-                align="center",
-                width=200,
+            node_level = (
+                0 if node_view.is_continue else self._get_node_level(node_view.sprite)
             )
+            node_view.sprite.draw_label(node_level)
         arcade.draw_text(
             f"Credits: {self.game_state.currency}",
             20,
@@ -148,39 +149,44 @@ class ShopPhaseState(BaseState):
         )
         shop_dir = Path(__file__).resolve().parents[3] / "assets/sprites/shop"
         node_definitions = [
-            ("Weapons", "Lv 0/5", "20c", shop_dir / "orb_weapon.png"),
-            ("Defense", "Lv 0/5", "25c", shop_dir / "orb_defense.png"),
-            ("Mobility", "Lv 0/5", "20c", shop_dir / "orb_mobility.png"),
-            ("Economy", "Lv 0/5", "15c", shop_dir / "orb_economy.png"),
-            ("Repairs", "Lv 0/5", "30c", shop_dir / "orb_repair.png"),
-            ("Insurance", "Lv 0/3", "35c", shop_dir / "orb_insurance.png"),
+            ("weapon_fire_rate", shop_dir / "orb_weapon.png", None),
+            ("defense_shields", shop_dir / "orb_defense.png", None),
+            ("mobility_thrust", shop_dir / "orb_mobility.png", None),
+            ("economy_magnet", shop_dir / "orb_economy.png", None),
+            ("repair", shop_dir / "orb_repair.png", None),
+            (None, shop_dir / "orb_insurance.png", "Insurance"),
         ]
         angle_step = 360.0 / len(node_definitions)
         self.shop_nodes.clear()
         self._node_views.clear()
-        for index, (label, level_text, cost_text, texture_path) in enumerate(
+        for index, (upgrade_id, texture_path, label_override) in enumerate(
             node_definitions
         ):
             angle_radians = math.radians(90.0 - (index * angle_step))
-            sprite = arcade.Sprite(
-                str(texture_path),
+            definition = (
+                get_upgrade_by_id(upgrade_id) if isinstance(upgrade_id, str) else None
+            )
+            sprite = ShopNode(
+                texture_path=texture_path,
                 center_x=center_x + math.cos(angle_radians) * radius,
                 center_y=center_y + math.sin(angle_radians) * radius,
+                upgrade_definition=definition,
+                label_override=label_override,
             )
             self.shop_nodes.append(sprite)
             self._node_views.append(
                 _ShopNodeView(
                     sprite=sprite,
-                    label=label,
-                    level_text=level_text,
-                    cost_text=cost_text,
+                    label=sprite.display_name,
                 )
             )
 
-        continue_sprite = arcade.Sprite(
-            str(shop_dir / "node_continue.png"),
+        continue_sprite = ContinueNode(
+            texture_path=shop_dir / "node_continue.png",
             center_x=center_x,
             center_y=center_y - radius - SHOP_LAYOUT_CONFIG.continue_node_extra_offset,
+            upgrade_definition=None,
+            label_override="Continue",
         )
         self.shop_nodes.append(continue_sprite)
         self._continue_node = continue_sprite
@@ -188,8 +194,6 @@ class ShopPhaseState(BaseState):
             _ShopNodeView(
                 sprite=continue_sprite,
                 label="Continue",
-                level_text="",
-                cost_text="[Enter]",
                 is_continue=True,
             )
         )
@@ -201,15 +205,89 @@ class ShopPhaseState(BaseState):
         self.player_ship.center_x = max(0.0, min(width, self.player_ship.center_x))
         self.player_ship.center_y = max(0.0, min(height, self.player_ship.center_y))
 
-    def _check_continue_transition(self) -> None:
-        """Transition back to combat when colliding with the continue node."""
-        if (
-            self.player_ship is None
-            or self._continue_node is None
-            or not arcade.check_for_collision(self.player_ship, self._continue_node)
-        ):
+    def _update_node_visual_states(self, delta_time: float) -> None:
+        """Refresh affordability visuals for each node each frame."""
+        for node_view in self._node_views:
+            level = (
+                0 if node_view.is_continue else self._get_node_level(node_view.sprite)
+            )
+            node_view.sprite.update_visual_state(
+                currency=self.game_state.currency,
+                current_level=level,
+                delta_time=delta_time,
+            )
+
+    def _handle_node_collisions(self) -> None:
+        """Handle continue, purchase, and denied collisions."""
+        if self.player_ship is None or self._interaction_cooldown_seconds > 0.0:
             return
-        self._transition_to_combat()
+        for node_view in self._node_views:
+            if not arcade.check_for_collision(self.player_ship, node_view.sprite):
+                continue
+            if node_view.is_continue:
+                self._transition_to_combat()
+                return
+            self._attempt_purchase(node_view.sprite)
+            return
+
+    def _attempt_purchase(self, node: ShopNode) -> None:
+        """Attempt an upgrade purchase and apply accepted or denied feedback."""
+        current_level = self._get_node_level(node)
+        if not node.can_purchase(self.game_state.currency, current_level):
+            self._interaction_cooldown_seconds = 0.2
+            self._play_shop_sound("shop_denied")
+            self._apply_denied_bounce(node)
+            return
+
+        cost = node.calculate_cost(current_level)
+        self.game_state.currency -= cost
+        self.game_state.run_stats.currency_spent += cost
+        self.game_state.run_stats.upgrades_purchased += 1
+
+        definition = node.upgrade_definition
+        if definition is not None:
+            if definition.id == "repair":
+                self.game_state.shields = min(
+                    self.game_state.max_shields,
+                    self.game_state.shields + definition.effect_per_level,
+                )
+            else:
+                level_attr = f"{definition.id}_level"
+                setattr(self.ship_state, level_attr, current_level + 1)
+                self.ship_state.recalculate_effective_stats(UPGRADE_DEFINITIONS)
+
+        self._interaction_cooldown_seconds = 0.2
+        self._play_shop_sound("shop_purchase")
+
+    def _get_node_level(self, node: ShopNode) -> int:
+        """Resolve the ship's current level for a node's upgrade."""
+        if node.upgrade_definition is None:
+            return 0
+        return int(getattr(self.ship_state, f"{node.upgrade_definition.id}_level", 0))
+
+    def _play_shop_sound(self, sound_name: str) -> None:
+        """Play a shop sound effect when an audio manager is available."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return
+        if not hasattr(window, "audio_manager"):
+            return
+        window.audio_manager.play(sound_name)
+
+    def _apply_denied_bounce(self, node: ShopNode) -> None:
+        """Apply a slight velocity nudge away from a denied node collision."""
+        if self.player_ship is None:
+            return
+        dx = self.player_ship.center_x - node.center_x
+        dy = self.player_ship.center_y - node.center_y
+        distance = math.hypot(dx, dy)
+        if distance <= 1e-6:
+            dx, dy = 0.0, 1.0
+            distance = 1.0
+        push = 120.0
+        self.player_ship.velocity_x = (dx / distance) * push
+        self.player_ship.velocity_y = (dy / distance) * push
 
     def _transition_to_combat(self) -> None:
         """Return to combat on the next level while preserving run totals."""

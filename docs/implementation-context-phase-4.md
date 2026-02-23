@@ -3,7 +3,7 @@
 ## Component Status Summary
 - 4.1 Human Setup & Shop Assets — Completed
 - 4.2 Shop Phase State & Layout — Completed
-- 4.3 Shop Node Entities & Interaction — Not Started
+- 4.3 Shop Node Entities & Interaction — Completed
 - 4.4 Upgrade Manager & Stat Application — Not Started
 - 4.5 Insurance Manager & Death Retention — Not Started
 - 4.6 Currency Manager & Economy Flow — Not Started
@@ -42,3 +42,16 @@
   - `tests/test_combat_phase_state.py` — adjusted level-clear assertion to validate shop transition path.
 - **Design decisions**: Kept shop layout values centralized in config (radius fraction + continue offset) for later Phase 5 tuning. Used lightweight shop-node view models in `shop.py` to avoid blocking on Component 4.3 entity work while still enabling layout, rendering, and collision checks in 4.2.
 - **Deviations**: Deferred node affordability/max-state logic to Component 4.3 as planned; 4.2 currently provides static node labels/cost text to satisfy layout/state requirements without overlapping upcoming entity responsibilities.
+
+## Component 4.3 — Shop Node Entities & Interaction
+- **Status**: Completed
+- **What was built**: Added reusable `ShopNode` and `ContinueNode` entity classes with geometric cost scaling, purchasability checks, and frame-updated affordability/max-state visual alpha logic. Integrated the shop phase to instantiate real node entities (including upgrade-backed nodes plus insurance placeholder and continue node), render node-owned labels, evaluate node collisions each frame, process purchases (currency deduction + stat level increment + effective-stat recalculation), and apply denied feedback (sound + bounce).
+- **Key files created**:
+  - `app/src/entities/shop_node.py` — `ShopNode` and `ContinueNode` implementations with label and visual-state methods
+  - `tests/test_shop_node.py` — targeted tests for cost scaling, purchase gating, visual-state alpha behavior, and shop-phase purchase collision flow
+  - `docs/components/phase-4-component-4-3-overview.md` — component summary for future contributors
+- **Key files modified**:
+  - `app/src/states/shop.py` — replaced static sprite metadata with entity-backed nodes and added purchase/denied interaction handling
+  - `app/src/entities/__init__.py` — exported `ShopNode` and `ContinueNode`
+- **Design decisions**: Kept insurance as a non-purchasable placeholder node in 4.3 so visuals/interactions are complete now without pre-empting Phase 4.5 insurance-tier business rules. Reused `ShipState.recalculate_effective_stats()` for immediate stat propagation after purchases to avoid introducing an interim manager abstraction before 4.4.
+- **Deviations**: The denied visual feedback uses dimming + bounce + denied sound and reserves explicit crossed-out icon rendering for a later polish pass to keep this component minimal and localized.

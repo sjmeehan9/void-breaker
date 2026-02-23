@@ -5,5 +5,14 @@ from asterax.app.src.entities.asteroid import Asteroid
 from asterax.app.src.entities.pickups import CurrencyPickup
 from asterax.app.src.entities.player_ship import PlayerShip
 from asterax.app.src.entities.projectile import Projectile
+from asterax.app.src.entities.shop_node import ContinueNode, ShopNode
 
-__all__ = ["Asteroid", "AsteroidSize", "CurrencyPickup", "PlayerShip", "Projectile"]
+__all__ = [
+    "Asteroid",
+    "AsteroidSize",
+    "CurrencyPickup",
+    "PlayerShip",
+    "Projectile",
+    "ShopNode",
+    "ContinueNode",
+]
