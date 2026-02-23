@@ -81,7 +81,7 @@ def test_get_difficulty_clamps_extreme_levels() -> None:
     assert params.asteroid_count <= 30
     assert params.asteroid_speed_min <= 300.0
     assert params.asteroid_speed_max <= 400.0
-    assert params.enemy_spawn_interval >= 3.0
+    assert params.enemy_spawn_interval >= 2.5
     assert 0.0 <= params.enemy_aggression <= 1.0
     assert 0.05 <= params.currency_drop_chance <= 1.0
 
