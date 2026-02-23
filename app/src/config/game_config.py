@@ -153,6 +153,14 @@ class CurrencyConfig:
     pickup_drift_speed_range: tuple[float, float] = (10.0, 30.0)
 
 
+@dataclass(frozen=True, slots=True)
+class ShopLayoutConfig:
+    """Configuration values used to generate shop node layouts."""
+
+    radius_fraction_of_min_dimension: float = 0.36
+    continue_node_extra_offset: float = 48.0
+
+
 class UpgradeEffectDefinition(Protocol):
     """Protocol for upgrade definitions consumed by `ShipState`."""
 
@@ -307,3 +315,4 @@ PHYSICS_CONFIG: Final[PhysicsConfig] = PhysicsConfig()
 ASTEROID_CONFIG: Final[AsteroidConfig] = AsteroidConfig()
 COLLISION_CONFIG: Final[CollisionConfig] = CollisionConfig()
 CURRENCY_CONFIG: Final[CurrencyConfig] = CurrencyConfig()
+SHOP_LAYOUT_CONFIG: Final[ShopLayoutConfig] = ShopLayoutConfig()

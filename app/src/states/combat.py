@@ -14,6 +14,10 @@ from asterax.app.src.config.game_config import (
     PHYSICS_CONFIG,
 )
 from asterax.app.src.config.game_config import GameState as RunGameState
+from asterax.app.src.config.game_config import (
+    RunStats,
+    ShipState,
+)
 from asterax.app.src.entities.buff_pickup import BuffPickup, BuffType
 from asterax.app.src.entities.enemy_ship import EnemyShip
 from asterax.app.src.entities.player_ship import PlayerShip
@@ -48,7 +52,14 @@ BUFF_PICKUP_SOUND_NAME: Final[str] = (
 class CombatPhaseState(BaseState):
     """Combat phase with level progression, collisions, and game-over transitions."""
 
-    def __init__(self, state_machine: StateMachine) -> None:
+    def __init__(
+        self,
+        state_machine: StateMachine,
+        initial_level: int = 1,
+        initial_score: int = 0,
+        initial_currency: int = 0,
+        initial_run_stats: RunStats | None = None,
+    ) -> None:
         """Initialize combat-phase manager references and run state."""
         super().__init__(state_machine)
         self.entity_manager = EntityManager()
@@ -64,7 +75,10 @@ class CombatPhaseState(BaseState):
         self.damage_effects = DamageEffects()
         self.hud: HUDRenderer | None = None
         self.game_state = RunGameState()
-        self.current_level = 1
+        self.current_level = max(1, initial_level)
+        self._initial_score = max(0, initial_score)
+        self._initial_currency = max(0, initial_currency)
+        self._initial_run_stats = initial_run_stats
         self.accumulator = 0.0
         self._game_over_triggered = False
         self._game_over_delay_remaining = 0.0
@@ -92,12 +106,17 @@ class CombatPhaseState(BaseState):
         self.entity_manager.player_ship = ship
         self.physics_engine = PhysicsEngine(self.entity_manager, PHYSICS_CONFIG)
         self.hud = HUDRenderer(window.width, window.height)
-        self.current_level = 1
+        self.current_level = max(1, self.current_level)
         self.accumulator = 0.0
         self._game_over_triggered = False
         self._game_over_delay_remaining = 0.0
         self.score_manager.reset()
         self.currency_manager.reset()
+        self.score_manager.score = self._initial_score
+        if self._initial_currency > 0:
+            self.currency_manager.earn(self._initial_currency)
+        if self._initial_run_stats is not None:
+            self.game_state.run_stats = self._initial_run_stats
         self.entity_manager.clear_projectiles()
         self.entity_manager.clear_enemies()
         self.entity_manager.currency_pickups.clear()
@@ -208,9 +227,28 @@ class CombatPhaseState(BaseState):
             )
 
     def _check_level_clear(self) -> None:
-        """Advance to the next level when all asteroids are cleared."""
+        """Transition to shop when all asteroids are cleared."""
         if len(self.entity_manager.asteroids) == 0:
-            self._advance_level()
+            self._transition_to_shop()
+
+    def _transition_to_shop(self) -> None:
+        """Switch into ShopPhase with snapshots of current run and ship state."""
+        ship = self.player_ship
+        self._sync_state_for_hud()
+        self._play_sound("level_clear")
+        from asterax.app.src.states.shop import ShopPhaseState
+
+        self.state_machine.switch_state(
+            ShopPhaseState(
+                self.state_machine,
+                game_state=self.game_state,
+                ship_state=ShipState(
+                    position=(ship.center_x, ship.center_y),
+                    velocity=(ship.velocity_x, ship.velocity_y),
+                    angle=ship.angle,
+                ),
+            )
+        )
 
     def _advance_level(self) -> None:
         """Increment level and spawn next-wave asteroids with updated difficulty."""
