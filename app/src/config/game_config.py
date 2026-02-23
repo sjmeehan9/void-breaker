@@ -194,7 +194,8 @@ class DifficultyParams:
     enemy_spawn_enabled: bool = False
     enemy_count_max: int = 0
     enemy_spawn_interval: float = 10.0
-    enemy_aggression: float = 0.2
+    enemy_aggression: float = 0.0
+    aggressive_ratio: float = 0.0
     currency_drop_chance: float = 0.4
     currency_value_base: int = 10
 

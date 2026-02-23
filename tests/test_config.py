@@ -62,14 +62,16 @@ def test_get_upgrade_cost_scales_per_level() -> None:
 
 
 def test_get_difficulty_scales_and_enables_enemies_progressively() -> None:
-    """Difficulty generation should scale asteroid pressure over levels."""
+    """Difficulty generation should scale asteroid and enemy pressure over levels."""
     samples = [get_difficulty(level) for level in (1, 5, 10, 20, 50)]
 
     assert samples[0].asteroid_count <= samples[-1].asteroid_count
-    assert samples[0].enemy_spawn_enabled is False
-    assert samples[1].enemy_spawn_enabled is False
-    assert samples[2].enemy_spawn_enabled is False
-    assert samples[-1].enemy_count_max == 0
+    # Phase 3: Enemy spawning enabled from level 6+
+    assert samples[0].enemy_spawn_enabled is False  # Level 1
+    assert samples[1].enemy_spawn_enabled is False  # Level 5
+    assert samples[2].enemy_spawn_enabled is True  # Level 10
+    assert samples[2].enemy_count_max > 0
+    assert samples[-1].enemy_count_max >= samples[2].enemy_count_max
 
 
 def test_get_difficulty_clamps_extreme_levels() -> None:

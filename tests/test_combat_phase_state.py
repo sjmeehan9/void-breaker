@@ -56,7 +56,8 @@ def test_advance_level_resets_and_spawns(monkeypatch) -> None:
 
     spawned = [SimpleNamespace(velocity_x=400.0, velocity_y=-410.0)]
     state.spawn_manager = SimpleNamespace(
-        spawn_level_asteroids=lambda **kwargs: spawned
+        spawn_level_asteroids=lambda **kwargs: spawned,
+        reset_enemy_spawning=lambda: None,
     )  # type: ignore[assignment]
     state.entity_manager.clear_projectiles = lambda: state.entity_manager.player_projectiles.clear()  # type: ignore[method-assign]
     state.hud = None

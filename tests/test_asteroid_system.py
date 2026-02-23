@@ -130,6 +130,9 @@ def test_difficulty_params_scale_across_levels_1_to_30() -> None:
     assert level_one.asteroid_speed_min == 50.0
     assert level_one.asteroid_speed_max == 100.0
     assert level_one.asteroid_speed_max < level_thirty.asteroid_speed_max <= 350.0
+    # Phase 3: Enemy spawning enabled from level 6+
     assert level_one.enemy_spawn_enabled is False
-    assert level_ten.enemy_spawn_enabled is False
-    assert level_thirty.enemy_spawn_enabled is False
+    assert level_ten.enemy_spawn_enabled is True
+    assert level_thirty.enemy_spawn_enabled is True
+    assert level_ten.enemy_count_max > 0
+    assert level_thirty.enemy_count_max >= level_ten.enemy_count_max

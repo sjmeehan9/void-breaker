@@ -95,6 +95,7 @@ class CombatPhaseState(BaseState):
             screen_height=window.height,
         ):
             self.entity_manager.asteroids.append(asteroid)
+        self.spawn_manager.reset_enemy_spawning()
         self._sync_state_for_hud()
 
     def on_update(self, delta_time: float) -> None:
@@ -131,6 +132,9 @@ class CombatPhaseState(BaseState):
             currency_manager=self.currency_manager,
             audio_manager=window.audio_manager,
             particle_system=self.particle_system,
+        )
+        self._spawn_enemies(
+            dt=dt, screen_width=window.width, screen_height=window.height
         )
         self._update_enemies(
             dt=dt,
@@ -198,6 +202,7 @@ class CombatPhaseState(BaseState):
                 min(params.asteroid_speed_max, asteroid.velocity_y),
             )
             self.entity_manager.asteroids.append(asteroid)
+        self.spawn_manager.reset_enemy_spawning()
         window.audio_manager.play("level_clear")
         self._sync_state_for_hud()
 
@@ -224,6 +229,24 @@ class CombatPhaseState(BaseState):
                 persistence=persistence,
             )
         )
+
+    def _spawn_enemies(
+        self,
+        dt: float,
+        screen_width: float,
+        screen_height: float,
+    ) -> None:
+        """Spawn new enemies at interval if enabled and under count cap."""
+        difficulty_params = get_difficulty_params(self.current_level)
+        new_enemies = self.spawn_manager.update_enemy_spawning(
+            dt=dt,
+            current_enemy_count=len(self.entity_manager.enemies),
+            difficulty_params=difficulty_params,
+            screen_width=screen_width,
+            screen_height=screen_height,
+        )
+        for enemy in new_enemies:
+            self.entity_manager.enemies.append(enemy)
 
     def _update_enemies(
         self,
