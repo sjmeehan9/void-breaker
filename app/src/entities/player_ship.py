@@ -36,6 +36,20 @@ class PlayerShip(arcade.Sprite):
         self.max_shields: float = physics_config.max_shields
         self.fire_cooldown_remaining: float = 0.0
         self._invulnerability_timer: float = 0.0
+        self._damage_boost_active: bool = False
+        self._damage_boost_multiplier: float = 1.0
+        self._speed_boost_active: bool = False
+        self._speed_boost_multiplier: float = 1.0
+
+    @property
+    def effective_damage(self) -> float:
+        """Return projectile damage including temporary buff modifiers."""
+        return self.physics_config.base_damage * self._damage_boost_multiplier
+
+    @property
+    def effective_thrust(self) -> float:
+        """Return thrust force including temporary buff modifiers."""
+        return self.physics_config.base_thrust * self._speed_boost_multiplier
 
     @property
     def invulnerability_timer(self) -> float:
@@ -54,8 +68,8 @@ class PlayerShip(arcade.Sprite):
             dt: Fixed simulation step in seconds.
         """
         angle_radians = math.radians(self.angle + 90.0)
-        thrust_x = math.cos(angle_radians) * self.physics_config.base_thrust
-        thrust_y = math.sin(angle_radians) * self.physics_config.base_thrust
+        thrust_x = math.cos(angle_radians) * self.effective_thrust
+        thrust_y = math.sin(angle_radians) * self.effective_thrust
         self.velocity_x += thrust_x * dt
         self.velocity_y += thrust_y * dt
 
@@ -140,7 +154,7 @@ class PlayerShip(arcade.Sprite):
             angle=self.angle,
             speed=self.physics_config.base_projectile_speed,
             max_range=self.physics_config.base_projectile_range,
-            damage=self.physics_config.base_damage,
+            damage=self.effective_damage,
         )
         projectile_list.append(projectile)
         self.fire_cooldown_remaining = 1.0 / self.physics_config.base_fire_rate
@@ -164,3 +178,23 @@ class PlayerShip(arcade.Sprite):
     def update_invulnerability(self, dt: float) -> None:
         """Advance the invulnerability timer by elapsed simulation time."""
         self._invulnerability_timer = max(0.0, self._invulnerability_timer - dt)
+
+    def apply_damage_boost(self, multiplier: float) -> None:
+        """Apply or refresh the temporary projectile-damage multiplier."""
+        self._damage_boost_active = True
+        self._damage_boost_multiplier = max(1.0, multiplier)
+
+    def remove_damage_boost(self) -> None:
+        """Remove any active projectile-damage buff and restore baseline damage."""
+        self._damage_boost_active = False
+        self._damage_boost_multiplier = 1.0
+
+    def apply_speed_boost(self, multiplier: float) -> None:
+        """Apply or refresh the temporary thrust multiplier."""
+        self._speed_boost_active = True
+        self._speed_boost_multiplier = max(1.0, multiplier)
+
+    def remove_speed_boost(self) -> None:
+        """Remove any active thrust buff and restore baseline thrust."""
+        self._speed_boost_active = False
+        self._speed_boost_multiplier = 1.0

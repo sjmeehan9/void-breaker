@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import arcade
 from asterax.app.src.entities.asteroid import Asteroid
+from asterax.app.src.entities.buff_pickup import BuffPickup
 from asterax.app.src.entities.enemy_ship import EnemyShip
 from asterax.app.src.entities.pickups import CurrencyPickup
 from asterax.app.src.entities.player_ship import PlayerShip
@@ -24,6 +25,7 @@ class EntityManager:
         self.enemy_projectiles: arcade.SpriteList[Projectile] = arcade.SpriteList()
         self.player_projectiles: arcade.SpriteList[Projectile] = arcade.SpriteList()
         self.currency_pickups: arcade.SpriteList[CurrencyPickup] = arcade.SpriteList()
+        self.buff_pickups: arcade.SpriteList[BuffPickup] = arcade.SpriteList()
         self.particles: arcade.SpriteList[arcade.Sprite] = arcade.SpriteList()
 
     @property
@@ -75,6 +77,7 @@ class EntityManager:
             self.background_renderer.draw()
         self.asteroids.draw()
         self.currency_pickups.draw()
+        self.buff_pickups.draw()
         self.particles.draw()
         self.enemies.draw()
         self.enemy_projectiles.draw()
@@ -92,6 +95,7 @@ class EntityManager:
         self.clear_enemies()
         self.player_projectiles.clear()
         self.currency_pickups.clear()
+        self.buff_pickups.clear()
         self.particles.clear()
         self.player = None
 

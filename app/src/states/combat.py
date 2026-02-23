@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
@@ -13,8 +14,10 @@ from asterax.app.src.config.game_config import (
     PHYSICS_CONFIG,
 )
 from asterax.app.src.config.game_config import GameState as RunGameState
+from asterax.app.src.entities.buff_pickup import BuffPickup, BuffType
 from asterax.app.src.entities.enemy_ship import EnemyShip
 from asterax.app.src.entities.player_ship import PlayerShip
+from asterax.app.src.managers.buff_manager import BuffManager
 from asterax.app.src.managers.currency_manager import CurrencyManager
 from asterax.app.src.managers.entity_manager import EntityManager
 from asterax.app.src.managers.score_manager import ScoreManager
@@ -33,6 +36,13 @@ if TYPE_CHECKING:
 
 PHYSICS_DT: Final[float] = GAME_CONFIG.physics_dt
 MAX_FRAME_TIME: Final[float] = GAME_CONFIG.max_frame_time
+BUFF_PICKUP_SOUND_NAME: Final[str] = (
+    "pickup_buff"
+    if (
+        Path(__file__).resolve().parents[3] / "assets" / "sounds" / "pickup_buff.wav"
+    ).exists()
+    else "pickup_currency"
+)
 
 
 class CombatPhaseState(BaseState):
@@ -49,6 +59,7 @@ class CombatPhaseState(BaseState):
         self.spawn_manager = SpawnManager()
         self.score_manager = ScoreManager()
         self.currency_manager = CurrencyManager()
+        self.buff_manager = BuffManager()
         self.particle_system = ParticleSystem(self.entity_manager.particles)
         self.damage_effects = DamageEffects()
         self.hud: HUDRenderer | None = None
@@ -90,7 +101,9 @@ class CombatPhaseState(BaseState):
         self.entity_manager.clear_projectiles()
         self.entity_manager.clear_enemies()
         self.entity_manager.currency_pickups.clear()
+        self.entity_manager.buff_pickups.clear()
         self.entity_manager.asteroids.clear()
+        self.buff_manager.clear_all(ship)
 
         for asteroid in self.spawn_manager.spawn_level_asteroids(
             level=self.current_level,
@@ -156,6 +169,9 @@ class CombatPhaseState(BaseState):
             screen_width=window.width,
             screen_height=window.height,
         )
+        for buff_pickup in list(self.entity_manager.buff_pickups):
+            buff_pickup.update(dt)
+        self.buff_manager.update(dt, self.player_ship)
         self.player_ship.update_invulnerability(dt)
         self.damage_effects.update(dt)
         self.particle_system.update(dt)
@@ -203,6 +219,7 @@ class CombatPhaseState(BaseState):
         self.entity_manager.clear_projectiles()
         self.entity_manager.clear_enemies()
         self.entity_manager.currency_pickups.clear()
+        self.entity_manager.buff_pickups.clear()
         ship = self.player_ship
         ship.center_x = window.width / 2
         ship.center_y = window.height / 2
@@ -234,6 +251,8 @@ class CombatPhaseState(BaseState):
         if self._game_over_triggered:
             return
         self._game_over_triggered = True
+        if self.entity_manager.player_ship is not None:
+            self.buff_manager.clear_all(self.player_ship)
         run_stats = {
             "score": self.score_manager.score,
             "level_reached": self.current_level,
@@ -302,6 +321,7 @@ class CombatPhaseState(BaseState):
         rewards = enemy.on_destroyed()
         self.score_manager.score += int(rewards.get("point_value", 0))
         self.game_state.run_stats.enemies_destroyed += 1
+        self._maybe_spawn_enemy_buff(enemy, float(rewards.get("buff_drop_chance", 0.0)))
         self.damage_effects.trigger_explosion(
             (enemy.center_x, enemy.center_y),
             "medium",
@@ -344,6 +364,17 @@ class CombatPhaseState(BaseState):
             destroyed = enemy.take_damage(self.collision_system.collision_damage)
             if destroyed:
                 self._handle_enemy_destroyed(enemy)
+        for player, buff_pickup in collision_pairs["player_vs_buff_pickups"]:
+            if buff_pickup not in self.entity_manager.buff_pickups:
+                continue
+            self.buff_manager.apply_buff(
+                buff_type=buff_pickup.buff_type,
+                magnitude=buff_pickup.magnitude,
+                duration=buff_pickup.duration,
+                ship=player,
+            )
+            buff_pickup.kill()
+            self._play_sound(BUFF_PICKUP_SOUND_NAME)
 
     def _apply_player_damage(self, player: PlayerShip, amount: float) -> None:
         """Apply player damage and trigger associated audiovisual feedback."""
@@ -365,6 +396,36 @@ class CombatPhaseState(BaseState):
         except RuntimeError:
             return
         window.audio_manager.play(sound_name)
+
+    def _maybe_spawn_enemy_buff(
+        self, enemy: EnemyShip, buff_drop_chance: float
+    ) -> None:
+        """Spawn a buff pickup from enemy destruction when drop chance roll succeeds."""
+        if random.random() >= buff_drop_chance:
+            return
+        buff_type = random.choices(
+            population=[BuffType.HEAL, BuffType.DAMAGE_BOOST, BuffType.SPEED_BOOST],
+            weights=[0.4, 0.3, 0.3],
+            k=1,
+        )[0]
+        magnitude, duration = self._buff_values(buff_type)
+        self.entity_manager.buff_pickups.append(
+            BuffPickup(
+                buff_type=buff_type,
+                magnitude=magnitude,
+                duration=duration,
+                center_x=enemy.center_x,
+                center_y=enemy.center_y,
+            )
+        )
+
+    def _buff_values(self, buff_type: BuffType) -> tuple[float, float]:
+        """Return default magnitude and duration for each supported buff type."""
+        if buff_type is BuffType.HEAL:
+            return (0.25, 0.0)
+        if buff_type is BuffType.DAMAGE_BOOST:
+            return (1.5, 8.0)
+        return (1.4, 8.0)
 
     def on_draw(self) -> None:
         """Draw combat scene entities, particles, and HUD."""

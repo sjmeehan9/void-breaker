@@ -12,6 +12,7 @@ from asterax.app.src.entities.pickups import CurrencyPickup
 if TYPE_CHECKING:
     from asterax.app.src.audio.audio_manager import AudioManager
     from asterax.app.src.entities.asteroid import Asteroid
+    from asterax.app.src.entities.buff_pickup import BuffPickup
     from asterax.app.src.entities.enemy_ship import EnemyShip
     from asterax.app.src.entities.player_ship import PlayerShip
     from asterax.app.src.entities.projectile import Projectile
@@ -152,6 +153,29 @@ class CollisionSystem:
         finally:
             self._cleanup_ghost_sprites()
 
+    def check_player_vs_buff_pickups(
+        self,
+        entity_manager: object,
+        screen_width: float,
+        screen_height: float,
+    ) -> list[tuple[PlayerShip, BuffPickup]]:
+        """Return all player-vs-buff-pickup contacts, including seam ghosts."""
+        ship = getattr(entity_manager, "player_ship", None)
+        buff_pickups = getattr(entity_manager, "buff_pickups", None)
+        if ship is None or buff_pickups is None:
+            return []
+
+        try:
+            hits = self._check_collisions_with_ghosts(
+                source=ship,
+                targets=buff_pickups,
+                screen_width=screen_width,
+                screen_height=screen_height,
+            )
+            return [(ship, buff_pickup) for buff_pickup in hits]
+        finally:
+            self._cleanup_ghost_sprites()
+
     def check_all_combat(
         self,
         entity_manager: object,
@@ -176,6 +200,13 @@ class CollisionSystem:
             ),
             "player_vs_enemies": list(
                 self.check_player_vs_enemies(
+                    entity_manager=entity_manager,
+                    screen_width=screen_width,
+                    screen_height=screen_height,
+                )
+            ),
+            "player_vs_buff_pickups": list(
+                self.check_player_vs_buff_pickups(
                     entity_manager=entity_manager,
                     screen_width=screen_width,
                     screen_height=screen_height,
