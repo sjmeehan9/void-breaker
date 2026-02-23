@@ -8,6 +8,7 @@ from pathlib import Path
 from PIL import Image
 
 SPRITES_DIR = Path(__file__).resolve().parent.parent / "assets" / "sprites"
+SHOP_SPRITES_DIR = SPRITES_DIR / "shop"
 SOUNDS_DIR = Path(__file__).resolve().parent.parent / "assets" / "sounds"
 
 
@@ -43,6 +44,32 @@ def main() -> None:
             print(f"  MISSING: {name}")
 
     print()
+    print("=== SHOP SPRITE VERIFICATION ===")
+    expected_shop_sprites = {
+        "orb_weapon.png": 64,
+        "orb_defense.png": 64,
+        "orb_mobility.png": 64,
+        "orb_economy.png": 64,
+        "orb_repair.png": 64,
+        "orb_insurance.png": 64,
+        "node_continue.png": 64,
+    }
+    for name, expected_dim in expected_shop_sprites.items():
+        path = SHOP_SPRITES_DIR / name
+        if path.exists():
+            img = Image.open(path)
+            mode = img.mode
+            w, h = img.size
+            ok = mode == "RGBA" and w == expected_dim and h == expected_dim
+            status = "OK" if ok else "MISMATCH"
+            if not ok:
+                all_ok = False
+            print(f"  {status}: {name} - {w}x{h} {mode}")
+        else:
+            all_ok = False
+            print(f"  MISSING: {name}")
+
+    print()
     print("=== SOUND VERIFICATION ===")
     expected_sounds = [
         "fire.wav",
@@ -56,6 +83,8 @@ def main() -> None:
         "enemy_fire.wav",
         "enemy_explode.wav",
         "player_hit.wav",
+        "shop_purchase.wav",
+        "shop_denied.wav",
     ]
     for name in expected_sounds:
         path = SOUNDS_DIR / name

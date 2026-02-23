@@ -9,6 +9,8 @@ Creates simple geometric shape sprites using Pillow:
 - Enemy Basic: red diamond (64x64)
 - Enemy Aggressive: orange chevron/arrow (64x64)
 - Projectile (enemy): red-orange dot (8x8)
+- Shop orbs: coloured circles in 6 category colours (64x64)
+- Shop continue node: green right-pointing arrow (64x64)
 
 All sprites are RGBA PNGs with transparent backgrounds.
 
@@ -25,6 +27,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 SPRITES_DIR = Path(__file__).resolve().parent.parent / "assets" / "sprites"
+SHOP_DIR = SPRITES_DIR / "shop"
 
 
 def generate_ship(output_path: Path) -> None:
@@ -221,6 +224,80 @@ def generate_enemy_projectile(output_path: Path) -> None:
     img.save(output_path, "PNG")
 
 
+def generate_shop_orb(output_path: Path, colour: tuple[int, int, int]) -> None:
+    """Generate a coloured circle orb sprite for a shop category (64x64).
+
+    A filled circle with a soft outer glow ring on a transparent background.
+
+    Args:
+        output_path: Where to save the PNG.
+        colour: RGB tuple for the orb fill colour.
+    """
+    size = 64
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    cx, cy = size // 2, size // 2
+    radius = 26
+
+    # Outer glow ring (lighter, semi-transparent)
+    glow_r, glow_g, glow_b = (
+        min(colour[0] + 60, 255),
+        min(colour[1] + 60, 255),
+        min(colour[2] + 60, 255),
+    )
+    draw.ellipse(
+        [cx - radius - 3, cy - radius - 3, cx + radius + 3, cy + radius + 3],
+        fill=(glow_r, glow_g, glow_b, 80),
+    )
+
+    # Main orb circle
+    draw.ellipse(
+        [cx - radius, cy - radius, cx + radius, cy + radius],
+        fill=(*colour, 255),
+        outline=(glow_r, glow_g, glow_b, 255),
+    )
+
+    # Inner highlight for depth
+    highlight_r = radius // 2
+    draw.ellipse(
+        [cx - highlight_r + 4, cy - highlight_r - 4,
+         cx + highlight_r - 2, cy + highlight_r - 10],
+        fill=(
+            min(colour[0] + 80, 255),
+            min(colour[1] + 80, 255),
+            min(colour[2] + 80, 255),
+            120,
+        ),
+    )
+
+    img.save(output_path, "PNG")
+
+
+def generate_shop_continue(output_path: Path) -> None:
+    """Generate a bright green right-pointing arrow for the continue node (64x64).
+
+    Visually distinct from the coloured category orbs so the player
+    immediately recognises it as the 'exit shop' action.
+    """
+    size = 64
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    cx, cy = size // 2, size // 2
+
+    # Right-pointing chevron/arrow
+    arrow_points = [
+        (14, 10),   # top-left
+        (50, cy),   # right tip
+        (14, 54),   # bottom-left
+        (24, cy),   # inner notch
+    ]
+    draw.polygon(arrow_points, fill=(46, 204, 113, 255), outline=(100, 255, 160, 255))
+
+    img.save(output_path, "PNG")
+
+
 def main() -> None:
     """Generate all placeholder sprites."""
     SPRITES_DIR.mkdir(parents=True, exist_ok=True)
@@ -256,6 +333,25 @@ def main() -> None:
 
     generate_enemy_projectile(SPRITES_DIR / "projectile_enemy.png")
     print("  ✓ projectile_enemy.png (8x8)")
+
+    # --- Shop sprites ---
+    SHOP_DIR.mkdir(parents=True, exist_ok=True)
+    print(f"\nGenerating shop sprites in {SHOP_DIR}")
+
+    orb_colours: dict[str, tuple[int, int, int]] = {
+        "orb_weapon": (231, 76, 60),      # red   #E74C3C
+        "orb_defense": (52, 152, 219),     # blue  #3498DB
+        "orb_mobility": (46, 204, 113),    # green #2ECC71
+        "orb_economy": (241, 196, 15),     # gold  #F1C40F
+        "orb_repair": (236, 240, 241),     # white #ECF0F1
+        "orb_insurance": (155, 89, 182),   # purple #9B59B6
+    }
+    for name, colour in orb_colours.items():
+        generate_shop_orb(SHOP_DIR / f"{name}.png", colour)
+        print(f"  ✓ {name}.png (64x64)")
+
+    generate_shop_continue(SHOP_DIR / "node_continue.png")
+    print("  ✓ node_continue.png (64x64)")
 
     print("\nAll placeholder sprites generated successfully.")
 
