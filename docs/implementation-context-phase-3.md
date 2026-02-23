@@ -44,3 +44,21 @@
   - `tests/test_entity_manager_rendering.py` — validates enemy SpriteList initialization, draw z-order, and clear behavior including enemy collections
 - **Design decisions**: Kept existing Phase 2 `CollisionSystem.check_all()` behavior unchanged for asteroid/pickup flows, then layered enemy collision processing through new dedicated methods and `CombatPhaseState._process_enemy_collisions()` to minimize regression risk.
 - **Deviations**: None from component requirements.
+
+## Component 3.4 — Spawn Manager & Enemy Waves
+- **Status**: Completed
+- **What was built**: Extended `SpawnManager` with timed enemy spawning logic, per-level enemy configuration via difficulty tables, and screen-edge spawn positioning. Enemies spawn at configurable intervals during combat, respecting count caps and level-specific archetype ratios. Early levels (1-5) have no enemies, mid levels (6-15) introduce Basic Shooters then Aggressive enemies, and late levels (16+) feature frequent aggressive waves.
+- **Key files modified**:
+  - `app/src/config/game_config.py` — added `aggressive_ratio: float = 0.0` field to `DifficultyParams` dataclass
+  - `app/src/config/difficulty_tables.py` — updated `get_difficulty_params()` with enemy spawn parameters: levels 1-5 have `enemy_spawn_enabled=False`, level 6+ enabled with progressive scaling of `enemy_count_max` (1→3→5→8), `enemy_spawn_interval` (8.0s→3.0s), `aggressive_ratio` (0.0→0.3→0.5→0.7), and `enemy_aggression` (0.3→0.9); updated `get_difficulty()` to propagate `aggressive_ratio`
+  - `app/src/managers/spawn_manager.py` — added `_enemy_spawn_timer` and `_enemy_spawn_active` attributes; added methods: `update_enemy_spawning()` (interval-based spawn with cap enforcement), `_get_spawn_edge_position()` (off-screen spawn with inward velocity), `_select_archetype()` (weighted archetype selection), `reset_enemy_spawning()` (timer reset for level start)
+  - `app/src/states/combat.py` — added `_spawn_enemies()` method called in `_physics_step()`; added `reset_enemy_spawning()` calls in `on_enter()` and `_advance_level()`
+- **Key tests added**:
+  - `tests/test_spawn_manager_enemies.py` — 8 focused tests covering: no spawn when disabled, no spawn before interval, spawn after interval when under cap, no spawn at cap, edge position validation (off-screen + inward velocity), archetype selection respects `aggressive_ratio` statistically, timer reset, and 30-second integration test
+  - Updated `tests/test_asteroid_system.py`, `tests/test_config.py`, `tests/test_difficulty.py`, `tests/test_combat_phase_state.py` to reflect Phase 3 enemy spawning enabled from level 6+
+- **Design decisions**: 
+  - Enemy spawn positioning uses random edge selection (top/bottom/left/right) with off-screen margin (50px) and velocity vector aimed at screen center with randomness (±200px horizontal, ±100px vertical for top/bottom; ±100px horizontal, ±200px vertical for left/right) to create natural inward movement and variety.
+  - Archetype selection uses simple probabilistic selection (`random() < aggressive_ratio`) rather than complex weighted pools for clarity and determinism in tests.
+  - Spawn interval timer is unconditional (always advances when enabled) but spawn only occurs when under cap, allowing natural spawn behavior without complex state tracking.
+  - Enemy spawning is independent of asteroid spawning (both run in same `_physics_step()`) to maintain Phase 2 asteroid behavior unchanged.
+- **Deviations**: None from component requirements. All acceptance criteria met: spawn manager supports enemies alongside asteroids, spawning disabled for levels 1-5, enemies spawn at screen edges moving inward, spawn interval decreases with level, aggressive enemies introduced via `aggressive_ratio`, count cap enforced, `DifficultyParams` includes all enemy fields.
