@@ -12,6 +12,7 @@ from asterax.app.src.entities.pickups import CurrencyPickup
 if TYPE_CHECKING:
     from asterax.app.src.audio.audio_manager import AudioManager
     from asterax.app.src.entities.asteroid import Asteroid
+    from asterax.app.src.entities.enemy_ship import EnemyShip
     from asterax.app.src.entities.player_ship import PlayerShip
     from asterax.app.src.entities.projectile import Projectile
     from asterax.app.src.managers.currency_manager import CurrencyManager
@@ -71,6 +72,116 @@ class CollisionSystem:
             )
         finally:
             self._cleanup_ghost_sprites()
+
+    def check_player_vs_enemy_projectiles(
+        self,
+        entity_manager: object,
+        screen_width: float,
+        screen_height: float,
+    ) -> list[tuple[PlayerShip, Projectile]]:
+        """Return all player-vs-enemy-projectile contacts, including seam ghosts."""
+        ship = getattr(entity_manager, "player_ship", None)
+        enemy_projectiles = getattr(entity_manager, "enemy_projectiles", None)
+        if ship is None or enemy_projectiles is None:
+            return []
+
+        try:
+            hits = self._check_collisions_with_ghosts(
+                source=ship,
+                targets=enemy_projectiles,
+                screen_width=screen_width,
+                screen_height=screen_height,
+            )
+            return [(ship, projectile) for projectile in hits]
+        finally:
+            self._cleanup_ghost_sprites()
+
+    def check_player_projectiles_vs_enemies(
+        self,
+        entity_manager: object,
+        screen_width: float,
+        screen_height: float,
+    ) -> list[tuple[Projectile, EnemyShip]]:
+        """Return all player-projectile-vs-enemy contacts, including seam ghosts."""
+        player_projectiles = getattr(entity_manager, "player_projectiles", None)
+        enemies = getattr(entity_manager, "enemies", None)
+        if player_projectiles is None or enemies is None:
+            return []
+
+        collisions: list[tuple[Projectile, EnemyShip]] = []
+        seen_pairs: set[tuple[int, int]] = set()
+        try:
+            for projectile in list(player_projectiles):
+                if projectile not in player_projectiles:
+                    continue
+                for enemy in self._check_collisions_with_ghosts(
+                    source=projectile,
+                    targets=enemies,
+                    screen_width=screen_width,
+                    screen_height=screen_height,
+                ):
+                    pair_key = (id(projectile), id(enemy))
+                    if pair_key in seen_pairs:
+                        continue
+                    seen_pairs.add(pair_key)
+                    collisions.append((projectile, enemy))
+            return collisions
+        finally:
+            self._cleanup_ghost_sprites()
+
+    def check_player_vs_enemies(
+        self,
+        entity_manager: object,
+        screen_width: float,
+        screen_height: float,
+    ) -> list[tuple[PlayerShip, EnemyShip]]:
+        """Return all player-vs-enemy contacts, including seam ghosts."""
+        ship = getattr(entity_manager, "player_ship", None)
+        enemies = getattr(entity_manager, "enemies", None)
+        if ship is None or enemies is None:
+            return []
+
+        try:
+            hits = self._check_collisions_with_ghosts(
+                source=ship,
+                targets=enemies,
+                screen_width=screen_width,
+                screen_height=screen_height,
+            )
+            return [(ship, enemy) for enemy in hits]
+        finally:
+            self._cleanup_ghost_sprites()
+
+    def check_all_combat(
+        self,
+        entity_manager: object,
+        screen_width: float,
+        screen_height: float,
+    ) -> dict[str, list[tuple[arcade.Sprite, arcade.Sprite]]]:
+        """Return enemy-combat collision pairs in a single structured payload."""
+        return {
+            "player_vs_enemy_projectiles": list(
+                self.check_player_vs_enemy_projectiles(
+                    entity_manager=entity_manager,
+                    screen_width=screen_width,
+                    screen_height=screen_height,
+                )
+            ),
+            "player_projectiles_vs_enemies": list(
+                self.check_player_projectiles_vs_enemies(
+                    entity_manager=entity_manager,
+                    screen_width=screen_width,
+                    screen_height=screen_height,
+                )
+            ),
+            "player_vs_enemies": list(
+                self.check_player_vs_enemies(
+                    entity_manager=entity_manager,
+                    screen_width=screen_width,
+                    screen_height=screen_height,
+                )
+            ),
+        }
 
     def _check_projectiles_vs_asteroids(
         self,
@@ -292,6 +403,43 @@ class CollisionSystem:
                 ghosts.append(ghost)
                 self._ghost_sprites.append(ghost)
         return ghosts
+
+    def _check_collisions_with_ghosts(
+        self,
+        source: arcade.Sprite,
+        targets: arcade.SpriteList,
+        screen_width: float,
+        screen_height: float,
+    ) -> list[arcade.Sprite]:
+        """Return unique source-target collisions while accounting for screen seams."""
+        hits: dict[int, arcade.Sprite] = {
+            id(target): target
+            for target in arcade.check_for_collision_with_list(source, targets)
+        }
+
+        ghost_target_map: dict[arcade.Sprite, arcade.Sprite] = {}
+        ghost_targets = arcade.SpriteList()
+        for target in targets:
+            for ghost in self._ghosts_for_entity(target, screen_width, screen_height):
+                ghost_target_map[ghost] = target
+                ghost_targets.append(ghost)
+
+        for ghost_hit in arcade.check_for_collision_with_list(source, ghost_targets):
+            original_target = ghost_target_map[ghost_hit]
+            hits[id(original_target)] = original_target
+
+        for ghost_source in self._ghosts_for_entity(
+            source, screen_width, screen_height
+        ):
+            for hit in arcade.check_for_collision_with_list(ghost_source, targets):
+                hits[id(hit)] = hit
+            for ghost_hit in arcade.check_for_collision_with_list(
+                ghost_source, ghost_targets
+            ):
+                original_target = ghost_target_map[ghost_hit]
+                hits[id(original_target)] = original_target
+
+        return list(hits.values())
 
     def _cleanup_ghost_sprites(self) -> None:
         for ghost in self._ghost_sprites:

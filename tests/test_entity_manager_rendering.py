@@ -56,20 +56,24 @@ def test_entity_manager_clear_all_empties_lists_and_player() -> None:
         )
     )
     manager.player_projectiles.append(arcade.Sprite())
+    manager.enemy_projectiles.append(arcade.Sprite())
     manager.currency_pickups.append(arcade.Sprite())
+    manager.enemies.append(arcade.Sprite())
     manager.particles.append(arcade.Sprite())
 
     manager.clear_all()
 
     assert manager.player is None
     assert len(manager.asteroids) == 0
+    assert len(manager.enemies) == 0
+    assert len(manager.enemy_projectiles) == 0
     assert len(manager.player_projectiles) == 0
     assert len(manager.currency_pickups) == 0
     assert len(manager.particles) == 0
 
 
 def test_entity_manager_draw_uses_expected_z_order() -> None:
-    """draw should render asteroids, pickups, particles, projectiles, then ship."""
+    """draw should render asteroids, pickups, particles, enemies, then projectiles."""
     manager = EntityManager()
     manager.player = _make_ship()
     draw_calls: list[str] = []
@@ -82,6 +86,10 @@ def test_entity_manager_draw_uses_expected_z_order() -> None:
         lambda: draw_calls.append("pickups")
     )
     manager.particles.draw = lambda: draw_calls.append("particles")  # type: ignore[method-assign]
+    manager.enemies.draw = lambda: draw_calls.append("enemies")  # type: ignore[method-assign]
+    manager.enemy_projectiles.draw = (  # type: ignore[method-assign]
+        lambda: draw_calls.append("enemy_projectiles")
+    )
     manager.player_projectiles.draw = (  # type: ignore[method-assign]
         lambda: draw_calls.append("projectiles")
     )
@@ -94,9 +102,19 @@ def test_entity_manager_draw_uses_expected_z_order() -> None:
         "asteroids",
         "pickups",
         "particles",
+        "enemies",
+        "enemy_projectiles",
         "projectiles",
         "ship",
     ]
+
+
+def test_entity_manager_initializes_enemy_sprite_lists() -> None:
+    """Entity manager should expose enemy and enemy projectile sprite lists."""
+    manager = EntityManager()
+
+    assert isinstance(manager.enemies, arcade.SpriteList)
+    assert isinstance(manager.enemy_projectiles, arcade.SpriteList)
 
 
 def test_particle_system_spawn_explosion_creates_expected_particle_count() -> None:
