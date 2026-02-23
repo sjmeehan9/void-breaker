@@ -1,11 +1,14 @@
-"""Generate placeholder geometric sprites for Phase 2 gameplay.
+"""Generate placeholder geometric sprites for gameplay.
 
 Creates simple geometric shape sprites using Pillow:
 - Ship: white triangle pointing upward (~32x32)
 - Asteroids: irregular grey circles in 3 sizes (~64, ~40, ~20)
-- Projectile: cyan dot (~8x8)
+- Projectile (player): cyan dot (~8x8)
 - Currency pickup: gold diamond (~16x16)
 - Explosion particle: bright orange-white dot (~6x6)
+- Enemy Basic: red diamond (64x64)
+- Enemy Aggressive: orange chevron/arrow (64x64)
+- Projectile (enemy): red-orange dot (8x8)
 
 All sprites are RGBA PNGs with transparent backgrounds.
 
@@ -137,8 +140,89 @@ def generate_explosion_particle(output_path: Path) -> None:
     img.save(output_path, "PNG")
 
 
+def generate_enemy_basic(output_path: Path) -> None:
+    """Generate a red diamond-shaped Basic Shooter enemy sprite (64x64).
+
+    Visually distinct from the player ship (white triangle) — uses a red
+    diamond shape to clearly signal an enemy entity.
+    """
+    size = 64
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    cx, cy = size // 2, size // 2
+    # Diamond shape: top, right, bottom, left
+    points = [
+        (cx, 4),  # top
+        (size - 4, cy),  # right
+        (cx, size - 4),  # bottom
+        (4, cy),  # left
+    ]
+    draw.polygon(points, fill=(200, 30, 30, 255), outline=(255, 80, 80, 255))
+
+    # Small centre cockpit detail
+    inner = [
+        (cx, cy - 6),
+        (cx + 6, cy),
+        (cx, cy + 6),
+        (cx - 6, cy),
+    ]
+    draw.polygon(inner, fill=(255, 100, 100, 255))
+
+    img.save(output_path, "PNG")
+
+
+def generate_enemy_aggressive(output_path: Path) -> None:
+    """Generate an orange chevron/arrow Aggressive enemy sprite (64x64).
+
+    Uses a chevron (V-arrow) shape with orange hues to differentiate from
+    the red diamond of the Basic Shooter archetype.
+    """
+    size = 64
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    cx = size // 2
+    # Chevron pointing downward (nose toward player)
+    outer = [
+        (cx, size - 6),  # nose (bottom-centre)
+        (6, 6),  # top-left wing tip
+        (cx, 20),  # inner notch
+        (size - 6, 6),  # top-right wing tip
+    ]
+    draw.polygon(outer, fill=(230, 120, 20, 255), outline=(255, 180, 60, 255))
+
+    # Inner accent stripe for visual interest
+    accent = [
+        (cx, size - 16),
+        (16, 14),
+        (cx, 24),
+        (size - 16, 14),
+    ]
+    draw.polygon(accent, fill=(255, 160, 40, 255))
+
+    img.save(output_path, "PNG")
+
+
+def generate_enemy_projectile(output_path: Path) -> None:
+    """Generate a small red-orange enemy projectile sprite (8x8).
+
+    Clearly distinguishable from the cyan player projectile by colour.
+    """
+    size = 8
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    # Red-orange dot with bright core
+    draw.ellipse([1, 1, size - 2, size - 2], fill=(255, 80, 30, 255))
+    # Bright yellow-orange core
+    draw.ellipse([2, 2, size - 3, size - 3], fill=(255, 200, 100, 255))
+
+    img.save(output_path, "PNG")
+
+
 def main() -> None:
-    """Generate all placeholder sprites for Phase 2."""
+    """Generate all placeholder sprites."""
     SPRITES_DIR.mkdir(parents=True, exist_ok=True)
 
     print(f"Generating sprites in {SPRITES_DIR}")
@@ -163,6 +247,15 @@ def main() -> None:
 
     generate_explosion_particle(SPRITES_DIR / "explosion_particle.png")
     print("  ✓ explosion_particle.png (6x6)")
+
+    generate_enemy_basic(SPRITES_DIR / "enemy_basic.png")
+    print("  ✓ enemy_basic.png (64x64)")
+
+    generate_enemy_aggressive(SPRITES_DIR / "enemy_aggressive.png")
+    print("  ✓ enemy_aggressive.png (64x64)")
+
+    generate_enemy_projectile(SPRITES_DIR / "projectile_enemy.png")
+    print("  ✓ projectile_enemy.png (8x8)")
 
     print("\nAll placeholder sprites generated successfully.")
 

@@ -1,4 +1,4 @@
-"""Verify all Phase 2 placeholder assets exist and are valid."""
+"""Verify all placeholder assets exist and are valid."""
 
 from __future__ import annotations
 
@@ -22,6 +22,9 @@ def main() -> None:
         "projectile_player.png": 8,
         "currency_pickup.png": 16,
         "explosion_particle.png": 6,
+        "enemy_basic.png": 64,
+        "enemy_aggressive.png": 64,
+        "projectile_enemy.png": 8,
     }
     all_ok = True
     for name, expected_dim in expected_sprites.items():
@@ -50,6 +53,9 @@ def main() -> None:
         "pickup_currency.wav",
         "level_clear.wav",
         "game_over.wav",
+        "enemy_fire.wav",
+        "enemy_explode.wav",
+        "player_hit.wav",
     ]
     for name in expected_sounds:
         path = SOUNDS_DIR / name
