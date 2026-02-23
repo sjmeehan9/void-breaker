@@ -58,6 +58,7 @@ def test_entity_manager_clear_all_empties_lists_and_player() -> None:
     manager.player_projectiles.append(arcade.Sprite())
     manager.enemy_projectiles.append(arcade.Sprite())
     manager.currency_pickups.append(arcade.Sprite())
+    manager.buff_pickups.append(arcade.Sprite())
     manager.enemies.append(arcade.Sprite())
     manager.particles.append(arcade.Sprite())
 
@@ -69,6 +70,7 @@ def test_entity_manager_clear_all_empties_lists_and_player() -> None:
     assert len(manager.enemy_projectiles) == 0
     assert len(manager.player_projectiles) == 0
     assert len(manager.currency_pickups) == 0
+    assert len(manager.buff_pickups) == 0
     assert len(manager.particles) == 0
 
 
@@ -85,6 +87,7 @@ def test_entity_manager_draw_uses_expected_z_order() -> None:
     manager.currency_pickups.draw = (  # type: ignore[method-assign]
         lambda: draw_calls.append("pickups")
     )
+    manager.buff_pickups.draw = lambda: draw_calls.append("buff_pickups")  # type: ignore[method-assign]
     manager.particles.draw = lambda: draw_calls.append("particles")  # type: ignore[method-assign]
     manager.enemies.draw = lambda: draw_calls.append("enemies")  # type: ignore[method-assign]
     manager.enemy_projectiles.draw = (  # type: ignore[method-assign]
@@ -101,6 +104,7 @@ def test_entity_manager_draw_uses_expected_z_order() -> None:
         "background",
         "asteroids",
         "pickups",
+        "buff_pickups",
         "particles",
         "enemies",
         "enemy_projectiles",

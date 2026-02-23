@@ -99,3 +99,24 @@
   - Returned cloned `DifficultyParams` objects for exact tier hits to avoid accidental shared-instance mutation.
 - **Deviations**:
   - The level-5 tier keeps `enemy_spawn_interval=99` as specified, but interpolation uses a level-6 bridge (`8.0s`, enemy count starts at 1) so levels 6-9 remain playable and aligned with Phase 3.4 spawn expectations.
+
+## Component 3.7 — Buff Pickups (Optional)
+- **Status**: Completed
+- **What was built**: Added optional enemy-dropped buff pickups and timed buff effect management. Combat now supports HEAL (instant 25% shield restore), DAMAGE_BOOST (1.5x projectile damage for 8s), and SPEED_BOOST (1.4x thrust for 8s), with non-stacking refresh behavior and automatic expiry.
+- **Key files created**:
+  - `app/src/entities/buff_pickup.py` — `BuffType` enum and `BuffPickup` sprite with per-type generated textures, bobbing animation, and lifetime expiry
+  - `app/src/managers/buff_manager.py` — `BuffManager` handling apply/update/expiry/clear for timed buffs and instant heal
+  - `tests/test_buff_pickups.py` — focused tests for pickup lifecycle, buff manager behavior, duration refresh semantics, and combat drop/collection flow
+- **Key files modified**:
+  - `app/src/entities/player_ship.py` — added effective damage/thrust properties and temporary buff apply/remove methods used by fire/thrust calculations
+  - `app/src/managers/entity_manager.py` — added `buff_pickups` SpriteList, draw ordering, and clear handling
+  - `app/src/physics/collisions.py` — added player-vs-buff-pickup seam-aware collision pair and exposed it in `check_all_combat()`
+  - `app/src/states/combat.py` — added `BuffManager` lifecycle wiring, enemy buff-drop rolls, buff pickup updates, collection handling, and sound fallback (`pickup_buff` if present else `pickup_currency`)
+  - `tests/test_entity_manager_rendering.py` — updated clear and draw-order expectations for buff pickup rendering layer
+- **Design decisions**:
+  - Kept buffs fully isolated to `BuffManager` to avoid mutating `GameState` or adding new run-state fields before Phase 4.
+  - Implemented same-type buff refresh by replacing timer/magnitude entry (single active entry per type), matching “no stacking” requirement.
+  - Used seam-aware collision reuse in `CollisionSystem` to keep pickup collection reliable near wrap edges.
+  - Used runtime sound fallback selection to guarantee a collection cue without requiring a new asset.
+- **Deviations**:
+  - Buff pickup visuals use procedurally generated coloured circles (Arcade textures) instead of authored sprite files to keep this optional component asset-light while remaining visually distinct.
