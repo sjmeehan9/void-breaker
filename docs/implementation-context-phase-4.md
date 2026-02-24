@@ -6,7 +6,7 @@
 - 4.3 Shop Node Entities & Interaction — Completed
 - 4.4 Upgrade Manager & Stat Application — Completed
 - 4.5 Insurance Manager & Death Retention — Completed
-- 4.6 Currency Manager & Economy Flow — Not Started
+- 4.6 Currency Manager & Economy Flow — Completed
 - 4.7 Ship Re-Centring & Purchase Flow Polish — Not Started
 - 4.8 E2E Testing & Documentation — Not Started
 
@@ -83,3 +83,17 @@
   - `app/src/managers/__init__.py` — exported `InsuranceManager`
 - **Design decisions**: Implemented small compatibility helpers inside `InsuranceManager` so it can work with both the current `CurrencyManager` API (`spend`/`get_balance`) and the planned Phase 4.6 API (`can_spend`/`deduct`) without introducing broad refactors.
 - **Deviations**: Shop-node tier-cycling UI integration is intentionally deferred to the shop-flow components (`4.7`/`4.8`) while 4.5 delivers the full insurance business logic and test coverage required by this component.
+
+## Component 4.6 — Currency Manager & Economy Flow
+- **Status**: Completed
+- **What was built**: Rewrote `CurrencyManager` as the single authority for all currency transactions. Added `CurrencyRunStats` dataclass, optional `GameState` backing store, `can_spend()`, `deduct()` (insurance semantic alias for `spend()`), `get_run_stats()`, and strict positive-integer validation (`ValueError` for `amount <= 0`). Wired `CombatPhaseState` to pass its `game_state` to the manager at construction and removed the manual `game_state.currency =` sync. Refactored `CollisionSystem._check_ship_vs_pickups` to write currency exclusively through the manager with a no-manager fallback.
+- **Key files created/modified**:
+  - `app/src/managers/currency_manager.py` — full rewrite with `CurrencyRunStats` and full API
+  - `app/src/managers/__init__.py` — added `CurrencyRunStats` export
+  - `app/src/states/combat.py` — `game_state` created before `currency_manager`; manager receives `game_state`; manual sync removed
+  - `app/src/physics/collisions.py` — `_check_ship_vs_pickups` now routes through manager exclusively
+  - `tests/test_currency.py` — rewritten with updated pickup test + 15 Phase 4.6 unit tests
+  - `tests/test_currency_pickups.py` — `test_ship_collects_pickups_and_earns_currency` updated to pass `game_state` to manager
+  - `docs/components/phase-4-component-4-6-overview.md` — created
+- **Design decisions**: Made `game_state` optional (not required) so existing tests and standalone usages continue without modification. `deduct()` delegates to `spend()` — single deduction path avoids divergence. `CurrencyRunStats` is a dataclass rather than a plain tuple for clarity at the game-over summary call site.
+- **Deviations**: None from component requirements. All 177 tests pass; evals pass.

@@ -137,7 +137,7 @@ def test_ship_collects_pickups_and_earns_currency() -> None:
     )
     entity_manager.currency_pickups.append(pickup)
     game_state = GameState()
-    currency_manager = CurrencyManager()
+    currency_manager = CurrencyManager(game_state)
 
     CollisionSystem().check_all(
         entity_manager=entity_manager,

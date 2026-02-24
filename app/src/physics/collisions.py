@@ -363,10 +363,11 @@ class CollisionSystem:
             if value <= 0:
                 pickup.kill()
                 continue
-            if hasattr(game_state, "currency"):
-                game_state.currency += value
             if currency_manager is not None:
                 currency_manager.earn(value)
+            elif hasattr(game_state, "currency"):
+                # Fallback for callers that pass no manager (legacy / isolated tests).
+                game_state.currency += value
             if audio_manager is not None:
                 audio_manager.play("pickup_currency")
             pickup.kill()

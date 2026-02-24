@@ -69,12 +69,12 @@ class CombatPhaseState(BaseState):
         )
         self.spawn_manager = SpawnManager()
         self.score_manager = ScoreManager()
-        self.currency_manager = CurrencyManager()
+        self.game_state = RunGameState()
+        self.currency_manager = CurrencyManager(self.game_state)
         self.buff_manager = BuffManager()
         self.particle_system = ParticleSystem(self.entity_manager.particles)
         self.damage_effects = DamageEffects()
         self.hud: HUDRenderer | None = None
-        self.game_state = RunGameState()
         self.current_level = max(1, initial_level)
         self._initial_score = max(0, initial_score)
         self._initial_currency = max(0, initial_currency)
@@ -216,7 +216,6 @@ class CombatPhaseState(BaseState):
         self.game_state.score = self.score_manager.score
         self.game_state.shields = self.player_ship.shields
         self.game_state.max_shields = self.player_ship.max_shields
-        self.game_state.currency = self.currency_manager.get_balance()
         if self.hud is not None:
             self.hud.update_combat_values(
                 score=self.game_state.score,
