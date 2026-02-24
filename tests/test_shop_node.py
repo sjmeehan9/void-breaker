@@ -58,11 +58,11 @@ def test_shop_node_calculate_cost_and_can_purchase() -> None:
         upgrade_definition=definition,
     )
 
-    assert node.calculate_cost(0) == 50
-    assert node.calculate_cost(1) == 75
-    assert node.calculate_cost(2) == 112
-    assert node.can_purchase(currency=112, current_level=2)
-    assert not node.can_purchase(currency=111, current_level=2)
+    assert node.calculate_cost(0) == 80
+    assert node.calculate_cost(1) == 120
+    assert node.calculate_cost(2) == 180
+    assert node.can_purchase(currency=180, current_level=2)
+    assert not node.can_purchase(currency=179, current_level=2)
     assert not node.can_purchase(currency=999, current_level=definition.max_level)
 
 
@@ -128,8 +128,8 @@ def test_shop_phase_collision_purchases_upgrade(monkeypatch) -> None:
 
     state.on_update(0.016)
 
-    assert state.game_state.currency == 150
+    assert state.game_state.currency == 120
     assert state.ship_state.weapon_fire_rate_level == 1
-    assert state.game_state.run_stats.currency_spent == 50
+    assert state.game_state.run_stats.currency_spent == 80
     assert state.game_state.run_stats.upgrades_purchased == 1
     assert "shop_purchase" in audio_stub.played

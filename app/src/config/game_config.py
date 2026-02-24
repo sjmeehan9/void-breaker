@@ -244,6 +244,7 @@ class ShipState:
     mobility_turn_level: int = 0
     economy_magnet_level: int = 0
     economy_protection_level: int = 0
+    score_bonus_level: int = 0
 
     effective_thrust: float = 400.0
     effective_turn_rate: float = 240.0
@@ -280,18 +281,26 @@ class ShipState:
             if level == 0:
                 continue
 
-            if definition.stat_key == "repair":
-                continue
-
-            current = getattr(self, definition.stat_key, None)
-            if isinstance(current, bool) or current is None:
+            if definition.stat_key in {"shields", "score_multiplier"}:
                 continue
 
             increment = definition.effect_per_level * level
-            if isinstance(current, int):
-                setattr(self, definition.stat_key, current + int(increment))
-            else:
-                setattr(self, definition.stat_key, current + increment)
+            if definition.stat_key == "fire_rate":
+                self.effective_fire_rate += increment
+            elif definition.stat_key == "damage":
+                self.effective_damage += increment
+            elif definition.stat_key == "projectile_speed":
+                self.effective_projectile_speed += increment
+            elif definition.stat_key == "spread":
+                self.effective_projectile_count += int(increment)
+            elif definition.stat_key == "max_shields":
+                self.effective_max_shields += increment
+            elif definition.stat_key == "thrust":
+                self.effective_thrust += increment
+            elif definition.stat_key == "turn_rate":
+                self.effective_turn_rate += increment
+            elif definition.stat_key == "magnet_radius":
+                self.effective_magnet_radius += increment
 
 
 @dataclass(slots=True)
