@@ -71,3 +71,15 @@
   - `tests/test_shop_node.py`, `tests/test_config.py` — updated expectations to match revised upgrade balance values
 - **Design decisions**: Kept `UPGRADE_DEFINITIONS` as a compatibility alias to `ALL_UPGRADES` so existing imports remain stable while enabling explicit “full catalog” naming for Phase 4.4. Repairs remain non-persistent (`repairs` ID) and are excluded from level retention workflows by manager behavior.
 - **Deviations**: None from the 4.4 component requirements; all items are AI-owned and fully implemented in this pass.
+
+## Component 4.5 — Insurance Manager & Death Retention
+- **Status**: Completed
+- **What was built**: Added a dedicated `InsuranceManager` that owns insurance tier state synchronization, per-level insurance cost scaling, recurring deduction behavior with automatic lapse-to-OFF when unaffordable, and upgrade retention calculations/application for death flow handoff.
+- **Key files created**:
+  - `app/src/managers/insurance_manager.py` — `InsuranceManager` implementation with tier configs (OFF/BASIC/PREMIUM), `get_tier_cost()`, `deduct_level_cost()`, `calculate_retained_upgrades()`, and `apply_retention()`
+  - `tests/test_insurance_manager.py` — focused unit tests for tier updates, cost scaling, deduction success/failure, retention fractions by tier, repairs exclusion, and retention application forwarding
+  - `docs/components/phase-4-component-4-5-overview.md` — technical overview for future contributors
+- **Key files modified**:
+  - `app/src/managers/__init__.py` — exported `InsuranceManager`
+- **Design decisions**: Implemented small compatibility helpers inside `InsuranceManager` so it can work with both the current `CurrencyManager` API (`spend`/`get_balance`) and the planned Phase 4.6 API (`can_spend`/`deduct`) without introducing broad refactors.
+- **Deviations**: Shop-node tier-cycling UI integration is intentionally deferred to the shop-flow components (`4.7`/`4.8`) while 4.5 delivers the full insurance business logic and test coverage required by this component.
