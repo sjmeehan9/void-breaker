@@ -24,7 +24,6 @@ At the start of every session, locate and thoroughly read:
 | `solution-design.md` | Detailed technical solution design document |
 | `phase-X-component-breakdown.md` | The complete spec for every component in the phase just completed |
 | `implementation-context-phase-X.md` | Running log of what was actually built for each component |
-| `phase-X-component-X-Y-overview.md` | Summary of the component implementation (read only if needed for context) |
 | `phase-plan.md` | Phase sequencing and delivery strategy |
 | `phase-summary.md` | Summary of completed phases (if this is Phase 2+), for continuity and tone |
 

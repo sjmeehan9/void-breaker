@@ -143,8 +143,6 @@ Upon successful completion of the component, **update `implementation-context-ph
 - Include: component name, what was built, key files created/modified, design decisions made, and any deviations from the original spec (with justification).
 - Be appended to the existing document content, preserving prior component entries.
 
-Then, create a new document `phase-X-component-X-Y-overview.md` (where X.Y is the component number) with a high-level summary of the component implementation for future reference. This document should also be no more than 100 lines of markdown and should be written for a technical audience who may need to understand the component without reading the full implementation context.
-
 ### 4.2 — Code Documentation
 
 - All public functions, classes, and modules have docstrings (Google style for Python, TSDoc for TypeScript).
@@ -166,7 +164,6 @@ Before declaring the component complete, verify every item:
 - [ ] Project evals pass (`scripts/evals.py` — no missing docstrings, no TODO/FIXME).
 - [ ] New dependencies are documented and justified.
 - [ ] `implementation-context-phase-X.md` is updated (≤100 lines for this component).
-- [ ] `phase-X-component-X-Y-overview.md` is created with a high-level summary of the component implementation (≤100 lines).
 - [ ] Code integrates cleanly with previously implemented components.
 
 ---

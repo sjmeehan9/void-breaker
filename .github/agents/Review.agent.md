@@ -25,7 +25,6 @@ At the start of every session, locate and thoroughly read:
 | `solution-design.md` | Detailed technical solution design document |
 | `phase-X-component-breakdown.md` | **Primary spec** — the definitive requirements for the component under review |
 | `implementation-context-phase-X.md` | What was actually built, design decisions made, files created/modified |
-| `phase-X-component-X-Y-overview.md` | Summary of the component implementation (read only if needed for context) |
 | `phase-plan.md` | Phase sequencing, dependencies, and integration points |
 
 After reading, provide a **review scope summary**:

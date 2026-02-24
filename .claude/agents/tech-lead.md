@@ -89,7 +89,6 @@ Create `docs/phase-X-component-breakdown.md` with the following template structu
 **Definition of Done**:
 - [ ] Code implemented and reviewed
 - [ ] Tests written and passing
-- [ ] Documentation created: Component Overview (`docs/components/phase-X-component-X-Y-overview.md`)
 - [ ] Documentation updated/created: Phase Component Overview (`docs/implementation-context-phase-X.md`). Maximum 100 lines of markdown per component implemented in the phase.
 - [ ] No regression in existing functionality
 - [ ] Deployed to dev/staging environment

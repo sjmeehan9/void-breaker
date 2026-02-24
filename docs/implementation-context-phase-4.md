@@ -4,8 +4,8 @@
 - 4.1 Human Setup & Shop Assets — Completed
 - 4.2 Shop Phase State & Layout — Completed
 - 4.3 Shop Node Entities & Interaction — Completed
-- 4.4 Upgrade Manager & Stat Application — Not Started
-- 4.5 Insurance Manager & Death Retention — Not Started
+- 4.4 Upgrade Manager & Stat Application — Completed
+- 4.5 Insurance Manager & Death Retention — Completed
 - 4.6 Currency Manager & Economy Flow — Not Started
 - 4.7 Ship Re-Centring & Purchase Flow Polish — Not Started
 - 4.8 E2E Testing & Documentation — Not Started

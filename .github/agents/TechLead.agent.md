@@ -132,7 +132,6 @@ You are a **Senior Tech Lead**. Your sole purpose is to guide implementation by 
 **Definition of Done**:
 - [ ] Code implemented and reviewed
 - [ ] Tests written and passing
-- [ ] Documentation created: Component Overview (`docs/components/phase-X-component-X-Y-overview.md`)
 - [ ] Documentation updated/created: Phase Component Overview (`docs/implementation-context-phase-X.md`). Maximum 100 lines of markdown per component implemented in the phase.
 - [ ] No regression in existing functionality
 - [ ] Deployed to dev/staging environment
@@ -185,7 +184,7 @@ You are a **Senior Tech Lead**. Your sole purpose is to guide implementation by 
 - **Integration Testing**: [Key integration points to test]
 
 ### Documentation Requirements
-- **Developer Context Documentation**: [Phase Component Overview (`implementation-context-phase-X.md`), Component Overview (`phase-X-component-X-Y-overview.md`)]
+- **Developer Context Documentation**: [Phase Component Overview (`implementation-context-phase-X.md`)]
 - **Agent Runbook**: [Runbook for AI agent application running, execution of end-to-end testing scenarios] 
 - **Code Documentation**: [Inline comments, docstrings]
 - **API Documentation**: [OpenAPI/Swagger specs]

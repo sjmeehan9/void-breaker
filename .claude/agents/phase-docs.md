@@ -22,7 +22,6 @@ At the start of every session, locate and thoroughly read:
 | `solution-design.md` | Technical solution design |
 | `phase-X-component-breakdown.md` | Complete spec for phase components |
 | `implementation-context-phase-X.md` | What was actually built |
-| `phase-X-component-X-Y-overview.md` | Component summaries (if needed) |
 | `phase-plan.md` | Phase sequencing |
 | `phase-summary.md` | Summary of completed phases (Phase 2+) |
 
@@ -69,7 +68,6 @@ You are the **final agent** spawned in an Implementation stage, after ALL compon
 Before you start, verify:
 - All components in `docs/agent-team-state.md` show status `Committed`.
 - All `implementation-context-phase-X.md` entries exist.
-- All `phase-X-component-X-Y-overview.md` files exist.
 - If any are missing, message the Lead Coordinator rather than proceeding with incomplete data.
 
 ### Document Ownership

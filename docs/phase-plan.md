@@ -311,7 +311,7 @@ VoidBreaker is implemented in six incremental phases, each building on the previ
 
 ### Documentation Requirements
 
-- **Developer Context Documentation**: Each phase produces `implementation-context-phase-X.md` summarising what was built, key decisions made, and patterns established. Each component produces `phase-X-component-X-Y-overview.md` in `docs/components/`.
+- **Developer Context Documentation**: Each phase produces `implementation-context-phase-X.md` summarising what was built, key decisions made, and patterns established.
 - **Code Documentation**: Google-style docstrings on all public functions, classes, and modules per `copilot.instructions.md`. Inline comments only where logic is non-obvious.
 - **API Documentation**: Not applicable (no external API). Internal module interfaces documented via type hints and docstrings.
 - **Architecture Decision Records**: Key decisions (physics tuning values, shop layout algorithm, insurance cost scaling) documented in implementation context files.

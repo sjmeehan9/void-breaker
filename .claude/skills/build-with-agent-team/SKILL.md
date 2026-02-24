@@ -463,7 +463,7 @@ This is critical for parallel implementation. When multiple Implement agents wor
    - **Ownership:** Exact file list from the component spec.
    - **Does NOT touch:** Files owned by other active agents, files outside the component spec.
    - **Input contract:** The component's section from `phase-X-component-breakdown.md`, plus `implementation-context-phase-X.md` for awareness of what's already built.
-   - **Output contract:** Source files, tests, updated `implementation-context-phase-X.md` (append ≤100 lines), new `phase-X-component-X-Y-overview.md` (≤100 lines).
+   - **Output contract:** Source files, tests, updated `implementation-context-phase-X.md` (append ≤100 lines).
    - **Coordination:** "Message the Lead Coordinator if you need to modify a file outside your ownership. Message the Lead Coordinator when implementation is complete and all validation passes."
    - **Validation:** The full validation sequence from `copilot.instructions.md`.
 
@@ -518,7 +518,6 @@ pnpm test
 Additionally:
 - [ ] All components in `agent-team-state.md` show status `Committed`
 - [ ] `implementation-context-phase-X.md` has entries for every component
-- [ ] `phase-X-component-X-Y-overview.md` exists for every component
 - [ ] `phase-summary.md` exists and is ≤150 lines per phase
 - [ ] Git log shows one commit per component with conventional format
 - [ ] No TODO, FIXME, or placeholder code in committed files
@@ -751,11 +750,10 @@ Conflict prevented before it happens ✅
 2. Full validation suite passes (formatters, linters, tests, evals).
 3. Git log shows conventional commits for each component.
 4. `implementation-context-phase-X.md` has entries for all components.
-5. `phase-X-component-X-Y-overview.md` exists for all components.
-6. `phase-summary.md` exists (≤150 lines per phase).
-7. No TODO, FIXME, or placeholder code in committed files.
-8. Steward confirms documentation consistency.
-9. Lead Coordinator has run end-to-end validation.
+5. `phase-summary.md` exists (≤150 lines per phase).
+6. No TODO, FIXME, or placeholder code in committed files.
+7. Steward confirms documentation consistency.
+8. Lead Coordinator has run end-to-end validation.
 
 ---
 

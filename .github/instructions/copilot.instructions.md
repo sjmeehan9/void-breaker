@@ -70,7 +70,6 @@ The following documents drive phased implementation and must be kept up to date:
 | `phase-X-component-breakdown.md` | `void-breaker/docs/` | Complete requirements for every component in a phase |
 | `phase-plan.md` | `void-breaker/docs/` | Phase sequencing, dependencies, delivery strategy |
 | `implementation-context-phase-X.md` | `void-breaker/docs/` | Running log of implemented components within a phase |
-| `phase-X-component-X-Y-overview.md` | `void-breaker/docs/components/` | Summary of the component implementation |
 | `phase-summary.md` | `void-breaker/docs/` | Post-completion summary of delivered phases |
 
 ## 2) Code Style and Conventions

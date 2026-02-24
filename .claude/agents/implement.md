@@ -67,7 +67,6 @@ python scripts/evals.py
 
 ## 3) Documentation & Context Updates
 - Update `implementation-context-phase-X.md` (≤100 lines per component, appended).
-- Create `phase-X-component-X-Y-overview.md` (≤100 lines).
 - Docstrings on all public interfaces. Inline comments for *why*.
 
 ## 4) Completion Checklist
@@ -120,7 +119,6 @@ You are one of potentially **multiple parallel Implement agents**, each working 
 Your implementation will be tested by a separate Test agent. Ensure:
 - Your code is runnable and all validation passes before reporting done.
 - Your `implementation-context-phase-X.md` entry clearly describes what was built, key files, and any design decisions.
-- Your `phase-X-component-X-Y-overview.md` provides enough context for the Test agent to understand the component without reading every line of code.
 
 ---
 

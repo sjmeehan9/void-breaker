@@ -23,7 +23,6 @@ At the start of every session, locate and thoroughly read:
 | `copilot.instructions.md` | Coding standards, testing requirements, and best practices |
 | `phase-X-component-breakdown.md` | **Primary spec** — the definitive requirements for the component under test |
 | `implementation-context-phase-X.md` | What was actually built, design decisions made, files created |
-| `phase-X-component-X-Y-overview.md` | Summary of the component implementation |
 | `phase-plan.md` | Dependencies and integration points with other components |
 
 After reading, provide a **one-sentence overview of each document** and a **test scope summary**:

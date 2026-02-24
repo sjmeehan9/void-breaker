@@ -105,7 +105,7 @@ Create `docs/phase-plan.md` with following template structure:
 - **Security Testing**: [Vulnerability scanning, pen testing]
 
 ### Documentation Requirements
-- **Developer Context Documentation**: [Phase Component Overview (`implementation-context-phase-X.md`), Component Overview (`phase-X-component-X-Y-overview.md`)]
+- **Developer Context Documentation**: [Phase Component Overview (`implementation-context-phase-X.md`)]
 - **Agent Runbook**: [Runbook for AI agent application running, execution of end-to-end testing scenarios] 
 - **Code Documentation**: [Inline comments, docstrings]
 - **API Documentation**: [OpenAPI/Swagger specs]

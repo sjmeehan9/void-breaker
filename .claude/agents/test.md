@@ -20,7 +20,6 @@ At the start of every session, locate and thoroughly read:
 | `copilot.instructions.md` | Coding standards and testing requirements |
 | `phase-X-component-breakdown.md` | **Primary spec** — component requirements |
 | `implementation-context-phase-X.md` | What was built, design decisions, files created |
-| `phase-X-component-X-Y-overview.md` | Component implementation summary |
 | `phase-plan.md` | Dependencies and integration points |
 
 Provide a **test scope summary**: component under test, core functionality, integration points, user-facing behaviour.
@@ -80,7 +79,7 @@ When operating as part of an agent team:
 You are spawned **after an Implement agent completes** a component. You test that specific component's implementation. Your test report determines whether the component proceeds to Review (pass) or Debug (fail).
 
 ### Handoff from Implement Agent
-- Read the Implement agent's output: `implementation-context-phase-X.md` entry and `phase-X-component-X-Y-overview.md`.
+- Read the Implement agent's output: `implementation-context-phase-X.md` entry.
 - Verify the implementation exists and validation passes before starting your test plan.
 - If the implementation appears incomplete or validation fails pre-test, message the Lead Coordinator immediately rather than proceeding.
 
