@@ -55,3 +55,19 @@
   - `app/src/entities/__init__.py` — exported `ShopNode` and `ContinueNode`
 - **Design decisions**: Kept insurance as a non-purchasable placeholder node in 4.3 so visuals/interactions are complete now without pre-empting Phase 4.5 insurance-tier business rules. Reused `ShipState.recalculate_effective_stats()` for immediate stat propagation after purchases to avoid introducing an interim manager abstraction before 4.4.
 - **Deviations**: The denied visual feedback uses dimming + bounce + denied sound and reserves explicit crossed-out icon rendering for a later polish pass to keep this component minimal and localized.
+
+## Component 4.4 — Upgrade Manager & Stat Application
+- **Status**: Completed
+- **What was built**: Implemented `UpgradeManager` as the central authority for upgrade levels, cost scaling, one-shot repairs, score multiplier tracking, and recalculation of effective ship stats plus game-state shields/max shields. Shop purchases now route through the manager instead of mutating ship stats directly.
+- **Key files created**:
+  - `app/src/managers/upgrade_manager.py` — upgrade level tracking, stat application, repairs, score multiplier, bulk set/get APIs
+  - `tests/test_upgrade_manager.py` — focused unit tests for apply/cost/cap/repair/set-level/score-multiplier/definition coverage behavior
+  - `docs/components/phase-4-component-4-4-overview.md` — technical component summary for future contributors
+- **Key files modified**:
+  - `app/src/config/upgrade_definitions.py` — populated full 11-upgrade catalog and added `score_bonus`
+  - `app/src/states/shop.py` — integrated `UpgradeManager` into purchase flow and node-level lookups
+  - `app/src/managers/__init__.py` — exported `UpgradeManager`
+  - `app/src/config/game_config.py` — added `score_bonus_level` and aligned `ShipState.recalculate_effective_stats()` with new stat keys
+  - `tests/test_shop_node.py`, `tests/test_config.py` — updated expectations to match revised upgrade balance values
+- **Design decisions**: Kept `UPGRADE_DEFINITIONS` as a compatibility alias to `ALL_UPGRADES` so existing imports remain stable while enabling explicit “full catalog” naming for Phase 4.4. Repairs remain non-persistent (`repairs` ID) and are excluded from level retention workflows by manager behavior.
+- **Deviations**: None from the 4.4 component requirements; all items are AI-owned and fully implemented in this pass.

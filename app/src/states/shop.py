@@ -18,11 +18,11 @@ from asterax.app.src.config.game_config import (
     ShipState,
 )
 from asterax.app.src.config.upgrade_definitions import (
-    UPGRADE_DEFINITIONS,
     get_upgrade_by_id,
 )
 from asterax.app.src.entities.player_ship import PlayerShip
 from asterax.app.src.entities.shop_node import ContinueNode, ShopNode
+from asterax.app.src.managers.upgrade_manager import UpgradeManager
 from asterax.app.src.states.base_state import BaseState
 
 if TYPE_CHECKING:
@@ -52,6 +52,7 @@ class ShopPhaseState(BaseState):
         self.game_state = game_state or RunGameState()
         self.ship_state = ship_state or ShipState()
         self.player_ship: PlayerShip | None = None
+        self.upgrade_manager = UpgradeManager(self.ship_state, self.game_state)
         self.shop_nodes = arcade.SpriteList(use_spatial_hash=True)
         self._node_views: list[_ShopNodeView] = []
         self._continue_node: ContinueNode | None = None
@@ -153,7 +154,7 @@ class ShopPhaseState(BaseState):
             ("defense_shields", shop_dir / "orb_defense.png", None),
             ("mobility_thrust", shop_dir / "orb_mobility.png", None),
             ("economy_magnet", shop_dir / "orb_economy.png", None),
-            ("repair", shop_dir / "orb_repair.png", None),
+            ("repairs", shop_dir / "orb_repair.png", None),
             (None, shop_dir / "orb_insurance.png", "Insurance"),
         ]
         angle_step = 360.0 / len(node_definitions)
@@ -239,22 +240,19 @@ class ShopPhaseState(BaseState):
             self._apply_denied_bounce(node)
             return
 
-        cost = node.calculate_cost(current_level)
+        definition = node.upgrade_definition
+        if definition is None:
+            self._interaction_cooldown_seconds = 0.2
+            self._play_shop_sound("shop_denied")
+            self._apply_denied_bounce(node)
+            return
+
+        cost = self.upgrade_manager.get_cost(definition.id)
         self.game_state.currency -= cost
         self.game_state.run_stats.currency_spent += cost
         self.game_state.run_stats.upgrades_purchased += 1
 
-        definition = node.upgrade_definition
-        if definition is not None:
-            if definition.id == "repair":
-                self.game_state.shields = min(
-                    self.game_state.max_shields,
-                    self.game_state.shields + definition.effect_per_level,
-                )
-            else:
-                level_attr = f"{definition.id}_level"
-                setattr(self.ship_state, level_attr, current_level + 1)
-                self.ship_state.recalculate_effective_stats(UPGRADE_DEFINITIONS)
+        self.upgrade_manager.apply_upgrade(definition.id)
 
         self._interaction_cooldown_seconds = 0.2
         self._play_shop_sound("shop_purchase")
@@ -263,7 +261,7 @@ class ShopPhaseState(BaseState):
         """Resolve the ship's current level for a node's upgrade."""
         if node.upgrade_definition is None:
             return 0
-        return int(getattr(self.ship_state, f"{node.upgrade_definition.id}_level", 0))
+        return self.upgrade_manager.get_level(node.upgrade_definition.id)
 
     def _play_shop_sound(self, sound_name: str) -> None:
         """Play a shop sound effect when an audio manager is available."""

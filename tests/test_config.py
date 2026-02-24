@@ -56,9 +56,9 @@ def test_get_upgrade_cost_scales_per_level() -> None:
     definition = get_upgrade_by_id("weapon_fire_rate")
     assert definition is not None
 
-    assert get_upgrade_cost(definition, 0) == 50
-    assert get_upgrade_cost(definition, 1) == 75
-    assert get_upgrade_cost(definition, 5) == int(50 * (1.5**5))
+    assert get_upgrade_cost(definition, 0) == 80
+    assert get_upgrade_cost(definition, 1) == 120
+    assert get_upgrade_cost(definition, 5) == int(80 * (1.5**5))
 
 
 def test_get_difficulty_scales_and_enables_enemies_progressively() -> None:
@@ -124,7 +124,7 @@ def test_ship_state_recalculate_effective_stats_applies_upgrades() -> None:
     assert ship.effective_damage == ship.base_damage + (1 * 0.3)
     assert ship.effective_thrust == ship.base_thrust + (3 * 60.0)
     assert ship.effective_max_shields == ship.base_shields + (2 * 25.0)
-    assert ship.effective_magnet_radius == ship.base_magnet_radius + (1 * 50.0)
+    assert ship.effective_magnet_radius == ship.base_magnet_radius + (1 * 30.0)
 
 
 def test_enums_expose_expected_members() -> None:
