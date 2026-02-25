@@ -7,7 +7,7 @@
 - 4.4 Upgrade Manager & Stat Application — Completed
 - 4.5 Insurance Manager & Death Retention — Completed
 - 4.6 Currency Manager & Economy Flow — Completed
-- 4.7 Ship Re-Centring & Purchase Flow Polish — Not Started
+- 4.7 Ship Re-Centring & Purchase Flow Polish — Completed
 - 4.8 E2E Testing & Documentation — Not Started
 
 ## Component 4.1 — Human Setup & Shop Assets
@@ -97,3 +97,20 @@
   - `docs/components/phase-4-component-4-6-overview.md` — created
 - **Design decisions**: Made `game_state` optional (not required) so existing tests and standalone usages continue without modification. `deduct()` delegates to `spend()` — single deduction path avoids divergence. `CurrencyRunStats` is a dataclass rather than a plain tuple for clarity at the game-over summary call site.
 - **Deviations**: None from component requirements. All 177 tests pass; evals pass.
+
+## Component 4.7 — Ship Re-Centring & Purchase Flow Polish
+- **Status**: Completed
+- **What was built**: Implemented the full polished shop purchase loop with smooth post-purchase ship re-centering, collision lockout during interpolation, manager-driven spend/apply orchestration for upgrades and insurance, and unified Continue flow for both node collision and Enter key.
+- **Key files created**:
+  - `docs/components/phase-4-component-4-7-overview.md` — component summary and validation log
+- **Key files modified**:
+  - `app/src/states/shop.py` — added re-centering state machine (`_start_recentre`, `_update_recentre`, `_is_recentring`), quadratic ease-out interpolation, collision gating during recenter, `_handle_node_collision` orchestration, insurance-tier cycling purchases, and `_handle_continue` with level-clear audio + recurring insurance deduction before transition
+  - `app/src/entities/shop_node.py` — added explicit node-type metadata (`upgrade_id`, `is_insurance_node`, `is_continue_node`) and optional affordability override support in `update_visual_state()` for insurance-node pulsing
+  - `tests/test_shop_phase_state.py` — added coverage for recenter completion, collision blocking during recenter, ease-out curve values, and Enter-key continue audio/transition
+  - `tests/test_shop_node.py` — added coverage for node-type metadata and insurance-node purchase flow (tier advance + spend)
+- **Design decisions**: Kept insurance interaction as a single node that cycles tiers (`OFF -> BASIC -> PREMIUM -> OFF`) to match the recommended simple v1.0 flow in the component notes. Re-used `CurrencyManager` and `InsuranceManager` directly inside `ShopPhaseState` to enforce transaction validation and avoid direct currency mutation paths.
+- **Validation run**:
+  - `pytest -q tests/test_shop_node.py tests/test_shop_phase_state.py`
+  - `pytest -q tests/test_insurance_manager.py tests/test_currency.py`
+  - Result: `36 passed`
+- **Deviations**: None from 4.7 acceptance criteria. Insurance cost is charged both for tier changes (when purchasing insurance upgrades in shop) and for per-level recurring deductions on Continue transition, as specified across components 4.5 and 4.7.

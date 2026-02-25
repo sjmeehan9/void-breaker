@@ -26,6 +26,7 @@ class ShopNode(arcade.Sprite):
         center_y: float,
         upgrade_definition: UpgradeDefinition | None,
         label_override: str | None = None,
+        is_insurance_node: bool = False,
     ) -> None:
         """Initialise a shop node sprite with optional upgrade metadata."""
         super().__init__(
@@ -35,6 +36,7 @@ class ShopNode(arcade.Sprite):
         )
         self.upgrade_definition = upgrade_definition
         self._label_override = label_override
+        self._is_insurance_node = is_insurance_node
         self._pulse_time_seconds = 0.0
 
     @property
@@ -45,6 +47,23 @@ class ShopNode(arcade.Sprite):
         if self.upgrade_definition is None:
             return "Unavailable"
         return self.upgrade_definition.name
+
+    @property
+    def upgrade_id(self) -> str | None:
+        """Return the upgrade identifier for this node when available."""
+        if self.upgrade_definition is None:
+            return None
+        return self.upgrade_definition.id
+
+    @property
+    def is_insurance_node(self) -> bool:
+        """Return whether this node represents insurance-tier cycling."""
+        return self._is_insurance_node
+
+    @property
+    def is_continue_node(self) -> bool:
+        """Return whether this node is the continue action node."""
+        return False
 
     def calculate_cost(self, current_level: int) -> int:
         """Calculate next-level cost from base cost and geometric scaling."""
@@ -70,8 +89,22 @@ class ShopNode(arcade.Sprite):
         currency: int,
         current_level: int,
         delta_time: float,
+        can_afford_override: bool | None = None,
     ) -> None:
         """Update pulsing/dimmed alpha based on affordability and level cap."""
+        if can_afford_override is not None:
+            if not can_afford_override:
+                self.alpha = _UNAFFORDABLE_ALPHA
+                return
+            self._pulse_time_seconds = (
+                self._pulse_time_seconds + max(0.0, delta_time)
+            ) % _PULSE_PERIOD_SECONDS
+            pulse = (math.sin((2.0 * math.pi * self._pulse_time_seconds)) + 1.0) / 2.0
+            self.alpha = int(
+                _PULSE_MIN_ALPHA + (_PULSE_MAX_ALPHA - _PULSE_MIN_ALPHA) * pulse
+            )
+            return
+
         if self.upgrade_definition is None:
             self.alpha = _MAXED_ALPHA
             return
@@ -123,6 +156,11 @@ class ContinueNode(ShopNode):
     def can_purchase(self, currency: int, current_level: int) -> bool:
         """Continue action is always available and has no cost."""
         del currency, current_level
+        return True
+
+    @property
+    def is_continue_node(self) -> bool:
+        """Return whether this node exits the shop."""
         return True
 
     def update_visual_state(

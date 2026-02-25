@@ -6,7 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import arcade
-from asterax.app.src.config.game_config import GameState
+from asterax.app.src.config.game_config import GameState, InsuranceTier
 from asterax.app.src.config.upgrade_definitions import get_upgrade_by_id
 from asterax.app.src.entities.shop_node import ContinueNode, ShopNode
 from asterax.app.src.states.shop import ShopPhaseState
@@ -132,4 +132,63 @@ def test_shop_phase_collision_purchases_upgrade(monkeypatch) -> None:
     assert state.ship_state.weapon_fire_rate_level == 1
     assert state.game_state.run_stats.currency_spent == 80
     assert state.game_state.run_stats.upgrades_purchased == 1
+    assert "shop_purchase" in audio_stub.played
+
+
+def test_shop_node_properties_expose_node_type_metadata() -> None:
+    """Shop nodes should expose type metadata used by shop collision flow."""
+    definition = get_upgrade_by_id("weapon_fire_rate")
+    assert definition is not None
+    upgrade_node = ShopNode(
+        texture_path=_shop_texture("orb_weapon.png"),
+        center_x=0.0,
+        center_y=0.0,
+        upgrade_definition=definition,
+    )
+    insurance_node = ShopNode(
+        texture_path=_shop_texture("orb_insurance.png"),
+        center_x=0.0,
+        center_y=0.0,
+        upgrade_definition=None,
+        label_override="Insurance",
+        is_insurance_node=True,
+    )
+
+    assert upgrade_node.upgrade_id == "weapon_fire_rate"
+    assert not upgrade_node.is_insurance_node
+    assert not upgrade_node.is_continue_node
+    assert insurance_node.upgrade_id is None
+    assert insurance_node.is_insurance_node
+    assert not insurance_node.is_continue_node
+
+
+def test_shop_phase_insurance_node_cycles_tier_and_spends(monkeypatch) -> None:
+    """Insurance node collision should spend credits and advance insurance tier."""
+    audio_stub = _AudioStub()
+    monkeypatch.setattr(
+        arcade,
+        "get_window",
+        lambda: SimpleNamespace(
+            width=1280,
+            height=960,
+            input_manager=_InputStub(),
+            audio_manager=audio_stub,
+        ),
+    )
+
+    state = ShopPhaseState(_MachineStub(), game_state=GameState(current_level=2, currency=500))
+    state.on_enter()
+    insurance_node = next(
+        view.sprite for view in state._node_views if view.sprite.is_insurance_node
+    )  # noqa: SLF001
+    assert state.player_ship is not None
+    state.player_ship.center_x = insurance_node.center_x
+    state.player_ship.center_y = insurance_node.center_y
+
+    expected_cost = state.insurance_manager.get_tier_cost(InsuranceTier.BASIC, 2)
+    state.on_update(0.016)
+
+    assert state.insurance_manager.get_tier() is InsuranceTier.BASIC
+    assert state.game_state.currency == 500 - expected_cost
+    assert state.game_state.run_stats.currency_spent == expected_cost
     assert "shop_purchase" in audio_stub.played

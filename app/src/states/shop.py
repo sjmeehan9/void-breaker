@@ -9,9 +9,11 @@ from typing import TYPE_CHECKING
 
 import arcade
 from asterax.app.src.config.game_config import (
+    GAME_CONFIG,
     PHYSICS_CONFIG,
     SHOP_LAYOUT_CONFIG,
     GamePhase,
+    InsuranceTier,
 )
 from asterax.app.src.config.game_config import GameState as RunGameState
 from asterax.app.src.config.game_config import (
@@ -22,6 +24,8 @@ from asterax.app.src.config.upgrade_definitions import (
 )
 from asterax.app.src.entities.player_ship import PlayerShip
 from asterax.app.src.entities.shop_node import ContinueNode, ShopNode
+from asterax.app.src.managers.currency_manager import CurrencyManager
+from asterax.app.src.managers.insurance_manager import InsuranceManager
 from asterax.app.src.managers.upgrade_manager import UpgradeManager
 from asterax.app.src.states.base_state import BaseState
 
@@ -53,11 +57,22 @@ class ShopPhaseState(BaseState):
         self.ship_state = ship_state or ShipState()
         self.player_ship: PlayerShip | None = None
         self.upgrade_manager = UpgradeManager(self.ship_state, self.game_state)
+        self.currency_manager = CurrencyManager(self.game_state)
+        self.insurance_manager = InsuranceManager(
+            self.game_state.insurance,
+            self.currency_manager,
+            self.upgrade_manager,
+        )
         self.shop_nodes = arcade.SpriteList(use_spatial_hash=True)
         self._node_views: list[_ShopNodeView] = []
         self._continue_node: ContinueNode | None = None
         self._interaction_cooldown_seconds = 0.0
         self._transitioning_out = False
+        self._recentre_active = False
+        self._recentre_elapsed = 0.0
+        self._recentre_duration = GAME_CONFIG.shop_recentre_duration
+        self._recentre_start_x = 0.0
+        self._recentre_start_y = 0.0
 
     def on_enter(self) -> None:
         """Initialize shop ship placement and generate circular node layout."""
@@ -75,6 +90,8 @@ class ShopPhaseState(BaseState):
         self.player_ship.velocity_y = 0.0
         self.player_ship.angle = self.ship_state.angle
         self.game_state.phase = GamePhase.SHOP
+        self._recentre_active = False
+        self._recentre_elapsed = 0.0
         self._generate_node_layout(window.width, window.height)
 
     def on_exit(self) -> None:
@@ -83,6 +100,8 @@ class ShopPhaseState(BaseState):
         self._node_views.clear()
         self._continue_node = None
         self._interaction_cooldown_seconds = 0.0
+        self._recentre_active = False
+        self._recentre_elapsed = 0.0
 
     def on_update(self, delta_time: float) -> None:
         """Apply shop movement controls and check continue-node transition."""
@@ -92,24 +111,27 @@ class ShopPhaseState(BaseState):
             0.0, self._interaction_cooldown_seconds - max(0.0, delta_time)
         )
         window = arcade.get_window()
-        input_manager = window.input_manager
-        if input_manager.is_action_held(
-            "rotate_left"
-        ) and not input_manager.is_action_held("rotate_right"):
-            self.player_ship.apply_rotation(delta_time, direction=1)
-        elif input_manager.is_action_held(
-            "rotate_right"
-        ) and not input_manager.is_action_held("rotate_left"):
-            self.player_ship.apply_rotation(delta_time, direction=-1)
-        if input_manager.is_action_held("thrust"):
-            self.player_ship.apply_thrust(delta_time)
-        if input_manager.is_action_held("brake"):
-            self.player_ship.apply_brake(delta_time)
-        self.player_ship.apply_drag(delta_time)
-        self.player_ship.cap_speed()
-        self.player_ship.update_position(delta_time)
-        self.player_ship.update_cooldown(delta_time)
-        self._clamp_ship_to_bounds(window.width, window.height)
+        if self._is_recentring():
+            self._update_recentre(delta_time)
+        else:
+            input_manager = window.input_manager
+            if input_manager.is_action_held(
+                "rotate_left"
+            ) and not input_manager.is_action_held("rotate_right"):
+                self.player_ship.apply_rotation(delta_time, direction=1)
+            elif input_manager.is_action_held(
+                "rotate_right"
+            ) and not input_manager.is_action_held("rotate_left"):
+                self.player_ship.apply_rotation(delta_time, direction=-1)
+            if input_manager.is_action_held("thrust"):
+                self.player_ship.apply_thrust(delta_time)
+            if input_manager.is_action_held("brake"):
+                self.player_ship.apply_brake(delta_time)
+            self.player_ship.apply_drag(delta_time)
+            self.player_ship.cap_speed()
+            self.player_ship.update_position(delta_time)
+            self.player_ship.update_cooldown(delta_time)
+            self._clamp_ship_to_bounds(window.width, window.height)
         self._update_node_visual_states(delta_time)
         self._handle_node_collisions()
 
@@ -139,7 +161,7 @@ class ShopPhaseState(BaseState):
         if key == arcade.key.ESCAPE:
             self.state_machine.push_state(PauseState(self.state_machine))
         elif key == arcade.key.ENTER:
-            self._transition_to_combat()
+            self._handle_continue()
 
     def _generate_node_layout(self, width: float, height: float) -> None:
         """Generate a circular node arrangement with continue at the bottom."""
@@ -173,6 +195,7 @@ class ShopPhaseState(BaseState):
                 center_y=center_y + math.sin(angle_radians) * radius,
                 upgrade_definition=definition,
                 label_override=label_override,
+                is_insurance_node=upgrade_id is None,
             )
             self.shop_nodes.append(sprite)
             self._node_views.append(
@@ -208,33 +231,63 @@ class ShopPhaseState(BaseState):
 
     def _update_node_visual_states(self, delta_time: float) -> None:
         """Refresh affordability visuals for each node each frame."""
+        current_currency = self.currency_manager.get_balance()
         for node_view in self._node_views:
+            node = node_view.sprite
+            if node.is_insurance_node:
+                next_tier = self._get_next_insurance_tier()
+                insurance_cost = self.insurance_manager.get_tier_cost(
+                    next_tier,
+                    self.game_state.current_level,
+                )
+                can_afford = insurance_cost <= 0 or (
+                    current_currency >= insurance_cost
+                )
+                node.update_visual_state(
+                    currency=current_currency,
+                    current_level=0,
+                    delta_time=delta_time,
+                    can_afford_override=can_afford,
+                )
+                continue
             level = (
                 0 if node_view.is_continue else self._get_node_level(node_view.sprite)
             )
-            node_view.sprite.update_visual_state(
-                currency=self.game_state.currency,
+            node.update_visual_state(
+                currency=current_currency,
                 current_level=level,
                 delta_time=delta_time,
             )
 
     def _handle_node_collisions(self) -> None:
         """Handle continue, purchase, and denied collisions."""
-        if self.player_ship is None or self._interaction_cooldown_seconds > 0.0:
+        if (
+            self.player_ship is None
+            or self._interaction_cooldown_seconds > 0.0
+            or self._is_recentring()
+        ):
             return
         for node_view in self._node_views:
             if not arcade.check_for_collision(self.player_ship, node_view.sprite):
                 continue
-            if node_view.is_continue:
-                self._transition_to_combat()
-                return
-            self._attempt_purchase(node_view.sprite)
+            self._handle_node_collision(node_view.sprite)
             return
 
-    def _attempt_purchase(self, node: ShopNode) -> None:
+    def _handle_node_collision(self, node: ShopNode) -> None:
+        """Route node interactions to continue, insurance, or upgrade purchase."""
+        if node.is_continue_node:
+            self._handle_continue()
+            return
+        if node.is_insurance_node:
+            self._attempt_insurance_change()
+            return
+        self._attempt_upgrade_purchase(node)
+
+    def _attempt_upgrade_purchase(self, node: ShopNode) -> None:
         """Attempt an upgrade purchase and apply accepted or denied feedback."""
         current_level = self._get_node_level(node)
-        if not node.can_purchase(self.game_state.currency, current_level):
+        current_currency = self.currency_manager.get_balance()
+        if not node.can_purchase(current_currency, current_level):
             self._interaction_cooldown_seconds = 0.2
             self._play_shop_sound("shop_denied")
             self._apply_denied_bounce(node)
@@ -248,14 +301,48 @@ class ShopPhaseState(BaseState):
             return
 
         cost = self.upgrade_manager.get_cost(definition.id)
-        self.game_state.currency -= cost
+        if not self.currency_manager.spend(cost):
+            self._interaction_cooldown_seconds = 0.2
+            self._play_shop_sound("shop_denied")
+            self._apply_denied_bounce(node)
+            return
+
         self.game_state.run_stats.currency_spent += cost
         self.game_state.run_stats.upgrades_purchased += 1
 
-        self.upgrade_manager.apply_upgrade(definition.id)
+        if not self.upgrade_manager.apply_upgrade(definition.id):
+            self.currency_manager.earn(cost)
+            self.game_state.run_stats.currency_spent = max(
+                0,
+                self.game_state.run_stats.currency_spent - cost,
+            )
+            self._interaction_cooldown_seconds = 0.2
+            self._play_shop_sound("shop_denied")
+            self._apply_denied_bounce(node)
+            return
 
         self._interaction_cooldown_seconds = 0.2
         self._play_shop_sound("shop_purchase")
+        self._start_recentre()
+
+    def _attempt_insurance_change(self) -> None:
+        """Cycle to the next insurance tier when the tier-change cost is affordable."""
+        next_tier = self._get_next_insurance_tier()
+        insurance_cost = self.insurance_manager.get_tier_cost(
+            next_tier,
+            self.game_state.current_level,
+        )
+        if insurance_cost > 0 and not self.currency_manager.spend(insurance_cost):
+            self._interaction_cooldown_seconds = 0.2
+            self._play_shop_sound("shop_denied")
+            return
+
+        if insurance_cost > 0:
+            self.game_state.run_stats.currency_spent += insurance_cost
+        self.insurance_manager.set_tier(next_tier)
+        self._interaction_cooldown_seconds = 0.2
+        self._play_shop_sound("shop_purchase")
+        self._start_recentre()
 
     def _get_node_level(self, node: ShopNode) -> int:
         """Resolve the ship's current level for a node's upgrade."""
@@ -305,3 +392,70 @@ class ShopPhaseState(BaseState):
                 initial_run_stats=self.game_state.run_stats,
             )
         )
+
+    def _is_recentring(self) -> bool:
+        """Return whether the ship is currently interpolating back to center."""
+        return self._recentre_active
+
+    def _start_recentre(self) -> None:
+        """Start smooth interpolation of the ship back to playfield center."""
+        if self.player_ship is None:
+            return
+        self._recentre_active = True
+        self._recentre_elapsed = 0.0
+        self._recentre_start_x = self.player_ship.center_x
+        self._recentre_start_y = self.player_ship.center_y
+
+    def _update_recentre(self, delta_time: float) -> None:
+        """Advance ease-out re-centering interpolation by one frame."""
+        if self.player_ship is None:
+            return
+        duration = max(1e-6, self._recentre_duration)
+        self._recentre_elapsed += max(0.0, delta_time)
+        progress = min(1.0, self._recentre_elapsed / duration)
+        eased_progress = self._ease_out_quadratic(progress)
+
+        window = arcade.get_window()
+        target_x = window.width / 2
+        target_y = window.height / 2
+        self.player_ship.center_x = self._recentre_start_x + (
+            target_x - self._recentre_start_x
+        ) * eased_progress
+        self.player_ship.center_y = self._recentre_start_y + (
+            target_y - self._recentre_start_y
+        ) * eased_progress
+        if progress >= 1.0:
+            self._recentre_active = False
+            self.player_ship.center_x = target_x
+            self.player_ship.center_y = target_y
+            self.player_ship.velocity_x = 0.0
+            self.player_ship.velocity_y = 0.0
+
+    @staticmethod
+    def _ease_out_quadratic(progress: float) -> float:
+        """Apply a quadratic ease-out curve to normalized interpolation progress."""
+        clamped_progress = max(0.0, min(1.0, progress))
+        return 1.0 - ((1.0 - clamped_progress) ** 2)
+
+    def _handle_continue(self) -> None:
+        """Apply level-transition side effects then switch back to combat."""
+        if self._transitioning_out:
+            return
+        self._play_shop_sound("level_clear")
+        balance_before_deduction = self.currency_manager.get_balance()
+        self.insurance_manager.deduct_level_cost(self.game_state.current_level)
+        balance_after_deduction = self.currency_manager.get_balance()
+        if balance_after_deduction < balance_before_deduction:
+            self.game_state.run_stats.currency_spent += (
+                balance_before_deduction - balance_after_deduction
+            )
+        self._transition_to_combat()
+
+    def _get_next_insurance_tier(self) -> InsuranceTier:
+        """Return the next tier in OFF -> BASIC -> PREMIUM -> OFF cycle."""
+        current_tier = self.insurance_manager.get_tier()
+        if current_tier == InsuranceTier.OFF:
+            return InsuranceTier.BASIC
+        if current_tier == InsuranceTier.BASIC:
+            return InsuranceTier.PREMIUM
+        return InsuranceTier.OFF
