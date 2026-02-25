@@ -1,4 +1,4 @@
-"""Shared pytest fixtures for Phase 1 and Phase 2 test modules."""
+"""Shared pytest fixtures for Phase 1 through Phase 4 test modules."""
 
 from __future__ import annotations
 
@@ -12,13 +12,18 @@ from asterax.app.src.config.game_config import (
     AsteroidConfig,
     GameConfig,
     GameState,
+    InsuranceState,
     PhysicsConfig,
+    ShipState,
 )
+from asterax.app.src.config.upgrade_definitions import UPGRADE_DEFINITIONS
 from asterax.app.src.entities.player_ship import PlayerShip
 from asterax.app.src.input.input_manager import InputManager
 from asterax.app.src.managers.currency_manager import CurrencyManager
 from asterax.app.src.managers.entity_manager import EntityManager
+from asterax.app.src.managers.insurance_manager import InsuranceManager
 from asterax.app.src.managers.score_manager import ScoreManager
+from asterax.app.src.managers.upgrade_manager import UpgradeManager
 from asterax.app.src.persistence.persistence_manager import PersistenceManager
 from asterax.app.src.persistence.schemas import GameSettings
 from asterax.app.src.physics.collisions import CollisionSystem
@@ -111,3 +116,40 @@ def score_manager() -> ScoreManager:
 def currency_manager() -> CurrencyManager:
     """Return a currency manager initialized at zero."""
     return CurrencyManager()
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 fixtures
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def ship_state() -> ShipState:
+    """Return a default mutable ship-state model for Phase 4 tests."""
+    return ShipState()
+
+
+@pytest.fixture
+def sample_upgrade_definitions() -> list:
+    """Return the full upgrade definition catalog for parameterised tests."""
+    return list(UPGRADE_DEFINITIONS)
+
+
+@pytest.fixture
+def upgrade_manager(ship_state: ShipState, game_state: GameState) -> UpgradeManager:
+    """Return an upgrade manager wired to fresh ship and game state."""
+    return UpgradeManager(ship_state, game_state)
+
+
+@pytest.fixture
+def insurance_manager(
+    game_state: GameState,
+    currency_manager: CurrencyManager,
+    upgrade_manager: UpgradeManager,
+) -> InsuranceManager:
+    """Return an insurance manager wired to shared test collaborators."""
+    return InsuranceManager(
+        game_state.insurance,
+        currency_manager,
+        upgrade_manager,
+    )

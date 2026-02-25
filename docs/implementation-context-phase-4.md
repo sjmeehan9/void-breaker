@@ -8,7 +8,7 @@
 - 4.5 Insurance Manager & Death Retention — Completed
 - 4.6 Currency Manager & Economy Flow — Completed
 - 4.7 Ship Re-Centring & Purchase Flow Polish — Completed
-- 4.8 E2E Testing & Documentation — Not Started
+- 4.8 E2E Testing & Documentation — Completed
 
 ## Component 4.1 — Human Setup & Shop Assets
 - **Status**: Completed
@@ -114,3 +114,17 @@
   - `pytest -q tests/test_insurance_manager.py tests/test_currency.py`
   - Result: `36 passed`
 - **Deviations**: None from 4.7 acceptance criteria. Insurance cost is charged both for tier changes (when purchasing insurance upgrades in shop) and for per-level recurring deductions on Continue transition, as specified across components 4.5 and 4.7.
+
+## Component 4.8 — E2E Testing & Documentation
+- **Status**: Completed
+- **What was built**: Comprehensive test coverage for all Phase 4 modules (105 new tests across 3 new test files) plus component overview documentation for 4.2–4.6. Added conftest fixtures for `ship_state`, `upgrade_manager`, `insurance_manager`, and `sample_upgrade_definitions`.
+- **Key files created**:
+  - `tests/test_upgrades.py` — 30 tests: TestUpgradeApplication, TestCostScaling (parametrized x10 upgrades), TestStatRecalculation (parametrized x7 stats), TestRepairs, TestScoreMultiplier, TestSetLevels, TestUpgradeDefinitions
+  - `tests/test_insurance.py` — 28 tests: TestInsuranceTiers, TestCostDeduction (parametrized x7 levels), TestCostDeductionFailure, TestRetentionCalculation (parametrized x3 tiers), TestRetentionExcludesRepairs, TestApplyRetention, TestInsuranceManagerIntegration (multi-level deduction)
+  - `tests/test_shop.py` — 47 tests: TestShopNodeCost, TestShopNodeAffordability, TestShopLayout, TestRecentring, TestPurchaseFlow, TestDeniedFlow, TestCombatShopCombatLoop, TestCostScalingAllUpgrades (parametrized x11), TestInsufficientCurrencyDenial, TestMultiLevelRunE2E
+  - `docs/components/phase-4-component-4-2-overview.md` through `phase-4-component-4-6-overview.md`
+- **Key files modified**:
+  - `tests/conftest.py` — added `ship_state`, `sample_upgrade_definitions`, `upgrade_manager`, `insurance_manager` fixtures
+- **Coverage results**: `currency_manager.py` 100%, `upgrade_manager.py` 98%, `insurance_manager.py` 86%, `shop_node.py` 83%, `states/shop.py` 82%
+- **Design decisions**: New test files (`test_upgrades.py`, `test_insurance.py`, `test_shop.py`) provide the structured test-class organization required by the spec while existing per-component test files (`test_upgrade_manager.py`, `test_insurance_manager.py`, `test_shop_node.py`, `test_shop_phase_state.py`) remain for backward compatibility. All tests are pure logic — no Arcade window or GPU required.
+- **Deviations**: `test_currency.py` already had comprehensive 4.6 coverage (15 unit tests) and was not replaced — the spec's `test_currency.py` deliverable was already satisfied by component 4.6.

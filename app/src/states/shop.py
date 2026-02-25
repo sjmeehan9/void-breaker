@@ -13,10 +13,10 @@ from asterax.app.src.config.game_config import (
     PHYSICS_CONFIG,
     SHOP_LAYOUT_CONFIG,
     GamePhase,
-    InsuranceTier,
 )
 from asterax.app.src.config.game_config import GameState as RunGameState
 from asterax.app.src.config.game_config import (
+    InsuranceTier,
     ShipState,
 )
 from asterax.app.src.config.upgrade_definitions import (
@@ -240,9 +240,7 @@ class ShopPhaseState(BaseState):
                     next_tier,
                     self.game_state.current_level,
                 )
-                can_afford = insurance_cost <= 0 or (
-                    current_currency >= insurance_cost
-                )
+                can_afford = insurance_cost <= 0 or (current_currency >= insurance_cost)
                 node.update_visual_state(
                     currency=current_currency,
                     current_level=0,
@@ -418,12 +416,14 @@ class ShopPhaseState(BaseState):
         window = arcade.get_window()
         target_x = window.width / 2
         target_y = window.height / 2
-        self.player_ship.center_x = self._recentre_start_x + (
-            target_x - self._recentre_start_x
-        ) * eased_progress
-        self.player_ship.center_y = self._recentre_start_y + (
-            target_y - self._recentre_start_y
-        ) * eased_progress
+        self.player_ship.center_x = (
+            self._recentre_start_x
+            + (target_x - self._recentre_start_x) * eased_progress
+        )
+        self.player_ship.center_y = (
+            self._recentre_start_y
+            + (target_y - self._recentre_start_y) * eased_progress
+        )
         if progress >= 1.0:
             self._recentre_active = False
             self.player_ship.center_x = target_x

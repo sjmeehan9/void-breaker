@@ -176,7 +176,9 @@ def test_shop_phase_insurance_node_cycles_tier_and_spends(monkeypatch) -> None:
         ),
     )
 
-    state = ShopPhaseState(_MachineStub(), game_state=GameState(current_level=2, currency=500))
+    state = ShopPhaseState(
+        _MachineStub(), game_state=GameState(current_level=2, currency=500)
+    )
     state.on_enter()
     insurance_node = next(
         view.sprite for view in state._node_views if view.sprite.is_insurance_node

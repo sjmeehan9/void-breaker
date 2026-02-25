@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from asterax.app.src.config.difficulty_tables import get_difficulty_params
 
 

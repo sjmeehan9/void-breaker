@@ -205,5 +205,7 @@ def test_shop_recentre_blocks_collision_purchases(monkeypatch) -> None:
 def test_shop_ease_out_curve_known_points() -> None:
     """Quadratic ease-out should match expected values at key points."""
     assert ShopPhaseState._ease_out_quadratic(0.0) == pytest.approx(0.0)  # noqa: SLF001
-    assert ShopPhaseState._ease_out_quadratic(0.5) == pytest.approx(0.75)  # noqa: SLF001
+    assert ShopPhaseState._ease_out_quadratic(0.5) == pytest.approx(
+        0.75
+    )  # noqa: SLF001
     assert ShopPhaseState._ease_out_quadratic(1.0) == pytest.approx(1.0)  # noqa: SLF001
