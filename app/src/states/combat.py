@@ -298,6 +298,7 @@ class CombatPhaseState(BaseState):
             "currency_balance": self.currency_manager.get_balance(),
             "asteroids_destroyed": self.game_state.run_stats.asteroids_destroyed,
             "enemies_destroyed": self.game_state.run_stats.enemies_destroyed,
+            "insurance_tier": self.game_state.insurance.tier.value,
         }
         from asterax.app.src.states.game_over import GameOverState
 

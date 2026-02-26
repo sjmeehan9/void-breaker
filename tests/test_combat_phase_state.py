@@ -174,8 +174,8 @@ def test_physics_step_delays_game_over_for_destruction_sequence(monkeypatch) -> 
     assert triggered == [True]
 
 
-def test_game_over_saves_high_score_when_qualifying(monkeypatch) -> None:
-    """Qualifying scores should be persisted with fallback initials."""
+def test_game_over_marks_qualifying_score_without_auto_save(monkeypatch) -> None:
+    """Qualifying scores should enter name-entry flow before persistence."""
 
     class FakePersistence:
         def __init__(self) -> None:
@@ -201,10 +201,8 @@ def test_game_over_saves_high_score_when_qualifying(monkeypatch) -> None:
 
     state.on_enter()
 
-    assert state.is_high_score is True
-    assert len(persistence.saved_entries) == 1
-    assert persistence.saved_entries[0].name == "AAA"
-    assert persistence.saved_entries[0].score == 999
+    assert state._qualifies_for_leaderboard is True  # noqa: SLF001
+    assert persistence.saved_entries == []
 
 
 def test_combat_multi_level_session_with_enemy_updates_no_crash(monkeypatch) -> None:

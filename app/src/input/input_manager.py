@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 # Mapping from human-readable string key names to arcade.key constants
 KEY_NAME_MAP: dict[str, int] = {
+    "UNBOUND": -1,
     # Arrow keys
     "LEFT": arcade.key.LEFT,
     "RIGHT": arcade.key.RIGHT,

@@ -1,0 +1,151 @@
+# Phase 5 Implementation Context
+
+## Component Status Summary
+- 5.1 Human Setup & Final Assets — Completed
+- 5.2 Main Menu & Navigation System — Completed
+- 5.3 How-to-Play & High Scores Screens — Completed
+- 5.4 Settings Screen & Accessibility — Completed
+- 5.5 Game Over Screen & High Score Entry — Completed
+
+## Component 5.1 — Human Setup & Final Assets
+- **Status**: Completed
+- **What was built**: All 25 sprite assets generated via Pillow script, plus 2 backward-compatibility alias copies. Sound effects (17 WAV files) provided by developer. Font asset (`game_font.ttf`) present.
+- **Key files created**:
+  - `scripts/generate_final_sprites.py` — comprehensive Pillow-based sprite generator producing all game sprites with retro-arcade aesthetics (glow effects, gradients, detail work)
+  - `assets/sprites/ship.png` — 64×64 player ship with engine nacelles and cockpit accent
+  - `assets/sprites/ship_thrust.png` — 64×64 ship variant with orange/yellow thrust flames
+  - `assets/sprites/asteroid_large.png` — 96px irregular polygon with crater details
+  - `assets/sprites/asteroid_medium.png` — 48px asteroid with craters
+  - `assets/sprites/asteroid_small.png` — 24px small rock
+  - `assets/sprites/enemy_basic.png` — 48×48 red diamond with cockpit detail
+  - `assets/sprites/enemy_aggressive.png` — 48×48 orange chevron
+  - `assets/sprites/projectile_player.png` — 8×16 cyan elongated bolt
+  - `assets/sprites/projectile_enemy.png` — 8×16 red-orange elongated bolt
+  - `assets/sprites/pickup_currency.png` — 24×24 gold hexagonal gem
+  - `assets/sprites/pickup_buff_heal.png` — 24×24 green cross
+  - `assets/sprites/pickup_buff_shield.png` — 24×24 blue shield shape
+  - `assets/sprites/pickup_buff_damage.png` — 24×24 red six-pointed star
+  - `assets/sprites/pickup_buff_speed.png` — 24×24 cyan lightning bolt
+  - `assets/sprites/particle_dot.png` — 8×8 white radial dot for code-time tinting
+  - `assets/sprites/shop/orb_*.png` (×6) — 48×48 shop category orbs
+  - `assets/sprites/shop/node_continue.png` — 48×48 green arrow
+  - `assets/sprites/ui_panel.png` — 256×192 dark panel with cyan border
+  - `assets/sprites/ui_button.png` — 200×40 dark button
+  - `assets/sprites/ui_button_selected.png` — 200×40 highlighted button with cyan border
+  - `docs/components/phase-5-component-5-1-overview.md` — component overview
+- **Key files modified**:
+  - `scripts/verify_assets.py` — rewritten to validate all Phase 5 sprites (with non-square dimension support), all sounds (with IEEE float WAV tolerance), and font; structured error reporting
+- **Sound files present** (17, provided by developer): `fire.wav`, `hit.wav`, `explode_small/medium/large.wav`, `enemy_explode.wav`, `pickup_currency.wav`, `pickup_buff.wav`, `shop_purchase.wav`, `shop_denied.wav`, `level_clear.wav`, `game_over.wav`, `menu_nav.wav`, `menu_select.wav`, `insurance_deduct.wav`, `enemy_fire.wav`, `player_hit.wav`
+- **Font**: `assets/fonts/game_font.ttf` (107.1 KB)
+- **Design decisions**: Created a new `generate_final_sprites.py` script rather than modifying the placeholder generator, preserving the original for reference. Used spec-recommended sprite sizes (ship 64px, asteroids 96/48/24px, etc.). Generated backward-compat copies (`currency_pickup.png`, `explosion_particle.png`) so Phase 1-4 code references continue working without modification. `shield_low.wav` deferred per spec notes.
+- **Deviations**: None from acceptance criteria. All assets original (programmatically generated). Verify script passes.
+
+## Component 5.2 — Main Menu & Navigation System
+- **Status**: Completed
+- **What was built**: Replaced the Phase 1 main menu stub with a full interactive menu and created a reusable menu renderer module. Implemented five-option menu flow (New Game, How to Play, Settings, High Scores, Quit), wrapped keyboard navigation, selection handling, menu audio cues, fade-in/fade-out transitions, and menu selection persistence across state returns.
+- **Key files modified**:
+  - `app/src/states/main_menu.py` — full `MainMenuState` implementation including:
+    - `_menu_options` list and `_selected_index` tracking
+    - `_navigate()` wrap logic and `_select()` activation queue
+    - `_activate_target()` transitions to `GameInitState`, `HowToPlayState`, `SettingsScreenState`, `HighScoresState`, and window close for Quit
+    - `_play_menu_sound()` hooks for `menu_nav` and `menu_select`
+    - `_last_selected_index` class-level persistence for menu return behavior
+    - Fade animation state in `on_enter()`, `on_update()`, and `on_draw()`
+  - `app/src/rendering/__init__.py` — added `MenuRenderer` export
+- **Key files created**:
+  - `app/src/rendering/menu_renderer.py` — reusable `MenuRenderer` with `draw_title()` and `draw_menu_options()` plus cached `arcade.Text` instances for efficient repeated draws
+  - `tests/test_main_menu.py` — focused tests for option count, wrap navigation, transition targets, quit action, and audio trigger behavior
+  - `docs/components/phase-5-component-5-2-overview.md` — component overview documentation
+- **Design decisions**:
+  - Added fade transition sequencing to keep input responsiveness while preserving visible enter/exit animation.
+  - Used a list-driven options model (`list[tuple[str, str]]`) to make future menu extension (Component 5.10 Practice mode) additive and low risk.
+  - Implemented selection persistence with a class-level index so sub-screens that reconstruct `MainMenuState` still restore prior highlight without requiring immediate changes to those states.
+  - Kept New Game routing to `GameInitState` as the pre-5.9 default hook.
+- **Validation run**:
+  - `black --check app/src tests/test_main_menu.py`
+  - `isort --check-only app/src tests/test_main_menu.py`
+  - `pytest -q tests/test_main_menu.py tests/test_window.py`
+  - `python scripts/evals.py`
+  - `pytest -q`
+  - Result: all checks passed (`292 passed`).
+- **Deviations**: None.
+
+## Component 5.3 — How-to-Play & High Scores Screens
+- **Status**: Completed
+- **What was built**: Replaced both screen stubs with fully functional informational states. `HowToPlayState` now renders a dynamic controls table from active `InputManager` bindings, concise gameplay/shop/insurance guidance, tips, and keyboard scrolling for long content. `HighScoresState` now loads persisted entries, sorts descending by score, renders a top-10 leaderboard table (rank, name, score, level, difficulty, date), supports empty-state messaging, and enables difficulty filter cycling (`all/casual/classic/hard`) when multiple difficulty groups exist.
+- **Key files modified**:
+  - `app/src/states/how_to_play.py` — implemented `on_enter`, `on_draw`, `on_key_press`, `_build_controls_text`, scroll bounds, and pause-key-aware back navigation to `MainMenuState`
+  - `app/src/states/high_scores.py` — implemented `on_enter`, `on_draw`, `on_key_press`, `_load_scores`, `_cycle_filter`, filtered rendering, and pause-key-aware back navigation to `MainMenuState`
+- **Key files created**:
+  - `tests/test_how_to_play.py` — tests for dynamic controls text generation and back navigation
+  - `tests/test_high_scores.py` — tests for descending score sort, difficulty filtering, and empty leaderboard behavior
+  - `docs/components/phase-5-component-5-3-overview.md` — component overview documentation
+- **Design decisions**:
+  - Implemented key-label display via `InputManager` key map reversal to avoid hardcoded bindings and keep control instructions synchronized with remapped settings.
+  - Kept leaderboard filtering conditional on observed score data diversity, matching the requirement to expose filters only when multiple difficulty presets are active in stored scores.
+  - Used the existing `MenuRenderer` for title consistency with Component 5.2 while drawing tabular content directly for clarity and alignment.
+- **Validation run**:
+  - `black --check app/src/states/how_to_play.py app/src/states/high_scores.py tests/test_how_to_play.py tests/test_high_scores.py`
+  - `isort --check-only app/src/states/how_to_play.py app/src/states/high_scores.py tests/test_how_to_play.py tests/test_high_scores.py`
+  - `pytest -q tests/test_how_to_play.py tests/test_high_scores.py`
+  - Result: all targeted checks passed (`5 passed`).
+- **Deviations**: None.
+
+## Component 5.4 — Settings Screen & Accessibility
+- **Status**: Completed
+- **What was built**: Replaced the settings stub with a full keyboard-driven settings interface covering key remapping, volume sliders, toggles, multi-option selectors, immediate persistence, and reset-to-defaults. Added runtime hot-application of updated settings to input and audio managers.
+- **Key files modified**:
+  - `app/src/states/settings_screen.py` — full `SettingsScreenState` implementation including:
+    - `SettingItem` row model with grouped categories and selectable rows
+    - `on_enter`, `on_update`, `on_draw`, and `on_key_press` for interactive navigation
+    - `_adjust_setting` with 0.1 slider step clamping for volume controls
+    - `_toggle_setting` and multi-option cycling for fire mode, difficulty, and screen shake
+    - `_start_rebind` / `_complete_rebind` key capture flow with Escape cancel
+    - duplicate binding resolution that clears prior action to `UNBOUND`
+    - `_save_settings` immediate persistence and `InputManager`/`AudioManager` hot updates
+    - `_reset_to_defaults` action row restoring factory settings
+    - `_exit_settings` return routing supporting main menu or pause target
+  - `app/src/input/input_manager.py` — added `KEY_NAME_MAP["UNBOUND"] = -1` support for cleared bindings
+- **Key files created**:
+  - `tests/test_settings_screen.py` — focused tests for slider clamp behavior, toggle behavior, duplicate key rebinding semantics, reset-to-defaults, and settings round-trip persistence
+  - `docs/components/phase-5-component-5-4-overview.md` — component overview documentation
+- **Design decisions**:
+  - Implemented duplicate-key handling by clearing the previous action (`UNBOUND`) rather than swapping to preserve explicit user intent for the newly selected action.
+  - Applied settings immediately after every change to avoid desync between UI state and runtime behavior.
+  - Kept navigation and visual style aligned with the existing menu system via `MenuRenderer` title usage and keyboard-first controls.
+- **Validation run**:
+  - `black --check app/src tests`
+  - `isort --check-only app/src tests`
+  - `pytest -q`
+  - `python scripts/evals.py`
+  - Result: all checks passed (`302 passed`).
+- **Deviations**: None.
+
+## Component 5.5 — Game Over Screen & High Score Entry
+- **Status**: Completed
+- **What was built**: Replaced the legacy game-over auto-save behavior with a three-phase flow: run summary, conditional leaderboard name entry, and post-run options. The game-over screen now displays all required stats (score, level reached, enemies/asteroids destroyed, currency earned/spent, insurance tier), checks top-10 qualification, captures validated 3-10 character alphanumeric names, and persists entries only after explicit submit.
+- **Key files modified**:
+  - `app/src/states/game_over.py` — full flow implementation including:
+    - `GameOverPhase` sub-state enum (`summary`, `name_entry`, `options`)
+    - `_check_qualification()` top-10 gate logic
+    - `_submit_high_score()` persistence with difficulty from saved settings and ISO 8601 timestamp
+    - Name-entry input handling (A-Z, 0-9, Backspace, Enter, max length 10)
+    - Options navigation and actions (`Play Again` -> `GameInitState`, `Return to Menu` -> `MainMenuState`)
+    - `game_over.wav` playback in `on_enter()`
+  - `app/src/states/combat.py` — included `insurance_tier` in game-over payload passed to `GameOverState`
+  - `tests/test_combat_phase_state.py` — updated stale expectation that qualifying scores auto-save as `AAA` on `on_enter()`
+- **Key files created**:
+  - `tests/test_game_over.py` — focused tests for qualification threshold behavior, name-entry filtering/length cap, high-score payload correctness, and run-summary hydration
+  - `docs/components/phase-5-component-5-5-overview.md` — component overview documentation
+- **Design decisions**:
+  - Qualification is strict top-10 (`score > 10th place`) and intentionally does not auto-save ties.
+  - High-score persistence is user-driven via name entry, replacing fallback placeholder initials.
+  - Replay path routes through `GameInitState` to guarantee a fresh run reset.
+- **Validation run**:
+  - `black --check app/src/states/game_over.py app/src/states/combat.py tests/test_game_over.py tests/test_combat_phase_state.py`
+  - `isort --check-only app/src/states/game_over.py app/src/states/combat.py tests/test_game_over.py tests/test_combat_phase_state.py`
+  - `pytest -q tests/test_game_over.py tests/test_combat_phase_state.py`
+  - `pytest -q`
+  - `python scripts/evals.py`
+  - Result: all checks passed (`307 passed`).
+- **Deviations**: None.
