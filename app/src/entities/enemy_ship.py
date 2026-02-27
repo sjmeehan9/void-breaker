@@ -74,7 +74,7 @@ class EnemyShip(arcade.Sprite):
 
         if self.velocity_x != 0.0 or self.velocity_y != 0.0:
             self.angle = (
-                math.degrees(math.atan2(self.velocity_y, self.velocity_x)) - 90.0
+                90.0 - math.degrees(math.atan2(self.velocity_y, self.velocity_x))
             )
 
     def try_fire(
@@ -144,7 +144,7 @@ class EnemyShip(arcade.Sprite):
         desired_angle += self._rng.uniform(-10.0, 10.0)
 
         if self.velocity_x == 0.0 and self.velocity_y == 0.0:
-            current_angle = self.angle + 90.0
+            current_angle = 90.0 - self.angle
         else:
             current_angle = math.degrees(math.atan2(self.velocity_y, self.velocity_x))
 
@@ -172,7 +172,7 @@ class EnemyShip(arcade.Sprite):
 
         aim_x = target_x - self.center_x
         aim_y = target_y - self.center_y
-        base_angle = math.degrees(math.atan2(aim_y, aim_x)) - 90.0
+        base_angle = 90.0 - math.degrees(math.atan2(aim_y, aim_x))
         scatter_limit = (1.0 - max(0.0, min(1.0, self.config.accuracy))) * 20.0
         return base_angle + self._rng.uniform(-scatter_limit, scatter_limit)
 

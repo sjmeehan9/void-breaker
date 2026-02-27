@@ -78,7 +78,10 @@ class VoidBreakerWindow(arcade.Window):
 
         if camera is not None:
             camera.equalise()
-            camera.position = (offset_x, offset_y)
+            camera.position = (
+                self.width / 2 + offset_x,
+                self.height / 2 + offset_y,
+            )
             camera.use()
 
         self.starfield.draw()
@@ -86,7 +89,7 @@ class VoidBreakerWindow(arcade.Window):
 
         if camera is not None:
             camera.equalise()
-            camera.position = (0.0, 0.0)
+            camera.position = (self.width / 2, self.height / 2)
             camera.use()
 
     def on_key_press(self, key: int, modifiers: int) -> None:

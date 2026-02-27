@@ -96,9 +96,14 @@ def test_entity_manager_draw_uses_expected_z_order() -> None:
     manager.player_projectiles.draw = (  # type: ignore[method-assign]
         lambda: draw_calls.append("projectiles")
     )
-    manager.player.draw = lambda: draw_calls.append("ship")  # type: ignore[method-assign]
 
-    manager.draw()
+    original_draw_sprite = arcade.draw_sprite
+    arcade.draw_sprite = lambda sprite: draw_calls.append("ship")  # type: ignore[assignment]
+
+    try:
+        manager.draw()
+    finally:
+        arcade.draw_sprite = original_draw_sprite  # type: ignore[assignment]
 
     assert draw_calls == [
         "background",

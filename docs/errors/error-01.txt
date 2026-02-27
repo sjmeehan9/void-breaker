@@ -1,0 +1,49 @@
+(.venv) seanmeehan@Seans-MacBook-Air void-breaker % python -m asterax.app.src.main
+2026-02-28 06:02:20.357 Python[74735:2460759] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to /var/folders/jv/v3dq_htd7_jcjx37pt9kn4zm0000gn/T/org.python.python.savedState
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/main.py", line 14, in <module>
+    main()
+    ~~~~^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/main.py", line 10, in main
+    arcade.run()
+    ~~~~~~~~~~^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/arcade/window_commands.py", line 152, in run
+    pyglet.app.run(None)
+    ~~~~~~~~~~~~~~^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/app/__init__.py", line 81, in run
+    event_loop.run(interval)
+    ~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/app/base.py", line 164, in run
+    timeout = self.idle()
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/app/base.py", line 232, in idle
+    self.clock.call_scheduled_functions(dt)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/clock.py", line 217, in call_scheduled_functions
+    item.func(now - item.last_ts, *item.args, **item.kwargs)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/arcade/application.py", line 556, in _dispatch_frame
+    self.draw(self._accumulated_draw_time)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/window/__init__.py", line 711, in draw
+    self.dispatch_event('on_draw')
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/window/__init__.py", line 685, in dispatch_event
+    super().dispatch_event(*args)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/event.py", line 376, in dispatch_event
+    raise e
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/event.py", line 371, in dispatch_event
+    if getattr(self, event_type)(*args):
+       ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/window.py", line 85, in on_draw
+    self.state_machine.draw()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/states/state_machine.py", line 48, in draw
+    state.on_draw()
+    ~~~~~~~~~~~~~^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/states/main_menu.py", line 117, in on_draw
+    arcade.draw_lrtb_rectangle_filled(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'arcade' has no attribute 'draw_lrtb_rectangle_filled'. Did you mean: 'draw_lrbt_rectangle_filled'?

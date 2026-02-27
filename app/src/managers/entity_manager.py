@@ -83,7 +83,7 @@ class EntityManager:
         self.enemy_projectiles.draw()
         self.player_projectiles.draw()
         if self.player is not None:
-            self.player.draw()
+            arcade.draw_sprite(self.player)
 
     def clear_projectiles(self) -> None:
         """Clear active player projectiles."""

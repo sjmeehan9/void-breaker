@@ -1,0 +1,64 @@
+(.venv) seanmeehan@Seans-MacBook-Air void-breaker % python -m asterax.app.src.main
+2026-02-28 06:05:03.691 Python[79006:2470810] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to /var/folders/jv/v3dq_htd7_jcjx37pt9kn4zm0000gn/T/org.python.python.savedState
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/main.py", line 14, in <module>
+    main()
+    ~~~~^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/main.py", line 10, in main
+    arcade.run()
+    ~~~~~~~~~~^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/arcade/window_commands.py", line 152, in run
+    pyglet.app.run(None)
+    ~~~~~~~~~~~~~~^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/app/__init__.py", line 81, in run
+    event_loop.run(interval)
+    ~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/app/base.py", line 164, in run
+    timeout = self.idle()
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/app/base.py", line 232, in idle
+    self.clock.call_scheduled_functions(dt)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/clock.py", line 217, in call_scheduled_functions
+    item.func(now - item.last_ts, *item.args, **item.kwargs)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/arcade/application.py", line 545, in _dispatch_frame
+    self._dispatch_updates(delta_time)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/arcade/application.py", line 579, in _dispatch_updates
+    self.dispatch_event("on_update", GLOBAL_CLOCK.delta_time)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/window/__init__.py", line 685, in dispatch_event
+    super().dispatch_event(*args)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/event.py", line 376, in dispatch_event
+    raise e
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/.venv/lib/python3.13/site-packages/pyglet/event.py", line 371, in dispatch_event
+    if getattr(self, event_type)(*args):
+       ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/window.py", line 59, in on_update
+    self._physics_step(PHYSICS_DT)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/window.py", line 64, in _physics_step
+    self.state_machine.update(dt)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/states/state_machine.py", line 43, in update
+    self._stack[-1].on_update(delta_time)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/states/main_menu.py", line 95, in on_update
+    self._activate_target(self._pending_target)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/states/main_menu.py", line 187, in _activate_target
+    self.state_machine.switch_state(HowToPlayState(self.state_machine))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/states/state_machine.py", line 26, in switch_state
+    state.on_enter()
+    ~~~~~~~~~~~~~~^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/states/how_to_play.py", line 67, in on_enter
+    self._max_scroll_offset = self._calculate_max_scroll()
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/app/src/states/how_to_play.py", line 237, in _calculate_max_scroll
+    text_image = arcade.get_text_image(
+                 ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'arcade' has no attribute 'get_text_image'. Did you mean: 'get_default_image'?

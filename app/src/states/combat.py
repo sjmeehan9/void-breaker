@@ -592,7 +592,7 @@ class CombatPhaseState(BaseState):
         if not bool(is_action_held("thrust")):
             return
         ship = self.player_ship
-        angle_radians = math.radians(ship.angle + 90.0)
+        angle_radians = math.radians(90.0 - ship.angle)
         thrust_origin_x = ship.center_x - math.cos(angle_radians) * (ship.height / 2)
         thrust_origin_y = ship.center_y - math.sin(angle_radians) * (ship.height / 2)
         self.particle_system.emit_thrust(

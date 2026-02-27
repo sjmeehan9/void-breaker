@@ -47,7 +47,8 @@ class Projectile(arcade.Sprite):
         super().__init__(
             str(PROJECTILE_SPRITE_PATH), center_x=center_x, center_y=center_y
         )
-        angle_radians = math.radians(angle + 90.0)
+        self.angle = angle
+        angle_radians = math.radians(90.0 - angle)
         self.velocity_x = math.cos(angle_radians) * speed
         self.velocity_y = math.sin(angle_radians) * speed
         self.speed = speed

@@ -196,14 +196,17 @@ class HowToPlayState(BaseState):
             )
             y -= _LINE_HEIGHT
 
-            wrapped_lines = arcade.get_text_image(
+            text_measure = arcade.Text(
                 text=body,
-                text_color=(210, 226, 240, 255),
+                x=0,
+                y=0,
+                color=(210, 226, 240, 255),
                 font_size=20,
                 width=int(window.width * 0.58),
+                multiline=True,
                 align="left",
             )
-            text_height = float(wrapped_lines.height)
+            text_height = float(text_measure.content_height)
             arcade.draw_text(
                 body,
                 window.width * _CONTROL_COLUMN_LEFT,
@@ -234,14 +237,17 @@ class HowToPlayState(BaseState):
         sections_height = 0.0
         for heading, body in self._gameplay_sections:
             sections_height += _LINE_HEIGHT
-            text_image = arcade.get_text_image(
+            text_measure = arcade.Text(
                 text=body,
-                text_color=(210, 226, 240, 255),
+                x=0,
+                y=0,
+                color=(210, 226, 240, 255),
                 font_size=20,
                 width=int(window.width * 0.58),
+                multiline=True,
                 align="left",
             )
-            sections_height += float(text_image.height) + 10.0
+            sections_height += float(text_measure.content_height) + 10.0
 
         total_height = controls_height + _SECTION_GAP + sections_height
         available_height = window.height - _CONTENT_TOP_OFFSET - _CONTENT_BOTTOM_MARGIN

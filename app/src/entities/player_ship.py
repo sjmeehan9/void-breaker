@@ -69,7 +69,7 @@ class PlayerShip(arcade.Sprite):
         Args:
             dt: Fixed simulation step in seconds.
         """
-        angle_radians = math.radians(self.angle + 90.0)
+        angle_radians = math.radians(90.0 - self.angle)
         thrust_x = math.cos(angle_radians) * self.effective_thrust
         thrust_y = math.sin(angle_radians) * self.effective_thrust
         self.velocity_x += thrust_x * dt
@@ -80,7 +80,7 @@ class PlayerShip(arcade.Sprite):
 
         Args:
             dt: Fixed simulation step in seconds.
-            direction: Rotation direction (-1 for right, +1 for left).
+            direction: Rotation direction (+1 for right/CW, -1 for left/CCW).
         """
         self.angle += direction * self.physics_config.base_turn_rate * dt
 
@@ -148,7 +148,7 @@ class PlayerShip(arcade.Sprite):
         if self.fire_cooldown_remaining > 0.0:
             return None
 
-        angle_radians = math.radians(self.angle + 90.0)
+        angle_radians = math.radians(90.0 - self.angle)
         nose_offset = self.height / 2
         projectile = Projectile(
             center_x=self.center_x + math.cos(angle_radians) * nose_offset,

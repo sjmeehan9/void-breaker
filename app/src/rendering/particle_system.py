@@ -103,7 +103,7 @@ class ParticleSystem:
 
     def emit_thrust(self, x: float, y: float, angle: float) -> None:
         """Emit one thrust-trail particle opposite ship heading."""
-        radians = math.radians(angle + 90.0)
+        radians = math.radians(90.0 - angle)
         base_velocity_x = -math.cos(radians)
         base_velocity_y = -math.sin(radians)
         speed = self._rng.uniform(30.0, 80.0)

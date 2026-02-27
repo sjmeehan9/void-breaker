@@ -114,11 +114,11 @@ class MainMenuState(BaseState):
             self._draw_difficulty_prompt()
 
         if self._fade_alpha > 0.0:
-            arcade.draw_lrtb_rectangle_filled(
+            arcade.draw_lrbt_rectangle_filled(
                 0.0,
                 float(window.width),
-                float(window.height),
                 0.0,
+                float(window.height),
                 (0, 0, 0, int(self._fade_alpha)),
             )
 
@@ -288,11 +288,11 @@ class MainMenuState(BaseState):
         center_x = window.width / 2
         center_y = window.height / 2
 
-        arcade.draw_lrtb_rectangle_filled(
+        arcade.draw_lrbt_rectangle_filled(
             center_x - 330,
             center_x + 330,
-            center_y + 220,
             center_y - 220,
+            center_y + 220,
             (8, 12, 24, 230),
         )
         self._renderer.draw_title("Select Difficulty", center_x, center_y + 165)

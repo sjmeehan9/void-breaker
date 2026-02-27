@@ -85,11 +85,11 @@ class PauseState(BaseState):
     def _draw_overlay(self) -> None:
         """Render a semi-transparent dark fullscreen overlay."""
         window = arcade.get_window()
-        arcade.draw_lrtb_rectangle_filled(
+        arcade.draw_lrbt_rectangle_filled(
             0.0,
             float(window.width),
-            float(window.height),
             0.0,
+            float(window.height),
             (0, 0, 0, 170),
         )
 

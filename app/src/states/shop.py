@@ -122,11 +122,11 @@ class ShopPhaseState(BaseState):
             if input_manager.is_action_held(
                 "rotate_left"
             ) and not input_manager.is_action_held("rotate_right"):
-                self.player_ship.apply_rotation(delta_time, direction=1)
+                self.player_ship.apply_rotation(delta_time, direction=-1)
             elif input_manager.is_action_held(
                 "rotate_right"
             ) and not input_manager.is_action_held("rotate_left"):
-                self.player_ship.apply_rotation(delta_time, direction=-1)
+                self.player_ship.apply_rotation(delta_time, direction=1)
             if input_manager.is_action_held("thrust"):
                 self.player_ship.apply_thrust(delta_time)
             if input_manager.is_action_held("brake"):
@@ -146,7 +146,7 @@ class ShopPhaseState(BaseState):
         self.shop_nodes.draw()
         self.particle_system.draw()
         if self.player_ship is not None:
-            self.player_ship.draw()
+            arcade.draw_sprite(self.player_ship)
         for node_view in self._node_views:
             node_level = (
                 0 if node_view.is_continue else self._get_node_level(node_view.sprite)

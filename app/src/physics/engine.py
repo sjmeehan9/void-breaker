@@ -57,9 +57,9 @@ class PhysicsEngine:
         rotate_left = input_manager.is_action_held("rotate_left")
         rotate_right = input_manager.is_action_held("rotate_right")
         if rotate_left and not rotate_right:
-            ship.apply_rotation(dt, direction=1)
-        elif rotate_right and not rotate_left:
             ship.apply_rotation(dt, direction=-1)
+        elif rotate_right and not rotate_left:
+            ship.apply_rotation(dt, direction=1)
 
         if input_manager.is_action_held("thrust"):
             ship.apply_thrust(dt)

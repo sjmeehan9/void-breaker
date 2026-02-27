@@ -168,7 +168,7 @@ def test_aggressive_targeting_leads_player_velocity() -> None:
     angle = enemy._calculate_aim(
         player_position=(0.0, 100.0), player_velocity=(100.0, 0.0)
     )
-    assert angle < 0.0
+    assert angle > 0.0
 
 
 def test_telegraph_state_transitions_to_fire_and_resets() -> None:
