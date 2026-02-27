@@ -62,7 +62,7 @@ def test_push_pop_preserves_underlying_state() -> None:
     machine.push_state(overlay)
     machine.pop_state()
 
-    assert calls == ["base:exit", "overlay:enter", "overlay:exit", "base:enter"]
+    assert calls == ["overlay:enter", "overlay:exit"]
     assert machine.current_state is base
 
 

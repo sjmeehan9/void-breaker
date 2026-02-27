@@ -2,16 +2,24 @@
 
 from __future__ import annotations
 
+import math
 import random
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 import arcade
-from asterax.app.src.config.difficulty_tables import get_difficulty_params
+from asterax.app.src.config.difficulty_tables import (
+    DIFFICULTY_PRESET_MULTIPLIERS,
+    DifficultyMultipliers,
+    DifficultyPreset,
+    get_difficulty_params,
+    parse_difficulty_preset,
+)
 from asterax.app.src.config.game_config import (
     COLLISION_CONFIG,
     GAME_CONFIG,
     PHYSICS_CONFIG,
+    DifficultyParams,
 )
 from asterax.app.src.config.game_config import GameState as RunGameState
 from asterax.app.src.config.game_config import (
@@ -23,6 +31,7 @@ from asterax.app.src.entities.enemy_ship import EnemyShip
 from asterax.app.src.entities.player_ship import PlayerShip
 from asterax.app.src.managers.buff_manager import BuffManager
 from asterax.app.src.managers.currency_manager import CurrencyManager
+from asterax.app.src.managers.difficulty_scaler import DifficultyScaler
 from asterax.app.src.managers.entity_manager import EntityManager
 from asterax.app.src.managers.score_manager import ScoreManager
 from asterax.app.src.managers.spawn_manager import SpawnManager
@@ -32,6 +41,10 @@ from asterax.app.src.physics.wrap import wrap_entity
 from asterax.app.src.rendering.damage_effects import DamageEffects
 from asterax.app.src.rendering.hud import HUDRenderer
 from asterax.app.src.rendering.particle_system import ParticleSystem
+from asterax.app.src.rendering.transitions import (
+    TransitionEffect,
+    apply_colorblind_palette_to_combat,
+)
 from asterax.app.src.states.base_state import BaseState
 
 if TYPE_CHECKING:
@@ -59,6 +72,11 @@ class CombatPhaseState(BaseState):
         initial_score: int = 0,
         initial_currency: int = 0,
         initial_run_stats: RunStats | None = None,
+        is_practice: bool = False,
+        practice_asteroids_only: bool = False,
+        practice_infinite_shields: bool = False,
+        practice_reduced_count: bool = False,
+        practice_params_override: DifficultyParams | None = None,
     ) -> None:
         """Initialize combat-phase manager references and run state."""
         super().__init__(state_machine)
@@ -68,6 +86,7 @@ class CombatPhaseState(BaseState):
             collision_damage=COLLISION_CONFIG.ship_asteroid_damage
         )
         self.spawn_manager = SpawnManager()
+        self.difficulty_scaler = DifficultyScaler()
         self.score_manager = ScoreManager()
         self.game_state = RunGameState()
         self.currency_manager = CurrencyManager(self.game_state)
@@ -82,6 +101,16 @@ class CombatPhaseState(BaseState):
         self.accumulator = 0.0
         self._game_over_triggered = False
         self._game_over_delay_remaining = 0.0
+        self._last_player_projectile_count = 0
+        self._transition_effect: TransitionEffect | None = None
+        self._difficulty_preset: DifficultyPreset = DifficultyPreset.CLASSIC
+        self._current_difficulty_params: DifficultyParams | None = None
+        self._damage_received_multiplier: float = 1.0
+        self._is_practice = bool(is_practice)
+        self._practice_asteroids_only = bool(practice_asteroids_only)
+        self._practice_infinite_shields = bool(practice_infinite_shields)
+        self._practice_reduced_count = bool(practice_reduced_count)
+        self._practice_params_override = practice_params_override
 
     @property
     def player_ship(self) -> PlayerShip:
@@ -110,8 +139,10 @@ class CombatPhaseState(BaseState):
         self.accumulator = 0.0
         self._game_over_triggered = False
         self._game_over_delay_remaining = 0.0
+        self._last_player_projectile_count = 0
         self.score_manager.reset()
         self.currency_manager.reset()
+        self.game_state.is_practice = self._is_practice
         self.score_manager.score = self._initial_score
         if self._initial_currency > 0:
             self.currency_manager.earn(self._initial_currency)
@@ -123,20 +154,38 @@ class CombatPhaseState(BaseState):
         self.entity_manager.buff_pickups.clear()
         self.entity_manager.asteroids.clear()
         self.buff_manager.clear_all(ship)
+        if self._practice_infinite_shields:
+            ship.shields = ship.max_shields
+        self._difficulty_preset = self._resolve_difficulty_preset()
+        params = self._practice_params_override or self._params_for_level(
+            self.current_level
+        )
+        self._practice_params_override = None
+        self._apply_runtime_difficulty(params)
 
         for asteroid in self.spawn_manager.spawn_level_asteroids(
             level=self.current_level,
             player_position=(ship.center_x, ship.center_y),
             screen_width=window.width,
             screen_height=window.height,
+            difficulty_params=params,
         ):
             self.entity_manager.asteroids.append(asteroid)
         self.spawn_manager.reset_enemy_spawning()
+        self._transition_effect = TransitionEffect(window.width, window.height)
+        if self.current_level > 1:
+            self._transition_effect.start_level_transition(self.current_level)
+        self._apply_visual_settings()
         self._sync_state_for_hud()
 
     def on_update(self, delta_time: float) -> None:
         """Advance combat simulation with a fixed-timestep accumulator."""
         if self.physics_engine is None:
+            return
+
+        if self._transition_effect is not None and self._transition_effect.is_active:
+            self._transition_effect.update(delta_time)
+            self._apply_visual_settings()
             return
 
         frame_time = min(delta_time, MAX_FRAME_TIME)
@@ -159,6 +208,8 @@ class CombatPhaseState(BaseState):
             width=window.width,
             height=window.height,
         )
+        self._emit_thrust_particles()
+        self._process_player_fire_sound()
         self.collision_system.check_all(
             entity_manager=self.entity_manager,
             game_state=self.game_state,
@@ -171,11 +222,15 @@ class CombatPhaseState(BaseState):
             particle_system=self.particle_system,
         )
         if self.player_ship.shields < shields_before_collisions:
-            self.damage_effects.trigger_damage_flash(self.player_ship)
+            self.player_ship.trigger_damage_flash_tint()
             self.damage_effects.trigger_invulnerability(
                 self.player_ship, GAME_CONFIG.invulnerability_duration
             )
-            self._play_sound("player_hit")
+            self.particle_system.emit_damage_flash(
+                self.player_ship.center_x,
+                self.player_ship.center_y,
+            )
+            self._trigger_screen_shake()
         self._spawn_enemies(
             dt=dt, screen_width=window.width, screen_height=window.height
         )
@@ -194,8 +249,13 @@ class CombatPhaseState(BaseState):
         self.player_ship.update_invulnerability(dt)
         self.damage_effects.update(dt)
         self.particle_system.update(dt)
+        self._apply_visual_settings()
         self._check_level_clear()
         if self.player_ship.shields <= 0.0:
+            if self._is_practice:
+                self._respawn_practice_ship()
+                self._sync_state_for_hud()
+                return
             if self._game_over_delay_remaining <= 0.0:
                 self._game_over_delay_remaining = 0.8
                 self.damage_effects.trigger_destruction_sequence(
@@ -223,18 +283,22 @@ class CombatPhaseState(BaseState):
                 shields=self.game_state.shields,
                 max_shields=self.game_state.max_shields,
                 credits=self.game_state.currency,
+                is_practice=self._is_practice,
             )
 
     def _check_level_clear(self) -> None:
         """Transition to shop when all asteroids are cleared."""
         if len(self.entity_manager.asteroids) == 0:
+            if self._is_practice:
+                self._advance_level()
+                return
             self._transition_to_shop()
 
     def _transition_to_shop(self) -> None:
         """Switch into ShopPhase with snapshots of current run and ship state."""
         ship = self.player_ship
         self._sync_state_for_hud()
-        self._play_sound("level_clear")
+        self._play_level_clear_sound()
         from asterax.app.src.states.shop import ShopPhaseState
 
         self.state_machine.switch_state(
@@ -263,12 +327,14 @@ class CombatPhaseState(BaseState):
         ship.velocity_x = 0.0
         ship.velocity_y = 0.0
 
-        params = get_difficulty_params(self.current_level)
+        params = self._params_for_level(self.current_level)
+        self._apply_runtime_difficulty(params)
         for asteroid in self.spawn_manager.spawn_level_asteroids(
             level=self.current_level,
             player_position=(ship.center_x, ship.center_y),
             screen_width=window.width,
             screen_height=window.height,
+            difficulty_params=params,
         ):
             asteroid.velocity_x = max(
                 -params.asteroid_speed_max,
@@ -280,7 +346,10 @@ class CombatPhaseState(BaseState):
             )
             self.entity_manager.asteroids.append(asteroid)
         self.spawn_manager.reset_enemy_spawning()
-        window.audio_manager.play("level_clear")
+        if hasattr(window.audio_manager, "play_level_clear"):
+            window.audio_manager.play_level_clear()
+        else:
+            window.audio_manager.play("level_clear")
         self._sync_state_for_hud()
 
     def _trigger_game_over(self, persistence: PersistenceManager) -> None:
@@ -307,6 +376,7 @@ class CombatPhaseState(BaseState):
                 self.state_machine,
                 run_stats=run_stats,
                 persistence=persistence,
+                is_practice=self._is_practice,
             )
         )
 
@@ -317,7 +387,10 @@ class CombatPhaseState(BaseState):
         screen_height: float,
     ) -> None:
         """Spawn new enemies at interval if enabled and under count cap."""
-        difficulty_params = get_difficulty_params(self.current_level)
+        difficulty_params = self._current_difficulty_params
+        if difficulty_params is None:
+            difficulty_params = self._params_for_level(self.current_level)
+            self._apply_runtime_difficulty(difficulty_params)
         new_enemies = self.spawn_manager.update_enemy_spawning(
             dt=dt,
             current_enemy_count=len(self.entity_manager.enemies),
@@ -349,6 +422,7 @@ class CombatPhaseState(BaseState):
             )
             if projectile is not None:
                 self.entity_manager.enemy_projectiles.append(projectile)
+                self._play_enemy_fire_sound()
 
         for projectile in list(self.entity_manager.enemy_projectiles):
             projectile.update(dt)
@@ -365,7 +439,7 @@ class CombatPhaseState(BaseState):
             "medium",
             self.entity_manager.particles,
         )
-        self._play_sound("enemy_explode")
+        self._play_enemy_explode_sound()
         enemy.kill()
 
     def _process_enemy_collisions(
@@ -411,21 +485,33 @@ class CombatPhaseState(BaseState):
                 duration=buff_pickup.duration,
                 ship=player,
             )
+            self.particle_system.emit_sparkle(
+                buff_pickup.center_x,
+                buff_pickup.center_y,
+            )
             buff_pickup.kill()
-            self._play_sound(BUFF_PICKUP_SOUND_NAME)
+            self._play_buff_pickup_sound()
 
     def _apply_player_damage(self, player: PlayerShip, amount: float) -> None:
         """Apply player damage and trigger associated audiovisual feedback."""
+        if self._practice_infinite_shields:
+            player.shields = player.max_shields
+            return
         if player.is_invulnerable:
             return
         took_damage = player.shields
-        player.take_damage(amount)
+        player.take_damage(amount * self._damage_received_multiplier)
         if player.shields < took_damage:
-            self.damage_effects.trigger_damage_flash(player)
+            player.trigger_damage_flash_tint()
             self.damage_effects.trigger_invulnerability(
                 player, GAME_CONFIG.invulnerability_duration
             )
-            self._play_sound("player_hit")
+            self.particle_system.emit_damage_flash(
+                player.center_x,
+                player.center_y,
+            )
+            self._play_hit_sound()
+            self._trigger_screen_shake()
 
     def _play_sound(self, sound_name: str) -> None:
         """Play a sound effect when a game window and audio manager are available."""
@@ -434,6 +520,100 @@ class CombatPhaseState(BaseState):
         except RuntimeError:
             return
         window.audio_manager.play(sound_name)
+
+    def _play_level_clear_sound(self) -> None:
+        """Play level-clear sound effect when available."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return
+        if hasattr(window.audio_manager, "play_level_clear"):
+            window.audio_manager.play_level_clear()
+            return
+        window.audio_manager.play("level_clear")
+
+    def _play_hit_sound(self) -> None:
+        """Play player-hit sound effect when available."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return
+        if hasattr(window.audio_manager, "play_hit"):
+            window.audio_manager.play_hit()
+            return
+        window.audio_manager.play("player_hit")
+
+    def _play_enemy_explode_sound(self) -> None:
+        """Play enemy-explosion sound effect when available."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return
+        if hasattr(window.audio_manager, "play_enemy_explode"):
+            window.audio_manager.play_enemy_explode()
+            return
+        window.audio_manager.play("enemy_explode")
+
+    def _play_buff_pickup_sound(self) -> None:
+        """Play buff pickup sound with fallback compatibility."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return
+        if BUFF_PICKUP_SOUND_NAME == "pickup_buff":
+            if hasattr(window.audio_manager, "play_pickup_buff"):
+                window.audio_manager.play_pickup_buff()
+            else:
+                window.audio_manager.play("pickup_buff")
+            return
+        if hasattr(window.audio_manager, "play_pickup_currency"):
+            window.audio_manager.play_pickup_currency()
+            return
+        window.audio_manager.play("pickup_currency")
+
+    def _play_enemy_fire_sound(self) -> None:
+        """Play enemy fire sound when an enemy projectile is emitted."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return
+        if hasattr(window.audio_manager, "play_enemy_fire"):
+            window.audio_manager.play_enemy_fire()
+            return
+        window.audio_manager.play("enemy_fire")
+
+    def _emit_thrust_particles(self) -> None:
+        """Emit thrust trail particles while thrust input is active."""
+        window = arcade.get_window()
+        input_manager = getattr(window, "input_manager", None)
+        is_action_held = getattr(input_manager, "is_action_held", None)
+        if not callable(is_action_held):
+            return
+        if not bool(is_action_held("thrust")):
+            return
+        ship = self.player_ship
+        angle_radians = math.radians(ship.angle + 90.0)
+        thrust_origin_x = ship.center_x - math.cos(angle_radians) * (ship.height / 2)
+        thrust_origin_y = ship.center_y - math.sin(angle_radians) * (ship.height / 2)
+        self.particle_system.emit_thrust(
+            thrust_origin_x,
+            thrust_origin_y,
+            ship.angle,
+        )
+
+    def _process_player_fire_sound(self) -> None:
+        """Play fire SFX exactly when a new player projectile is emitted."""
+        current_count = len(self.entity_manager.player_projectiles)
+        if current_count > self._last_player_projectile_count:
+            try:
+                window = arcade.get_window()
+            except RuntimeError:
+                return
+            if hasattr(window.audio_manager, "play_fire"):
+                window.audio_manager.play_fire()
+            else:
+                window.audio_manager.play("fire")
+        self._last_player_projectile_count = current_count
 
     def _maybe_spawn_enemy_buff(
         self, enemy: EnemyShip, buff_drop_chance: float
@@ -471,6 +651,8 @@ class CombatPhaseState(BaseState):
         self.particle_system.draw()
         if self.hud is not None:
             self.hud.draw()
+        if self._transition_effect is not None and self._transition_effect.is_active:
+            self._transition_effect.draw()
 
     def on_key_press(self, key: int, modifiers: int) -> None:
         """Handle combat-specific key transitions like pause or forced game-over."""
@@ -478,9 +660,126 @@ class CombatPhaseState(BaseState):
 
         from asterax.app.src.states.pause import PauseState
 
-        if key == arcade.key.ESCAPE:
+        if key == self._pause_key():
             self.state_machine.push_state(PauseState(self.state_machine))
         elif key == arcade.key.G:
+            if self._is_practice:
+                self._respawn_practice_ship()
+                return
             window = arcade.get_window()
             self.player_ship.shields = 0.0
             self._trigger_game_over(window.persistence)
+
+    def _pause_key(self) -> int:
+        """Return current configured pause key binding.
+
+        Returns:
+            Key code for pause action with Escape fallback.
+        """
+        window = arcade.get_window()
+        input_manager = getattr(window, "input_manager", None)
+        get_binding = getattr(input_manager, "get_binding", None)
+        if callable(get_binding):
+            return int(get_binding("pause"))
+        return arcade.key.ESCAPE
+
+    def _apply_visual_settings(self) -> None:
+        """Apply colorblind palette according to the active runtime settings."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return
+        settings = getattr(window, "runtime_settings", None)
+        if settings is None and hasattr(window, "persistence"):
+            load_settings = getattr(window.persistence, "load_settings", None)
+            if callable(load_settings):
+                settings = load_settings()
+        colorblind_enabled = bool(
+            getattr(settings, "colorblind_mode", False)
+            if settings is not None
+            else False
+        )
+        apply_colorblind_palette_to_combat(self.entity_manager, colorblind_enabled)
+
+    def _trigger_screen_shake(self) -> None:
+        """Trigger window-level screen shake with current settings intensity."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return
+        trigger = getattr(window, "trigger_screen_shake", None)
+        if not callable(trigger):
+            return
+        settings = getattr(window, "runtime_settings", None)
+        if settings is None and hasattr(window, "persistence"):
+            load_settings = getattr(window.persistence, "load_settings", None)
+            if callable(load_settings):
+                settings = load_settings()
+        intensity = (
+            str(getattr(settings, "screen_shake", "medium"))
+            if settings is not None
+            else "medium"
+        )
+        trigger(intensity)
+
+    def _resolve_difficulty_preset(self) -> DifficultyPreset:
+        """Load the active difficulty preset from persisted settings."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return DifficultyPreset.CLASSIC
+        persistence = getattr(window, "persistence", None)
+        if persistence is None or not hasattr(persistence, "load_settings"):
+            return DifficultyPreset.CLASSIC
+        settings = persistence.load_settings()
+        difficulty_value = getattr(settings, "difficulty", DifficultyPreset.CLASSIC)
+        return parse_difficulty_preset(str(difficulty_value))
+
+    def _params_for_level(self, level: int) -> DifficultyParams:
+        """Return preset-adjusted difficulty parameters for a level."""
+        base = get_difficulty_params(level)
+        params = self.difficulty_scaler.apply_preset(base, self._difficulty_preset)
+        return self._apply_practice_params(params)
+
+    def _apply_practice_params(self, params: DifficultyParams) -> DifficultyParams:
+        """Return difficulty params adjusted for practice-mode toggles."""
+        if not self._is_practice:
+            return params
+        if self._practice_asteroids_only:
+            params.enemy_spawn_enabled = False
+            params.enemy_count_max = 0
+            params.enemy_aggression = 0.0
+            params.aggressive_ratio = 0.0
+            params.enemy_spawn_interval = 99.0
+        if self._practice_reduced_count:
+            params.asteroid_count = max(1, int(round(params.asteroid_count * 0.5)))
+        return params
+
+    def _respawn_practice_ship(self) -> None:
+        """Respawn ship in-place for low-stakes practice sessions."""
+        window = arcade.get_window()
+        ship = self.player_ship
+        ship.shields = ship.max_shields
+        ship.center_x = window.width / 2
+        ship.center_y = window.height / 2
+        ship.velocity_x = 0.0
+        ship.velocity_y = 0.0
+        self.damage_effects.trigger_invulnerability(ship, 2.0)
+        self.particle_system.emit_sparkle(ship.center_x, ship.center_y)
+        self._game_over_delay_remaining = 0.0
+
+    def _apply_runtime_difficulty(self, params: DifficultyParams) -> None:
+        """Apply level difficulty values to runtime systems."""
+        self._current_difficulty_params = params
+        preset_multipliers = self._difficulty_scaler_for_current_preset()
+        self._damage_received_multiplier = preset_multipliers.damage_received
+        self.collision_system.damage_received_multiplier = (
+            self._damage_received_multiplier
+        )
+        self.collision_system.currency_drop_chance_override = (
+            params.currency_drop_chance
+        )
+
+    def _difficulty_scaler_for_current_preset(self) -> DifficultyMultipliers:
+        """Return multiplier object for the currently selected difficulty preset."""
+        return DIFFICULTY_PRESET_MULTIPLIERS[self._difficulty_preset]

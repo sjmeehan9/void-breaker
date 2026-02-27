@@ -149,3 +149,168 @@
   - `python scripts/evals.py`
   - Result: all checks passed (`307 passed`).
 - **Deviations**: None.
+
+## Component 5.6 — Pause System
+- **Status**: Completed
+- **What was built**: Replaced the pause stub with a full overlay pause menu that freezes combat/shop updates, supports keyboard navigation, resumes via pause shortcut, and routes actions for restart, settings, and exit-to-menu. Corrected pause/settings stack interaction so settings opened from pause returns to pause without discarding the active run.
+- **Key files modified**:
+  - `app/src/states/pause.py` — full `PauseState` implementation with menu options (`Resume`, `Restart Run`, `Settings`, `Exit to Menu`), wrapped navigation, overlay rendering, and action dispatch
+  - `app/src/states/combat.py` — pause trigger now uses configured pause binding with Escape fallback
+  - `app/src/states/shop.py` — pause trigger now uses configured pause binding with Escape fallback
+  - `app/src/states/settings_screen.py` — `return_to="pause"` now exits by `pop_state()` to restore existing pause overlay
+  - `app/src/states/state_machine.py` — overlay semantics updated so `push_state()`/`pop_state()` do not call `on_exit()`/`on_enter()` on underlying states
+  - `tests/test_state_machine.py` — updated overlay lifecycle expectation
+  - `tests/test_settings_screen.py` — added coverage for pause-return pop behavior
+- **Key files created**:
+  - `tests/test_pause.py` — tests for pause overlay lifecycle and action routing
+  - `docs/components/phase-5-component-5-6-overview.md` — component overview documentation
+- **Design decisions**:
+  - Treated pause/settings as true overlays to preserve exact run state while paused and avoid unintended state reinitialization.
+  - Used draw-through stack behavior (world visible behind overlay) with top-state-only updates to satisfy freeze requirements.
+  - Added robust pause-key lookup with Escape fallback to support lightweight test input stubs.
+- **Validation run**:
+  - `black --check app/src tests/test_pause.py tests/test_state_machine.py tests/test_settings_screen.py`
+  - `isort --check-only app/src tests/test_pause.py tests/test_state_machine.py tests/test_settings_screen.py`
+  - `pytest -q tests/test_pause.py tests/test_state_machine.py tests/test_settings_screen.py tests/test_shop_phase_state.py tests/test_shop.py`
+  - `pytest -q`
+  - `python scripts/evals.py`
+  - Result: all checks passed (`313 passed`, evals passed).
+- **Deviations**: None.
+
+## Component 5.7 — Audio Integration & Particle Effects
+- **Status**: Completed
+- **What was built**: Integrated event-specific audio playback across combat/shop/collision flows and replaced the explosion-only particle implementation with a pooled, capped multi-effect particle system (hard cap default `300`). Added emitters for size-scaled explosions, thrust trails, pickup sparkles, damage flashes, and purchase bursts.
+- **Key files modified**:
+  - `app/src/audio/audio_manager.py` — added wrapper methods (`play_fire`, `play_hit`, `play_explosion`, `play_enemy_fire`, `play_enemy_explode`, `play_pickup_currency`, `play_pickup_buff`, `play_shop_purchase`, `play_shop_denied`, `play_level_clear`, `play_game_over`, `play_menu_nav`, `play_menu_select`, `play_shield_low`, `play_insurance_deduct`)
+  - `app/src/rendering/particle_system.py` — full pooled implementation with preallocation, cap enforcement, oldest-particle recycling, and compatibility `spawn_explosion(...)` bridge
+  - `app/src/states/combat.py` — thrust emission, player/enemy fire sound triggers, buff sparkle trigger, wrapper-based hit/level-clear/enemy-explode playback
+  - `app/src/physics/collisions.py` — asteroid-size explosion SFX, pickup sparkle, damage impact flash, hit SFX, and wrapper compatibility fallbacks
+  - `app/src/states/shop.py` — shop-local particle system updates/draw, purchase bursts, insurance deduction SFX, wrapper-based shop audio routing
+  - `tests/test_audio_rendering.py` — wrapper routing + explosion mapping tests
+  - `tests/test_entity_manager_rendering.py` — pooled cap/recycle/active-count tests
+  - `tests/test_damage_effects.py` — adjusted particle-expiry assertions for pooled semantics
+- **Key files created**:
+  - `docs/components/phase-5-component-5-7-overview.md`
+- **Design decisions**:
+  - Kept audio wrapper invocations backward-compatible by falling back to `audio_manager.play(name)` when test stubs or lightweight adapters do not implement convenience methods.
+  - Kept pooled sprites permanently resident in `SpriteList`; effect activity is represented by alpha/slot state, preventing per-frame sprite allocation churn.
+  - Updated pooled update loop to also advance non-pooled transient particles (from `DamageEffects`) appended to the shared particle list.
+- **Validation run**:
+  - `pytest -q tests/test_audio_rendering.py tests/test_entity_manager_rendering.py tests/test_collisions.py tests/test_shop_phase_state.py tests/test_combat_phase_state.py`
+  - `black --check app/src tests`
+  - `isort --check-only app/src tests`
+  - `pytest -q`
+  - `python scripts/evals.py`
+  - Result: all checks passed (`317 passed`, evals passed).
+- **Deviations**:
+  - The asset set currently includes `17`/`18` sounds in `assets/sounds` (including optional `enemy_fire.wav`, `player_hit.wav`, and `shield_low.wav`); integration supports required Phase 5.7 events with graceful fallbacks where optional clips are absent.
+
+## Component 5.8 — Visual Polish & Transitions
+- **Status**: Completed
+- **What was built**: Added level transition overlays, window-level screen shake, HUD readability polish, colorblind palette support, and stronger shop node pulse behavior. Visual settings now hot-apply at runtime and are respected in combat/shop rendering.
+- **Key files created**:
+  - `app/src/rendering/transitions.py` — `TransitionEffect` (fade/hold/fade), `ScreenShake` (off/low/medium with decay), and colorblind palette/tint helper functions for combat and shop entities
+  - `tests/test_visual_polish_transitions.py` — timing, shake, and palette coverage
+  - `docs/components/phase-5-component-5-8-overview.md` — component overview documentation
+- **Key files modified**:
+  - `app/src/window.py` — integrated `ScreenShake`, camera offset in draw cycle, runtime settings cache hook (`update_runtime_settings`), and `trigger_screen_shake`
+  - `app/src/states/combat.py` — integrated `TransitionEffect`, freeze during transitions, shake trigger on player damage, colorblind tint application, and impact particle emission
+  - `app/src/states/shop.py` — colorblind tint application for shop nodes and player ship
+  - `app/src/rendering/hud.py` — shield bar with threshold coloring, centered score with shadow, improved layout, and credits-change flash
+  - `app/src/entities/shop_node.py` — affordable pulse scale oscillation (`1.0–1.15`) + dimmed non-affordable/maxed states
+  - `app/src/entities/player_ship.py` — ship-local damage flash tint lifecycle
+  - `app/src/states/settings_screen.py` — runtime settings callback so visual toggles apply immediately
+  - `app/src/rendering/__init__.py` — transitions module exports
+  - `tests/test_shop_node.py` — added scale pulse assertions
+- **Design decisions**:
+  - Applied level transitions on combat entry for level > 1, with gameplay updates paused while overlay is active.
+  - Implemented shake reset-on-trigger behavior (no accumulation), matching requirement notes.
+  - Implemented colorblind mode via sprite tinting at runtime to avoid asset duplication and preserve existing rendering pipeline.
+  - Kept HUD text object caching while introducing readability upgrades and low-cost draw embellishments.
+- **Validation run**:
+  - Focused tests: `pytest -q tests/test_visual_polish_transitions.py tests/test_shop_node.py tests/test_window.py tests/test_audio_rendering.py`
+  - Result: `23 passed`
+- **Deviations**: None.
+
+## Component 5.9 — Difficulty Presets Integration
+- **Status**: Completed
+- **What was built**: Implemented full preset-driven difficulty integration across configuration, menu flow, and combat runtime. New game now prompts for difficulty selection (`Casual`, `Classic`, `Hard`) with persisted settings, and combat applies multiplier-adjusted level parameters for spawn pressure, currency drop rates, and damage intake.
+- **Key files modified**:
+  - `app/src/config/difficulty_tables.py` — added `DifficultyPreset`, `DifficultyMultipliers`, `DIFFICULTY_PRESET_MULTIPLIERS`, parsing helper, and `apply_difficulty_preset(...)`
+  - `app/src/managers/spawn_manager.py` — `spawn_level_asteroids(...)` accepts optional caller-supplied `DifficultyParams`
+  - `app/src/physics/collisions.py` — added `damage_received_multiplier` and `currency_drop_chance_override` hooks
+  - `app/src/states/combat.py` — wired preset resolution from settings, per-level preset application, runtime damage/currency multiplier injection, and preset-aware asteroid/enemy spawning
+  - `app/src/states/main_menu.py` — added New Game difficulty sub-prompt (preselected from settings, Enter confirm, Esc cancel) and persistence writeback before combat init
+  - `app/src/persistence/schemas.py` — backward compatibility default for missing high-score difficulty (`classic`)
+  - `app/src/managers/__init__.py`, `app/src/config/__init__.py` — exported new difficulty symbols
+- **Key files created**:
+  - `app/src/managers/difficulty_scaler.py` — `DifficultyScaler.apply_preset(...)` and `for_level(...)`
+  - `tests/test_difficulty_presets.py` — preset behavior, clamp behavior, and high-score backward-compat coverage
+  - `docs/components/phase-5-component-5-9-overview.md` — component overview documentation
+- **Key tests updated**:
+  - `tests/test_main_menu.py` — updated New Game transition expectations for two-step difficulty confirmation flow and added persistence assertion
+- **Design decisions**:
+  - Presets remain multiplicative over Phase 3 tier interpolation to preserve existing tuning while shifting baseline difficulty.
+  - Enemy aggression multiplier is applied to both `enemy_aggression` and `aggressive_ratio` to create meaningful archetype pressure differences without rewriting enemy AI internals.
+  - Currency multiplier is integrated through collision drop override so preset economy effects are applied consistently to asteroid drops.
+- **Validation run**:
+  - `black --check app/src tests/test_main_menu.py tests/test_difficulty_presets.py`
+  - `isort --check-only app/src tests/test_main_menu.py tests/test_difficulty_presets.py`
+  - `pytest -q tests/test_main_menu.py tests/test_difficulty.py tests/test_difficulty_presets.py tests/test_config.py tests/test_persistence.py`
+  - `pytest -q`
+  - `python scripts/evals.py`
+  - Result: all checks passed (`328 passed`, evals passed).
+- **Deviations**: None.
+
+## Component 5.10 — Practice/Training Mode
+- **Status**: Completed
+- **What was built**: Added full practice/training flow from main menu to configurable pre-launch screen and into practice-aware combat. Implemented toggles (`asteroids_only`, `infinite_shields`, `reduced_count`), bypassed shop during practice progression, added non-lethal respawn behavior for practice deaths, prevented leaderboard flow for practice runs, and added a HUD `PRACTICE` indicator.
+- **Key files created**:
+  - `app/src/states/practice_config.py` — new practice configuration state with toggle UI, keyboard navigation, and combat launch wiring
+  - `tests/test_practice_mode.py` — focused tests for practice param building and practice game-over flow
+  - `docs/components/phase-5-component-5-10-overview.md` — component overview
+- **Key files modified**:
+  - `app/src/states/main_menu.py` — added `Practice` option after `New Game`; routes to `PracticeConfigState`
+  - `app/src/states/combat.py` — added practice flags and optional Level-1 practice params override; practice level-clear auto-advances (no shop), optional enemy suppression/reduced asteroid count, infinite-shield suppression path, and respawn-instead-of-death handling
+  - `app/src/states/game_over.py` — added `is_practice` support to skip leaderboard/name-entry and return `Play Again` to practice config
+  - `app/src/rendering/hud.py` — added `is_practice` value input and `PRACTICE` label rendering
+  - `app/src/config/game_config.py` — added `GameState.is_practice` flag
+  - `app/src/states/__init__.py` — exported `PracticeConfigState`
+  - `tests/test_main_menu.py` — updated menu expectations and transition targets for practice entry
+- **Design decisions**:
+  - Practice mode reuses `CombatPhaseState` with explicit flags to avoid duplicating combat systems.
+  - Practice intentionally skips shop transitions and leaderboard progression while preserving level scaling and core handling.
+  - Game-over handling remains compatible with existing flow but adds a practice-only branch for non-recording behavior.
+- **Validation run**:
+  - `black --check app/src/states/practice_config.py app/src/states/main_menu.py app/src/states/combat.py app/src/states/game_over.py app/src/rendering/hud.py app/src/config/game_config.py app/src/states/__init__.py tests/test_main_menu.py tests/test_practice_mode.py`
+  - `isort --check-only app/src/states/practice_config.py app/src/states/main_menu.py app/src/states/combat.py app/src/states/game_over.py app/src/rendering/hud.py app/src/config/game_config.py app/src/states/__init__.py tests/test_main_menu.py tests/test_practice_mode.py`
+  - `pytest -q tests/test_main_menu.py tests/test_practice_mode.py tests/test_game_over.py tests/test_combat_phase_state.py`
+  - Result: all focused checks passed (`23 passed`).
+- **Deviations**: None.
+
+## Component 5.11 — E2E Testing & Documentation
+- **Status**: Completed
+- **What was built**: Added a dedicated Phase 5 verification suite (`test_phase5_*.py`) covering menus/screens, settings persistence and remapping behavior, pause freeze/resume, game-over qualification and name-entry flow, audio wrapper trigger mapping, particle pooling/cap behavior, difficulty preset integration, practice-mode behavior, and a logic-level end-to-end session path from menu to leaderboard save. Added final component documentation for 5.11.
+- **Key files created**:
+  - `tests/test_phase5_menus.py`
+  - `tests/test_phase5_settings.py`
+  - `tests/test_phase5_pause.py`
+  - `tests/test_phase5_game_over.py`
+  - `tests/test_phase5_audio.py`
+  - `tests/test_phase5_particles.py`
+  - `tests/test_phase5_difficulty.py`
+  - `tests/test_phase5_practice.py`
+  - `tests/test_phase5_e2e.py`
+  - `docs/components/phase-5-component-5-11-overview.md`
+- **Design decisions**:
+  - Kept all new tests headless and state/manager-focused to avoid runtime graphics/audio coupling while still exercising end-to-end flow logic.
+  - Implemented audio coverage at the wrapper-method mapping level to verify the full sound-event surface area deterministically.
+  - Added an integration test that simulates menu-driven game start, repeated shop cadence across multiple levels, and game-over leaderboard persistence.
+- **Validation run**:
+  - `black --check app/src tests/test_phase5_*.py`
+  - `isort --check-only app/src tests/test_phase5_*.py`
+  - `pytest -q tests/test_phase5_*.py` → `10 passed`
+  - `pytest -q` → `343 passed`
+  - `pytest -q --cov=app/src --cov-report=term-missing` → `343 passed`, total coverage `79%`
+  - `python scripts/evals.py` → passed (no TODO/FIXME markers; docstring gate passed)
+- **Deviations**: None.

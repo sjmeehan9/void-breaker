@@ -97,7 +97,7 @@ class HighScoreEntry:
             name=str(data["name"]),
             score=int(data["score"]),
             level_reached=int(data["level_reached"]),
-            difficulty=str(data["difficulty"]),
+            difficulty=str(data.get("difficulty", "classic")),
             enemies_destroyed=int(data["enemies_destroyed"]),
             currency_collected=int(data["currency_collected"]),
             currency_spent=int(data["currency_spent"]),

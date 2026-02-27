@@ -50,6 +50,7 @@ class GameOverState(BaseState):
         state_machine: StateMachine,
         run_stats: dict[str, int] | None = None,
         persistence: PersistenceManager | None = None,
+        is_practice: bool = False,
     ) -> None:
         """Store run stats payload and optional persistence override.
 
@@ -76,6 +77,7 @@ class GameOverState(BaseState):
         self._renderer = MenuRenderer()
         self._run_stats_payload = run_stats or {}
         self._persistence = persistence
+        self._is_practice = bool(is_practice)
 
     def on_enter(self) -> None:
         """Hydrate run summary values and evaluate leaderboard qualification."""
@@ -104,6 +106,9 @@ class GameOverState(BaseState):
         self._selected_option_index = 0
 
         self._play_sound("game_over")
+        if self._is_practice:
+            self._qualifies_for_leaderboard = False
+            return
         persistence = self._resolve_persistence()
         if persistence is None:
             return
@@ -160,7 +165,9 @@ class GameOverState(BaseState):
         if self._phase is GameOverPhase.SUMMARY:
             if self._summary_elapsed_seconds < self._summary_min_seconds:
                 return
-            if self._qualifies_for_leaderboard:
+            if self._is_practice:
+                self._phase = GameOverPhase.OPTIONS
+            elif self._qualifies_for_leaderboard:
                 self._phase = GameOverPhase.NAME_ENTRY
             else:
                 self._phase = GameOverPhase.OPTIONS
@@ -247,9 +254,14 @@ class GameOverState(BaseState):
             return
 
         if self._selected_option_index == 0:
-            from asterax.app.src.states.game_init import GameInitState
+            if self._is_practice:
+                from asterax.app.src.states.practice_config import PracticeConfigState
 
-            self.state_machine.switch_state(GameInitState(self.state_machine))
+                self.state_machine.switch_state(PracticeConfigState(self.state_machine))
+            else:
+                from asterax.app.src.states.game_init import GameInitState
+
+                self.state_machine.switch_state(GameInitState(self.state_machine))
             return
 
         from asterax.app.src.states.main_menu import MainMenuState
@@ -306,18 +318,21 @@ class GameOverState(BaseState):
             if self._summary_elapsed_seconds >= self._summary_min_seconds
             else "..."
         )
-        qualification_text = (
-            "Score qualifies for leaderboard!"
-            if self._qualifies_for_leaderboard
-            else "Score does not qualify for leaderboard"
-        )
+        if self._is_practice:
+            qualification_text = "Practice Mode -- Score not recorded"
+        else:
+            qualification_text = (
+                "Score qualifies for leaderboard!"
+                if self._qualifies_for_leaderboard
+                else "Score does not qualify for leaderboard"
+            )
         arcade.draw_text(
             qualification_text,
             center_x,
             170,
             (
                 (255, 220, 80, 255)
-                if self._qualifies_for_leaderboard
+                if self._qualifies_for_leaderboard or self._is_practice
                 else (190, 210, 225, 255)
             ),
             22,

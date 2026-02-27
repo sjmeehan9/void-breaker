@@ -30,9 +30,10 @@ class SpawnManager:
         player_position: tuple[float, float],
         screen_width: float,
         screen_height: float,
+        difficulty_params: DifficultyParams | None = None,
     ) -> list[Asteroid]:
         """Spawn initial large asteroids for the start of a level."""
-        params = get_difficulty_params(level)
+        params = difficulty_params or get_difficulty_params(level)
         asteroids: list[Asteroid] = []
 
         for _ in range(params.asteroid_count):

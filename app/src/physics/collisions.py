@@ -28,6 +28,8 @@ class CollisionSystem:
     def __init__(self, collision_damage: float = 25.0) -> None:
         """Initialize configurable collision response values."""
         self.collision_damage = collision_damage
+        self.damage_received_multiplier = 1.0
+        self.currency_drop_chance_override: float | None = None
         self._ghost_sprites: list[arcade.Sprite] = []
 
     def check_all(
@@ -58,18 +60,22 @@ class CollisionSystem:
                 spawn_manager=spawn_manager,
                 score_manager=score_manager,
                 particle_system=particle_system,
+                audio_manager=audio_manager,
             )
             self._check_ship_vs_asteroids(
                 entity_manager=entity_manager,
                 ghost_ship_map=ghost_ship_map,
                 ghost_asteroid_map=ghost_asteroid_map,
                 ghost_asteroids=ghost_asteroids,
+                particle_system=particle_system,
+                audio_manager=audio_manager,
             )
             self._check_ship_vs_pickups(
                 entity_manager=entity_manager,
                 game_state=game_state,
                 currency_manager=currency_manager,
                 audio_manager=audio_manager,
+                particle_system=particle_system,
             )
         finally:
             self._cleanup_ghost_sprites()
@@ -223,6 +229,7 @@ class CollisionSystem:
         spawn_manager: SpawnManager,
         score_manager: ScoreManager,
         particle_system: ParticleSystem | None,
+        audio_manager: AudioManager | None,
     ) -> None:
         processed_asteroids: set[Asteroid] = set()
         projectiles = list(getattr(entity_manager, "player_projectiles", ()))
@@ -236,6 +243,7 @@ class CollisionSystem:
                 spawn_manager=spawn_manager,
                 score_manager=score_manager,
                 particle_system=particle_system,
+                audio_manager=audio_manager,
                 processed_asteroids=processed_asteroids,
             )
 
@@ -253,6 +261,7 @@ class CollisionSystem:
                 spawn_manager=spawn_manager,
                 score_manager=score_manager,
                 particle_system=particle_system,
+                audio_manager=audio_manager,
                 processed_asteroids=processed_asteroids,
             )
 
@@ -266,6 +275,7 @@ class CollisionSystem:
         spawn_manager: SpawnManager,
         score_manager: ScoreManager,
         particle_system: ParticleSystem | None,
+        audio_manager: AudioManager | None,
         processed_asteroids: set[Asteroid],
     ) -> None:
         if source_projectile not in getattr(entity_manager, "player_projectiles", ()):
@@ -293,6 +303,11 @@ class CollisionSystem:
                 particle_system.spawn_explosion(
                     (asteroid.center_x, asteroid.center_y), asteroid.asteroid_size
                 )
+            if audio_manager is not None:
+                if hasattr(audio_manager, "play_explosion"):
+                    audio_manager.play_explosion(asteroid.asteroid_size.value)
+                else:
+                    audio_manager.play(f"explode_{asteroid.asteroid_size.value}")
             asteroid.kill()
             for child in children:
                 entity_manager.asteroids.append(child)
@@ -305,7 +320,10 @@ class CollisionSystem:
         pickup_list = getattr(entity_manager, "currency_pickups", None)
         if pickup_list is None:
             return
-        if random.random() >= asteroid.currency_drop_chance:
+        drop_chance = asteroid.currency_drop_chance
+        if self.currency_drop_chance_override is not None:
+            drop_chance = self.currency_drop_chance_override
+        if random.random() >= max(0.0, min(1.0, drop_chance)):
             return
         pickup_list.append(
             CurrencyPickup(
@@ -323,22 +341,56 @@ class CollisionSystem:
         ghost_ship_map: dict[arcade.Sprite, PlayerShip],
         ghost_asteroid_map: dict[arcade.Sprite, Asteroid],
         ghost_asteroids: arcade.SpriteList,
+        particle_system: ParticleSystem | None,
+        audio_manager: AudioManager | None,
     ) -> None:
         ship = entity_manager.player_ship
         if self._ship_collides(ship, entity_manager.asteroids):
-            ship.take_damage(self.collision_damage)
+            if particle_system is not None:
+                particle_system.emit_damage_flash(ship.center_x, ship.center_y)
+            if audio_manager is not None:
+                if hasattr(audio_manager, "play_hit"):
+                    audio_manager.play_hit()
+                else:
+                    audio_manager.play("player_hit")
+            ship.take_damage(self.collision_damage * self.damage_received_multiplier)
             return
 
         if self._ship_collides(ship, ghost_asteroids):
-            ship.take_damage(self.collision_damage)
+            if particle_system is not None:
+                particle_system.emit_damage_flash(ship.center_x, ship.center_y)
+            if audio_manager is not None:
+                if hasattr(audio_manager, "play_hit"):
+                    audio_manager.play_hit()
+                else:
+                    audio_manager.play("player_hit")
+            ship.take_damage(self.collision_damage * self.damage_received_multiplier)
             return
 
         for ghost_ship in ghost_ship_map:
             if self._ship_collides(ghost_ship, entity_manager.asteroids):
-                ship.take_damage(self.collision_damage)
+                if particle_system is not None:
+                    particle_system.emit_damage_flash(ship.center_x, ship.center_y)
+                if audio_manager is not None:
+                    if hasattr(audio_manager, "play_hit"):
+                        audio_manager.play_hit()
+                    else:
+                        audio_manager.play("player_hit")
+                ship.take_damage(
+                    self.collision_damage * self.damage_received_multiplier
+                )
                 return
             if self._ship_collides(ghost_ship, ghost_asteroids):
-                ship.take_damage(self.collision_damage)
+                if particle_system is not None:
+                    particle_system.emit_damage_flash(ship.center_x, ship.center_y)
+                if audio_manager is not None:
+                    if hasattr(audio_manager, "play_hit"):
+                        audio_manager.play_hit()
+                    else:
+                        audio_manager.play("player_hit")
+                ship.take_damage(
+                    self.collision_damage * self.damage_received_multiplier
+                )
                 return
 
         del ghost_asteroid_map
@@ -352,6 +404,7 @@ class CollisionSystem:
         game_state: object,
         currency_manager: CurrencyManager | None,
         audio_manager: AudioManager | None,
+        particle_system: ParticleSystem | None,
     ) -> None:
         pickup_list = getattr(entity_manager, "currency_pickups", None)
         ship = getattr(entity_manager, "player_ship", None)
@@ -368,8 +421,13 @@ class CollisionSystem:
             elif hasattr(game_state, "currency"):
                 # Fallback for callers that pass no manager (legacy / isolated tests).
                 game_state.currency += value
+            if particle_system is not None:
+                particle_system.emit_sparkle(pickup.center_x, pickup.center_y)
             if audio_manager is not None:
-                audio_manager.play("pickup_currency")
+                if hasattr(audio_manager, "play_pickup_currency"):
+                    audio_manager.play_pickup_currency()
+                else:
+                    audio_manager.play("pickup_currency")
             pickup.kill()
 
     def _create_ghost_sprites(

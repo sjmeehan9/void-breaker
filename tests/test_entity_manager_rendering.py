@@ -123,18 +123,51 @@ def test_entity_manager_initializes_enemy_sprite_lists() -> None:
 
 def test_particle_system_spawn_explosion_creates_expected_particle_count() -> None:
     """Explosion particle burst count should respect configured size profile."""
-    particle_system = ParticleSystem(rng=random.Random(3))
+    particle_system = ParticleSystem(rng=random.Random(3), max_particles=300)
 
     particle_system.spawn_explosion((100.0, 120.0), AsteroidSize.LARGE)
 
-    assert 10 <= len(particle_system.particles) <= 15
+    assert particle_system.max_particles == 300
+    assert particle_system.active_particle_count == 25
 
 
 def test_particle_system_update_removes_expired_particles() -> None:
     """Particle update should remove particles whose lifetime has elapsed."""
-    particle_system = ParticleSystem(rng=random.Random(4))
+    particle_system = ParticleSystem(rng=random.Random(4), max_particles=12)
     particle_system.spawn_explosion((100.0, 120.0), AsteroidSize.SMALL)
 
-    particle_system.update(1.0)
+    particle_system.update(2.0)
 
-    assert len(particle_system.particles) == 0
+    assert particle_system.active_particle_count == 0
+
+
+def test_particle_system_preallocates_pool_and_enforces_cap() -> None:
+    """Particle system should preallocate sprites and never exceed configured cap."""
+    particle_system = ParticleSystem(rng=random.Random(7), max_particles=6)
+
+    assert len(particle_system.particles) == 6
+
+    particle_system.emit_explosion(100.0, 100.0, "large")
+    assert particle_system.active_particle_count == 6
+
+
+def test_particle_system_recycles_when_pool_exhausted() -> None:
+    """Emitting effects beyond capacity should recycle oldest active particles."""
+    particle_system = ParticleSystem(rng=random.Random(8), max_particles=5)
+
+    particle_system.emit_explosion(10.0, 20.0, "small")
+    first_positions = {
+        (sprite.center_x, sprite.center_y)
+        for sprite in particle_system.particles
+        if sprite.alpha > 0
+    }
+
+    particle_system.emit_purchase_burst(200.0, 220.0)
+    second_positions = {
+        (sprite.center_x, sprite.center_y)
+        for sprite in particle_system.particles
+        if sprite.alpha > 0
+    }
+
+    assert particle_system.active_particle_count == 5
+    assert first_positions != second_positions

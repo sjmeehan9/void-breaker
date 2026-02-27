@@ -54,4 +54,5 @@ def test_damage_particles_expire_after_lifetime() -> None:
 
     particle_system.update(1.0)
 
-    assert len(particles) == 0
+    assert len(particles) == particle_system.max_particles
+    assert sum(1 for sprite in particles if sprite.alpha > 0) == 0

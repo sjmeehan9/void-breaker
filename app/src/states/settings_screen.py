@@ -424,6 +424,10 @@ class SettingsScreenState(BaseState):
         if audio_manager is not None and hasattr(audio_manager, "update_settings"):
             audio_manager.update_settings(self._settings)
 
+        update_runtime_settings = getattr(window, "update_runtime_settings", None)
+        if callable(update_runtime_settings):
+            update_runtime_settings(self._settings)
+
     def _reset_to_defaults(self) -> None:
         """Restore factory defaults and persist immediately."""
         self._settings = GameSettings()
@@ -579,9 +583,7 @@ class SettingsScreenState(BaseState):
     def _exit_settings(self) -> None:
         """Return to the configured parent screen."""
         if self._return_to == "pause":
-            from asterax.app.src.states.pause import PauseState
-
-            self.state_machine.switch_state(PauseState(self.state_machine))
+            self.state_machine.pop_state()
             return
 
         from asterax.app.src.states.main_menu import MainMenuState

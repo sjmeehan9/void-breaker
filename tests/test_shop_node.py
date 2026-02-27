@@ -92,9 +92,11 @@ def test_shop_node_update_visual_state_sets_expected_alpha() -> None:
 
     node.update_visual_state(currency=0, current_level=0, delta_time=0.1)
     assert node.alpha == 100
+    assert node.scale[0] == 1.0
 
     node.update_visual_state(currency=9999, current_level=0, delta_time=0.1)
     assert 200 <= node.alpha <= 255
+    assert 1.0 <= node.scale[0] <= 1.15
 
     node.update_visual_state(
         currency=9999,
@@ -102,6 +104,7 @@ def test_shop_node_update_visual_state_sets_expected_alpha() -> None:
         delta_time=0.1,
     )
     assert node.alpha == 150
+    assert node.scale[0] == 1.0
 
 
 def test_shop_phase_collision_purchases_upgrade(monkeypatch) -> None:

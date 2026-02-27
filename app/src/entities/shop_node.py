@@ -13,6 +13,8 @@ _PULSE_MAX_ALPHA = 255
 _UNAFFORDABLE_ALPHA = 100
 _MAXED_ALPHA = 150
 _PULSE_PERIOD_SECONDS = 1.0
+_BASE_SCALE = 1.0
+_PULSE_SCALE_AMPLITUDE = 0.15
 
 
 class ShopNode(arcade.Sprite):
@@ -95,6 +97,7 @@ class ShopNode(arcade.Sprite):
         if can_afford_override is not None:
             if not can_afford_override:
                 self.alpha = _UNAFFORDABLE_ALPHA
+                self.scale = _BASE_SCALE
                 return
             self._pulse_time_seconds = (
                 self._pulse_time_seconds + max(0.0, delta_time)
@@ -103,18 +106,22 @@ class ShopNode(arcade.Sprite):
             self.alpha = int(
                 _PULSE_MIN_ALPHA + (_PULSE_MAX_ALPHA - _PULSE_MIN_ALPHA) * pulse
             )
+            self.scale = _BASE_SCALE + (_PULSE_SCALE_AMPLITUDE * pulse)
             return
 
         if self.upgrade_definition is None:
             self.alpha = _MAXED_ALPHA
+            self.scale = _BASE_SCALE
             return
 
         if current_level >= self.upgrade_definition.max_level:
             self.alpha = _MAXED_ALPHA
+            self.scale = _BASE_SCALE
             return
 
         if not self.can_purchase(currency, current_level):
             self.alpha = _UNAFFORDABLE_ALPHA
+            self.scale = _BASE_SCALE
             return
 
         self._pulse_time_seconds = (
@@ -124,6 +131,7 @@ class ShopNode(arcade.Sprite):
         self.alpha = int(
             _PULSE_MIN_ALPHA + (_PULSE_MAX_ALPHA - _PULSE_MIN_ALPHA) * pulse
         )
+        self.scale = _BASE_SCALE + (_PULSE_SCALE_AMPLITUDE * pulse)
 
     def draw_label(self, current_level: int) -> None:
         """Draw the node label, level text, and cost text under the sprite."""
@@ -179,6 +187,7 @@ class ContinueNode(ShopNode):
         self.alpha = int(
             _PULSE_MIN_ALPHA + (_PULSE_MAX_ALPHA - _PULSE_MIN_ALPHA) * pulse
         )
+        self.scale = _BASE_SCALE + (0.08 * pulse)
 
     def draw_label(self, current_level: int) -> None:
         """Draw only a simple continue label for this node."""

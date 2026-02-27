@@ -5,7 +5,12 @@ from __future__ import annotations
 from typing import ClassVar
 
 import arcade
+from asterax.app.src.config.difficulty_tables import (
+    DifficultyPreset,
+    parse_difficulty_preset,
+)
 from asterax.app.src.input.input_manager import InputManager
+from asterax.app.src.persistence.schemas import GameSettings
 from asterax.app.src.rendering.menu_renderer import MenuRenderer
 from asterax.app.src.states.base_state import BaseState
 
@@ -29,6 +34,7 @@ class MainMenuState(BaseState):
         super().__init__(state_machine)
         self._menu_options: list[tuple[str, str]] = [
             ("New Game", "new_game"),
+            ("Practice", "practice"),
             ("How to Play", "how_to_play"),
             ("Settings", "settings"),
             ("High Scores", "high_scores"),
@@ -39,6 +45,18 @@ class MainMenuState(BaseState):
         self._fade_speed: float = 850.0
         self._fading_in: bool = True
         self._pending_target: str | None = None
+        self._showing_difficulty_selection = False
+        self._difficulty_options: list[DifficultyPreset] = [
+            DifficultyPreset.CASUAL,
+            DifficultyPreset.CLASSIC,
+            DifficultyPreset.HARD,
+        ]
+        self._difficulty_descriptions: dict[DifficultyPreset, str] = {
+            DifficultyPreset.CASUAL: "Fewer asteroids, slower enemies, more drops",
+            DifficultyPreset.CLASSIC: "Balanced default challenge",
+            DifficultyPreset.HARD: "More pressure, fewer drops, heavier damage",
+        }
+        self._difficulty_selected_index = 1
         self._renderer = MenuRenderer()
 
     def on_enter(self) -> None:
@@ -51,6 +69,8 @@ class MainMenuState(BaseState):
         self._fade_alpha = 255.0
         self._fading_in = True
         self._pending_target = None
+        self._showing_difficulty_selection = False
+        self._difficulty_selected_index = self._load_selected_difficulty_index()
 
     def on_exit(self) -> None:
         """Persist the current selected index for later menu returns."""
@@ -90,6 +110,9 @@ class MainMenuState(BaseState):
             spacing=58.0,
         )
 
+        if self._showing_difficulty_selection:
+            self._draw_difficulty_prompt()
+
         if self._fade_alpha > 0.0:
             arcade.draw_lrtb_rectangle_filled(
                 0.0,
@@ -108,6 +131,10 @@ class MainMenuState(BaseState):
         """
         del modifiers
         if self._pending_target is not None:
+            return
+
+        if self._showing_difficulty_selection:
+            self._handle_difficulty_selection_input(key)
             return
 
         if key in self._up_keys():
@@ -135,7 +162,11 @@ class MainMenuState(BaseState):
     def _select(self) -> None:
         """Queue activation of the highlighted option after fade-out."""
         MainMenuState._last_selected_index = self._selected_index
-        self._pending_target = self._menu_options[self._selected_index][1]
+        selected_target = self._menu_options[self._selected_index][1]
+        if selected_target == "new_game":
+            self._show_difficulty_selection()
+            return
+        self._pending_target = selected_target
         self._play_menu_sound("menu_select")
 
     def _activate_target(self, target: str) -> None:
@@ -154,6 +185,12 @@ class MainMenuState(BaseState):
             from asterax.app.src.states.how_to_play import HowToPlayState
 
             self.state_machine.switch_state(HowToPlayState(self.state_machine))
+            return
+
+        if target == "practice":
+            from asterax.app.src.states.practice_config import PracticeConfigState
+
+            self.state_machine.switch_state(PracticeConfigState(self.state_machine))
             return
 
         if target == "settings":
@@ -182,6 +219,110 @@ class MainMenuState(BaseState):
         audio_manager = getattr(window, "audio_manager", None)
         if audio_manager is not None:
             audio_manager.play(sound_name)
+
+    def _show_difficulty_selection(self) -> None:
+        """Enter New Game difficulty selection mode."""
+        self._showing_difficulty_selection = True
+        self._difficulty_selected_index = self._load_selected_difficulty_index()
+        self._play_menu_sound("menu_select")
+
+    def _handle_difficulty_selection_input(self, key: int) -> None:
+        """Handle input while difficulty selection prompt is active."""
+        if key in self._up_keys():
+            self._difficulty_selected_index = (
+                self._difficulty_selected_index - 1
+            ) % len(self._difficulty_options)
+            self._play_menu_sound("menu_nav")
+            return
+
+        if key in self._down_keys():
+            self._difficulty_selected_index = (
+                self._difficulty_selected_index + 1
+            ) % len(self._difficulty_options)
+            self._play_menu_sound("menu_nav")
+            return
+
+        if key in self._select_keys():
+            self._persist_selected_difficulty()
+            self._showing_difficulty_selection = False
+            self._pending_target = "new_game"
+            self._play_menu_sound("menu_select")
+            return
+
+        if key == arcade.key.ESCAPE:
+            self._showing_difficulty_selection = False
+            self._play_menu_sound("menu_nav")
+
+    def _load_selected_difficulty_index(self) -> int:
+        """Return selected difficulty index from persisted settings."""
+        window = arcade.get_window()
+        persistence = getattr(window, "persistence", None)
+        if persistence is None or not hasattr(persistence, "load_settings"):
+            return 1
+        settings = persistence.load_settings()
+        difficulty = parse_difficulty_preset(getattr(settings, "difficulty", "classic"))
+        return self._difficulty_options.index(difficulty)
+
+    def _persist_selected_difficulty(self) -> None:
+        """Persist selected difficulty to settings storage."""
+        selected = self._difficulty_options[self._difficulty_selected_index].value
+        window = arcade.get_window()
+        persistence = getattr(window, "persistence", None)
+        if persistence is None:
+            return
+
+        loaded_settings: GameSettings
+        if hasattr(persistence, "load_settings"):
+            loaded_settings = persistence.load_settings()
+        else:
+            loaded_settings = GameSettings()
+        loaded_settings.difficulty = selected
+        if hasattr(persistence, "save_settings"):
+            persistence.save_settings(loaded_settings)
+        if hasattr(window, "runtime_settings"):
+            window.runtime_settings = loaded_settings
+
+    def _draw_difficulty_prompt(self) -> None:
+        """Draw New Game difficulty prompt overlay."""
+        window = arcade.get_window()
+        center_x = window.width / 2
+        center_y = window.height / 2
+
+        arcade.draw_lrtb_rectangle_filled(
+            center_x - 330,
+            center_x + 330,
+            center_y + 220,
+            center_y - 220,
+            (8, 12, 24, 230),
+        )
+        self._renderer.draw_title("Select Difficulty", center_x, center_y + 165)
+
+        option_labels = [preset.value.title() for preset in self._difficulty_options]
+        self._renderer.draw_menu_options(
+            options=option_labels,
+            selected=self._difficulty_selected_index,
+            x=center_x,
+            y=center_y + 70,
+            spacing=52.0,
+        )
+
+        selected_preset = self._difficulty_options[self._difficulty_selected_index]
+        arcade.draw_text(
+            self._difficulty_descriptions[selected_preset],
+            center_x,
+            center_y - 80,
+            arcade.color.LIGHT_GRAY,
+            18,
+            anchor_x="center",
+        )
+        arcade.draw_text(
+            "Enter: Confirm   Esc: Back",
+            center_x,
+            center_y - 135,
+            arcade.color.GRAY,
+            16,
+            anchor_x="center",
+        )
 
     def _up_keys(self) -> set[int]:
         """Return supported key bindings for upward menu navigation."""

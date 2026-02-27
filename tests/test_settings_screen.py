@@ -84,6 +84,7 @@ class RecordingStateMachine:
     def __init__(self) -> None:
         """Initialize transition recording storage."""
         self.switched_to: list[str] = []
+        self.pop_calls = 0
 
     def switch_state(self, state: object) -> None:
         """Record class names of switched states.
@@ -92,6 +93,10 @@ class RecordingStateMachine:
             state: State instance passed to switch.
         """
         self.switched_to.append(type(state).__name__)
+
+    def pop_state(self) -> None:
+        """Record overlay-pop requests from settings exit paths."""
+        self.pop_calls += 1
 
 
 def _set_selected_by_name(state: SettingsScreenState, label: str) -> None:
@@ -210,3 +215,17 @@ def test_settings_round_trip_through_persistence(tmp_path: Path) -> None:
     loaded = persistence.load_settings()
 
     assert loaded.to_dict() == source.to_dict()
+
+
+def test_exit_settings_to_pause_pops_overlay(monkeypatch) -> None:
+    """Settings opened from pause should pop back to pause overlay."""
+    window = FakeWindow(GameSettings())
+    monkeypatch.setattr(arcade, "get_window", lambda: window)
+    machine = RecordingStateMachine()
+    state = SettingsScreenState(machine, return_to="pause")
+    state.on_enter()
+
+    state._exit_settings()  # noqa: SLF001
+
+    assert machine.pop_calls == 1
+    assert machine.switched_to == []

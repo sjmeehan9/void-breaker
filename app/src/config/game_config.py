@@ -313,6 +313,7 @@ class GameState:
     shields: float = 100.0
     max_shields: float = 100.0
     is_paused: bool = False
+    is_practice: bool = False
     phase: GamePhase = GamePhase.COMBAT
     level_stats: LevelStats = field(default_factory=LevelStats)
     run_stats: RunStats = field(default_factory=RunStats)

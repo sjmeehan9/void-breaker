@@ -229,3 +229,170 @@ Phase 3 layered the enemy combat system on top of the Phase 2 core loop. `Combat
 ## Phase Readiness
 
 All eight components passed formatting checks (`black`, `isort`), 141 focused unit tests (`pytest`), quality evals (`scripts/evals.py`), and 89% overall code coverage. Phase 3 is complete and provides the full combat experience for Phase 4 (Economy & Progression).
+
+---
+
+## Phase 4 Overview
+
+Phase 4 delivered VoidBreaker's signature feature set: the fly-through shop phase, upgrade manager, insurance mechanic, and currency economy. After this phase, the complete core game loop is functional — fight, collect currency, shop for upgrades via ship-to-node collision, fight harder, repeat. The shop introduces meaningful strategic decisions each level through upgrade investment, insurance risk/reward, and currency management.
+
+## Components Delivered
+
+### Component 4.1 — Human Setup & Shop Assets
+- **What was built:** Seven placeholder shop sprites (six category orbs + continue arrow) generated via Pillow, plus two developer-provided `.wav` sound effects.
+- **Key files:** `assets/sprites/shop/orb_weapon.png`, `orb_defense.png`, `orb_mobility.png`, `orb_economy.png`, `orb_repair.png`, `orb_insurance.png`, `assets/sprites/shop/node_continue.png`, `scripts/generate_placeholder_sprites.py`
+- **Design decisions:** Extended the existing Pillow generation script. Orbs use a three-layer glow design for visual depth.
+
+### Component 4.2 — Shop Phase State & Layout
+- **What was built:** Replaced the Phase 1 shop stub with `ShopPhaseState` — circular node layout, ship centring on entry, thrust/rotation movement with screen-edge clamping (no wrap), and bidirectional combat↔shop transitions.
+- **Key files:** `app/src/states/shop.py`, `app/src/states/combat.py`, `app/src/config/game_config.py` (`ShopLayoutConfig`)
+- **Design decisions:** Layout radius and continue-node offset centralised in `ShopLayoutConfig`. Used lightweight view models in 4.2 to avoid blocking on the 4.3 entity implementation.
+
+### Component 4.3 — Shop Node Entities & Interaction
+- **What was built:** `ShopNode` and `ContinueNode` entity classes with geometric cost scaling, purchasability checks, per-frame affordability/max-state alpha rendering, text labels (name, level, cost), and collision-based purchase/denied flow.
+- **Key files:** `app/src/entities/shop_node.py`, `app/src/entities/__init__.py`
+- **Design decisions:** Insurance kept as a non-purchasable placeholder in 4.3 to defer tier-cycling logic to 4.5/4.7. Denied feedback uses dimming + bounce; crossed-out icon deferred to polish pass.
+
+### Component 4.4 — Upgrade Manager & Stat Application
+- **What was built:** `UpgradeManager` tracking all 11 upgrade levels, cost scaling, one-shot repairs, score multiplier, and effective stat recalculation on `ShipState`/`GameState`. Full upgrade catalog populated in `upgrade_definitions.py`.
+- **Key files:** `app/src/managers/upgrade_manager.py`, `app/src/config/upgrade_definitions.py`
+- **Design decisions:** `UPGRADE_DEFINITIONS` kept as compatibility alias to `ALL_UPGRADES`. Repairs excluded from level retention by manager behaviour.
+
+### Component 4.5 — Insurance Manager & Death Retention
+- **What was built:** `InsuranceManager` with tier configs (OFF/BASIC/PREMIUM), per-level cost scaling (10% increase per level), automatic lapse-to-OFF on unaffordable deductions, and upgrade retention calculation/application.
+- **Key files:** `app/src/managers/insurance_manager.py`
+- **Design decisions:** Compatibility helpers bridge both current `CurrencyManager` API (`spend`/`get_balance`) and planned Phase 4.6 API (`can_spend`/`deduct`).
+
+### Component 4.6 — Currency Manager & Economy Flow
+- **What was built:** Rewrote `CurrencyManager` as single authority for currency: `earn()`, `spend()`, `deduct()`, `can_spend()`, `CurrencyRunStats`, optional `GameState` backing store, and strict positive-integer validation.
+- **Key files:** `app/src/managers/currency_manager.py`, `app/src/physics/collisions.py`, `app/src/states/combat.py`
+- **Design decisions:** `game_state` parameter optional for backward compatibility. `deduct()` delegates to `spend()` for a single deduction path.
+
+### Component 4.7 — Ship Re-Centring & Purchase Flow Polish
+- **What was built:** Smooth quadratic ease-out ship re-centring (0.3s), collision lockout during interpolation, manager-driven purchase orchestration (currency → upgrade → audio → re-centre), insurance-tier cycling, and unified Continue flow (node collision or Enter key).
+- **Key files:** `app/src/states/shop.py`, `app/src/entities/shop_node.py`
+- **Design decisions:** Single insurance node cycling tiers (OFF → BASIC → PREMIUM → OFF) per v1.0 recommendation. Insurance cost charged on tier changes and recurring deductions on Continue transition.
+
+### Component 4.8 — E2E Testing & Documentation
+- **What was built:** 105 new tests across `test_upgrades.py` (30), `test_insurance.py` (28), and `test_shop.py` (47), plus conftest fixtures and component overview docs.
+- **Key files:** `tests/test_upgrades.py`, `tests/test_insurance.py`, `tests/test_shop.py`, `tests/conftest.py`
+- **Design decisions:** `test_currency.py` coverage from 4.6 reused rather than duplicated.
+
+## Architecture & Integration
+
+Phase 4 layered the economy system on top of the Phase 3 combat loop. `CombatPhaseState` now transitions to `ShopPhaseState` on level clear instead of advancing directly. `ShopPhaseState` owns a circular `ShopNode` layout and delegates purchases through `CurrencyManager.spend()` → `UpgradeManager.apply_upgrade()` → `ShipState.recalculate_effective_stats()`, with `InsuranceManager.deduct_level_cost()` called on Continue transition. The re-centring state machine inside `ShopPhaseState` prevents double-purchases via collision lockout. `GameOver` receives run summary data including `CurrencyRunStats` for post-run display.
+
+## Deviations from Spec
+
+- Denied node feedback uses dimming + bounce + sound without an explicit crossed-out icon overlay — deferred to visual polish.
+- Insurance interaction uses single-node tier cycling rather than three separate nodes, following the spec's recommended v1.0 approach.
+- `test_currency.py` was delivered by component 4.6 and reused for 4.8 rather than being created separately.
+
+## Dependencies & Configuration
+
+- **No new runtime dependencies** beyond Phases 1–3.
+- **New config entries:** `ShopLayoutConfig`/`SHOP_LAYOUT_CONFIG` in `game_config.py`; `score_bonus_level` on `GameConfig`.
+- **New modules:** `managers/upgrade_manager.py`, `managers/insurance_manager.py`, `entities/shop_node.py`.
+- **Asset files added:** 7 shop sprites in `assets/sprites/shop/`, 2 sound effects pre-existing from developer.
+
+## Known Limitations
+
+- Shop node denied feedback lacks a crossed-out icon (visual polish only).
+- No animated shop node entrance/exit — nodes appear instantly.
+- Insurance tier cycling is unidirectional (OFF → BASIC → PREMIUM → OFF); no direct downgrade path.
+- High-score initials still default to "AAA" (deferred to Phase 5).
+
+## Phase Readiness
+
+All eight components passed formatting checks, 177+ focused unit tests, quality evals (`scripts/evals.py`), and module coverage of 82–100% on Phase 4 code. Phase 4 is complete and provides the full economy loop for Phase 5 (Polish & UX).
+
+---
+
+## Phase 5 Overview
+
+Phase 5 transformed VoidBreaker from a functional game into a polished, release-quality experience. It delivered all remaining UI screens (main menu, how-to-play, settings, high scores, game over with name entry), the pause system, practice/training mode, complete audio integration (17 sound effects with wrapper methods), a pooled particle system (300 hard cap), visual polish (level transitions, screen shake, colorblind palette, HUD improvements), three difficulty presets (Casual/Classic/Hard), and comprehensive E2E testing. After this phase, a new player can navigate the entire game without external documentation.
+
+## Components Delivered
+
+### Component 5.1 — Human Setup & Final Assets
+- **What was built:** 25 final sprite assets via Pillow script, 17 developer-provided `.wav` sound effects, one font file (`game_font.ttf`), backward-compatibility alias sprites, and updated verification script.
+- **Key files:** `scripts/generate_final_sprites.py`, `scripts/verify_assets.py`, `assets/sprites/` (25 PNGs), `assets/sounds/` (17 WAVs), `assets/fonts/game_font.ttf`
+- **Design decisions:** New generation script preserves the original placeholder generator for reference. Backward-compat copies (`currency_pickup.png`, `explosion_particle.png`) avoid breaking Phase 1–4 code.
+
+### Component 5.2 — Main Menu & Navigation System
+- **What was built:** Full `MainMenuState` with five-option keyboard navigation, wrap logic, fade transitions, audio cues, selection persistence across state returns, and reusable `MenuRenderer` module.
+- **Key files:** `app/src/states/main_menu.py`, `app/src/rendering/menu_renderer.py`
+- **Design decisions:** List-driven options model for easy extension by 5.10. Class-level index persistence for sub-screen return behaviour.
+
+### Component 5.3 — How-to-Play & High Scores Screens
+- **What was built:** `HowToPlayState` with dynamic controls table from active key bindings, gameplay/insurance guidance, scrolling. `HighScoresState` with top-10 leaderboard, descending score sort, difficulty filter cycling, and empty-state messaging.
+- **Key files:** `app/src/states/how_to_play.py`, `app/src/states/high_scores.py`
+- **Design decisions:** Key-label display via `InputManager` key map reversal keeps controls synchronized with remapped settings.
+
+### Component 5.4 — Settings Screen & Accessibility
+- **What was built:** Full settings interface with key remapping (capture mode + duplicate resolution), volume sliders (0.1 step), toggles (fire mode, autofire, colorblind), multi-option cycling (screen shake, difficulty), immediate persistence, hot-application, and reset-to-defaults.
+- **Key files:** `app/src/states/settings_screen.py`, `app/src/input/input_manager.py` (added `UNBOUND` support)
+- **Design decisions:** Duplicate-key handling clears previous action to `UNBOUND` rather than swapping.
+
+### Component 5.5 — Game Over Screen & High Score Entry
+- **What was built:** Three-phase game-over flow: run summary (score, level, enemies/asteroids destroyed, currency earned/spent, insurance tier), conditional top-10 name entry (3–10 alphanumeric characters), and post-run options (Play Again / Return to Menu).
+- **Key files:** `app/src/states/game_over.py`
+- **Design decisions:** Strict top-10 qualification (score > 10th place). Replay routes through `GameInitState` for clean run reset.
+
+### Component 5.6 — Pause System
+- **What was built:** Full overlay pause menu (Resume, Restart Run, Settings, Exit to Menu) that freezes combat/shop updates. Settings opened from pause returns to pause via `pop_state()`. Overlay semantics corrected in state machine.
+- **Key files:** `app/src/states/pause.py`, `app/src/states/state_machine.py`, `app/src/states/combat.py`, `app/src/states/shop.py`
+- **Design decisions:** `push_state()`/`pop_state()` no longer call `on_exit()`/`on_enter()` on underlying states, preserving exact run state.
+
+### Component 5.7 — Audio Integration & Particle Effects
+- **What was built:** 15+ wrapper methods on `AudioManager` (e.g., `play_fire`, `play_explosion(size)`, `play_shop_purchase`), and a pooled particle system with 300 hard cap, pre-allocated sprites, oldest-particle recycling, and five effect types (explosion, thrust, sparkle, damage flash, purchase burst).
+- **Key files:** `app/src/audio/audio_manager.py`, `app/src/rendering/particle_system.py`, `app/src/states/combat.py`, `app/src/physics/collisions.py`
+- **Design decisions:** Pooled sprites permanently resident in `SpriteList` to prevent per-frame allocation churn. Backward-compatible fallback to `audio_manager.play(name)` for test stubs.
+
+### Component 5.8 — Visual Polish & Transitions
+- **What was built:** `TransitionEffect` (fade/hold/fade level overlays), `ScreenShake` (off/low/medium with decay), colorblind palette tinting, HUD shield bar with threshold colouring, centred score with shadow, credits-change flash, and shop node scale pulse (1.0–1.15).
+- **Key files:** `app/src/rendering/transitions.py`, `app/src/rendering/hud.py`, `app/src/window.py`, `app/src/entities/shop_node.py`, `app/src/entities/player_ship.py`
+- **Design decisions:** Colorblind mode via runtime sprite tinting avoids asset duplication. Shake reset-on-trigger (no accumulation).
+
+### Component 5.9 — Difficulty Presets Integration
+- **What was built:** `DifficultyPreset` enum (Casual/Classic/Hard), `DifficultyMultipliers` dataclass, `DifficultyScaler.apply_preset()`, New Game difficulty sub-prompt with persisted selection, and preset-aware combat spawning/damage/currency.
+- **Key files:** `app/src/config/difficulty_tables.py`, `app/src/managers/difficulty_scaler.py`, `app/src/states/main_menu.py`, `app/src/states/combat.py`
+- **Design decisions:** Presets are multiplicative over Phase 3 tier interpolation, preserving existing tuning while shifting baseline.
+
+### Component 5.10 — Practice/Training Mode
+- **What was built:** Practice menu option, `PracticeConfigState` with toggles (asteroids only, infinite shields, reduced count), practice-aware combat (shop bypass, non-lethal respawn, enemy suppression), leaderboard skip, and HUD `PRACTICE` indicator.
+- **Key files:** `app/src/states/practice_config.py`, `app/src/states/main_menu.py`, `app/src/states/combat.py`, `app/src/states/game_over.py`, `app/src/rendering/hud.py`
+- **Design decisions:** Reuses `CombatPhaseState` with explicit flags to avoid duplicating combat systems.
+
+### Component 5.11 — E2E Testing & Documentation
+- **What was built:** Nine dedicated test files (`test_phase5_*.py`) covering menus, settings, pause, game over, audio wiring, particle pooling, difficulty presets, practice mode, and a logic-level E2E session path. Final component documentation.
+- **Key files:** `tests/test_phase5_menus.py`, `test_phase5_settings.py`, `test_phase5_pause.py`, `test_phase5_game_over.py`, `test_phase5_audio.py`, `test_phase5_particles.py`, `test_phase5_difficulty.py`, `test_phase5_practice.py`, `test_phase5_e2e.py`
+- **Design decisions:** All tests headless and state/manager-focused. Audio coverage at wrapper-method mapping level.
+
+## Architecture & Integration
+
+Phase 5 completed the UI and polish layer atop the Phase 4 economy loop. `MainMenuState` now drives the full navigation tree (New Game with difficulty selection, Practice, How to Play, Settings, High Scores, Quit). `PauseState` operates as a true overlay via `push_state()`/`pop_state()`, freezing underlying combat/shop updates without `on_exit()`/`on_enter()` side effects. `AudioManager` wrapper methods are wired into combat, collision, shop, and menu flows. The pooled `ParticleSystem` integrates into both `CombatPhaseState` and `ShopPhaseState` draw pipelines. `TransitionEffect` and `ScreenShake` are managed by `CombatPhaseState` and `VoidBreakerWindow` respectively. Difficulty presets apply multiplicatively at combat init via `DifficultyScaler`, and practice mode reuses `CombatPhaseState` with flag-driven behaviour overrides.
+
+## Deviations from Spec
+
+- `shield_low.wav` deferred per spec notes (17 sounds present instead of the optional 18th).
+- Sound assets are stereo/varying formats rather than strictly mono 16-bit PCM; Arcade handles all standard WAV formats.
+- State machine overlay semantics updated so `push_state()`/`pop_state()` no longer invoke `on_exit()`/`on_enter()` on underlying states — a refinement of the Phase 1 overlay design.
+
+## Dependencies & Configuration
+
+- **No new runtime dependencies** beyond Phases 1–4.
+- **New modules:** `rendering/menu_renderer.py`, `rendering/transitions.py`, `managers/difficulty_scaler.py`, `states/practice_config.py`.
+- **New config entries:** `DifficultyPreset`, `DifficultyMultipliers`, `DIFFICULTY_PRESET_MULTIPLIERS` in `difficulty_tables.py`; `GameState.is_practice` flag.
+- **Asset files:** 25 final sprites, 17 sound effects, 1 font file.
+
+## Known Limitations
+
+- `shield_low.wav` sound effect deferred (optional per spec).
+- No background music support (deferred to post-v1.0 per phase plan).
+- Colorblind mode uses sprite tinting which may produce imperfect results on non-greyscale base textures.
+- Practice mode skips shop phase entirely — no shop practice available.
+
+## Phase Readiness
+
+All eleven components passed formatting checks (`black`, `isort`), 343 focused unit tests (`pytest`), quality evals (`scripts/evals.py`), and 79% overall code coverage. Phase 5 is complete and provides the polished, release-quality game for Phase 6 (Packaging & Release).

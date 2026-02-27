@@ -27,6 +27,8 @@ from asterax.app.src.entities.shop_node import ContinueNode, ShopNode
 from asterax.app.src.managers.currency_manager import CurrencyManager
 from asterax.app.src.managers.insurance_manager import InsuranceManager
 from asterax.app.src.managers.upgrade_manager import UpgradeManager
+from asterax.app.src.rendering.particle_system import ParticleSystem
+from asterax.app.src.rendering.transitions import apply_colorblind_palette_to_shop_nodes
 from asterax.app.src.states.base_state import BaseState
 
 if TYPE_CHECKING:
@@ -73,6 +75,7 @@ class ShopPhaseState(BaseState):
         self._recentre_duration = GAME_CONFIG.shop_recentre_duration
         self._recentre_start_x = 0.0
         self._recentre_start_y = 0.0
+        self.particle_system = ParticleSystem()
 
     def on_enter(self) -> None:
         """Initialize shop ship placement and generate circular node layout."""
@@ -93,6 +96,7 @@ class ShopPhaseState(BaseState):
         self._recentre_active = False
         self._recentre_elapsed = 0.0
         self._generate_node_layout(window.width, window.height)
+        self._apply_visual_settings()
 
     def on_exit(self) -> None:
         """Clear node data prior to transitioning back to combat."""
@@ -133,11 +137,14 @@ class ShopPhaseState(BaseState):
             self.player_ship.update_cooldown(delta_time)
             self._clamp_ship_to_bounds(window.width, window.height)
         self._update_node_visual_states(delta_time)
+        self._apply_visual_settings()
         self._handle_node_collisions()
+        self.particle_system.update(delta_time)
 
     def on_draw(self) -> None:
         """Draw shop nodes, player ship, and lightweight node/currency labels."""
         self.shop_nodes.draw()
+        self.particle_system.draw()
         if self.player_ship is not None:
             self.player_ship.draw()
         for node_view in self._node_views:
@@ -158,10 +165,23 @@ class ShopPhaseState(BaseState):
         del modifiers
         from asterax.app.src.states.pause import PauseState
 
-        if key == arcade.key.ESCAPE:
+        if key == self._pause_key():
             self.state_machine.push_state(PauseState(self.state_machine))
         elif key == arcade.key.ENTER:
             self._handle_continue()
+
+    def _pause_key(self) -> int:
+        """Return current configured pause key binding.
+
+        Returns:
+            Key code for pause action.
+        """
+        window = arcade.get_window()
+        input_manager = getattr(window, "input_manager", None)
+        get_binding = getattr(input_manager, "get_binding", None)
+        if callable(get_binding):
+            return int(get_binding("pause"))
+        return arcade.key.ESCAPE
 
     def _generate_node_layout(self, width: float, height: float) -> None:
         """Generate a circular node arrangement with continue at the bottom."""
@@ -321,6 +341,11 @@ class ShopPhaseState(BaseState):
 
         self._interaction_cooldown_seconds = 0.2
         self._play_shop_sound("shop_purchase")
+        self.particle_system.emit_purchase_burst(
+            node.center_x,
+            node.center_y,
+            color=(140, 255, 200),
+        )
         self._start_recentre()
 
     def _attempt_insurance_change(self) -> None:
@@ -340,6 +365,13 @@ class ShopPhaseState(BaseState):
         self.insurance_manager.set_tier(next_tier)
         self._interaction_cooldown_seconds = 0.2
         self._play_shop_sound("shop_purchase")
+        insurance_node = self._find_insurance_node()
+        if insurance_node is not None:
+            self.particle_system.emit_purchase_burst(
+                insurance_node.center_x,
+                insurance_node.center_y,
+                color=(186, 128, 255),
+            )
         self._start_recentre()
 
     def _get_node_level(self, node: ShopNode) -> int:
@@ -355,6 +387,24 @@ class ShopPhaseState(BaseState):
         except RuntimeError:
             return
         if not hasattr(window, "audio_manager"):
+            return
+        if sound_name == "shop_purchase":
+            if hasattr(window.audio_manager, "play_shop_purchase"):
+                window.audio_manager.play_shop_purchase()
+            else:
+                window.audio_manager.play("shop_purchase")
+            return
+        if sound_name == "shop_denied":
+            if hasattr(window.audio_manager, "play_shop_denied"):
+                window.audio_manager.play_shop_denied()
+            else:
+                window.audio_manager.play("shop_denied")
+            return
+        if sound_name == "level_clear":
+            if hasattr(window.audio_manager, "play_level_clear"):
+                window.audio_manager.play_level_clear()
+            else:
+                window.audio_manager.play("level_clear")
             return
         window.audio_manager.play(sound_name)
 
@@ -446,10 +496,31 @@ class ShopPhaseState(BaseState):
         self.insurance_manager.deduct_level_cost(self.game_state.current_level)
         balance_after_deduction = self.currency_manager.get_balance()
         if balance_after_deduction < balance_before_deduction:
+            self._play_insurance_deduct_sound()
             self.game_state.run_stats.currency_spent += (
                 balance_before_deduction - balance_after_deduction
             )
         self._transition_to_combat()
+
+    def _find_insurance_node(self) -> ShopNode | None:
+        """Return insurance node sprite if present in the active layout."""
+        for node_view in self._node_views:
+            if node_view.sprite.is_insurance_node:
+                return node_view.sprite
+        return None
+
+    def _play_insurance_deduct_sound(self) -> None:
+        """Play insurance deduction sound if an audio manager is available."""
+        try:
+            window = arcade.get_window()
+        except RuntimeError:
+            return
+        if not hasattr(window, "audio_manager"):
+            return
+        if hasattr(window.audio_manager, "play_insurance_deduct"):
+            window.audio_manager.play_insurance_deduct()
+            return
+        window.audio_manager.play("insurance_deduct")
 
     def _get_next_insurance_tier(self) -> InsuranceTier:
         """Return the next tier in OFF -> BASIC -> PREMIUM -> OFF cycle."""
@@ -459,3 +530,20 @@ class ShopPhaseState(BaseState):
         if current_tier == InsuranceTier.BASIC:
             return InsuranceTier.PREMIUM
         return InsuranceTier.OFF
+
+    def _apply_visual_settings(self) -> None:
+        """Apply colorblind-safe palette to shop entities when enabled."""
+        window = arcade.get_window()
+        settings = getattr(window, "runtime_settings", None)
+        if settings is None and hasattr(window, "persistence"):
+            settings = window.persistence.load_settings()
+        colorblind_enabled = bool(
+            getattr(settings, "colorblind_mode", False)
+            if settings is not None
+            else False
+        )
+        apply_colorblind_palette_to_shop_nodes(self.shop_nodes, colorblind_enabled)
+        if self.player_ship is not None:
+            self.player_ship.color = (
+                (240, 228, 66) if colorblind_enabled else arcade.color.WHITE
+            )

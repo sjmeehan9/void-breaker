@@ -52,6 +52,70 @@ def test_audio_manager_update_settings_changes_effective_volume(tmp_path: Path) 
     assert call_volumes == [0.25, 0.1]
 
 
+def test_audio_manager_play_explosion_maps_size_to_sound_name(tmp_path: Path) -> None:
+    """Explosion helper should route size labels to correct sound stems."""
+    manager = AudioManager(GameSettings(), tmp_path / "sounds")
+
+    played_names: list[str] = []
+    original_play = manager.play
+    manager.play = lambda name, volume_override=None: played_names.append(  # type: ignore[method-assign]
+        name
+    )
+    try:
+        manager.play_explosion("large")
+        manager.play_explosion("MEDIUM")
+        manager.play_explosion("invalid")
+    finally:
+        manager.play = original_play  # type: ignore[assignment]
+
+    assert played_names == ["explode_large", "explode_medium", "explode_small"]
+
+
+def test_audio_manager_wrapper_methods_route_to_expected_sound_names(
+    tmp_path: Path,
+) -> None:
+    """Convenience methods should delegate to the correct base sound names."""
+    manager = AudioManager(GameSettings(), tmp_path / "sounds")
+
+    played_names: list[str] = []
+    original_play = manager.play
+    manager.play = lambda name, volume_override=None: played_names.append(  # type: ignore[method-assign]
+        name
+    )
+    try:
+        manager.play_fire()
+        manager.play_enemy_fire()
+        manager.play_enemy_explode()
+        manager.play_pickup_currency()
+        manager.play_pickup_buff()
+        manager.play_shop_purchase()
+        manager.play_shop_denied()
+        manager.play_level_clear()
+        manager.play_game_over()
+        manager.play_menu_nav()
+        manager.play_menu_select()
+        manager.play_shield_low()
+        manager.play_insurance_deduct()
+    finally:
+        manager.play = original_play  # type: ignore[assignment]
+
+    assert played_names == [
+        "fire",
+        "enemy_fire",
+        "enemy_explode",
+        "pickup_currency",
+        "pickup_buff",
+        "shop_purchase",
+        "shop_denied",
+        "level_clear",
+        "game_over",
+        "menu_nav",
+        "menu_select",
+        "shield_low",
+        "insurance_deduct",
+    ]
+
+
 def test_starfield_renderer_is_deterministic_and_counts_stars() -> None:
     """Starfield generation should be deterministic and match requested count."""
     first = StarfieldRenderer(width=320, height=240, star_count=30)

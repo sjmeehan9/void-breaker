@@ -40,6 +40,8 @@ class PlayerShip(arcade.Sprite):
         self._damage_boost_multiplier: float = 1.0
         self._speed_boost_active: bool = False
         self._speed_boost_multiplier: float = 1.0
+        self._damage_flash_remaining: float = 0.0
+        self._damage_flash_duration: float = 0.0
 
     @property
     def effective_damage(self) -> float:
@@ -178,6 +180,25 @@ class PlayerShip(arcade.Sprite):
     def update_invulnerability(self, dt: float) -> None:
         """Advance the invulnerability timer by elapsed simulation time."""
         self._invulnerability_timer = max(0.0, self._invulnerability_timer - dt)
+        self.update_damage_flash(dt)
+
+    def trigger_damage_flash_tint(self, duration: float = 0.2) -> None:
+        """Start or refresh a brief red/white damage flash."""
+        self._damage_flash_duration = max(0.01, duration)
+        self._damage_flash_remaining = self._damage_flash_duration
+
+    def update_damage_flash(self, dt: float) -> None:
+        """Update damage flash tint state and restore default color when complete."""
+        if self._damage_flash_remaining <= 0.0:
+            return
+        self._damage_flash_remaining = max(
+            0.0, self._damage_flash_remaining - max(0.0, dt)
+        )
+        progress = 1.0 - (self._damage_flash_remaining / self._damage_flash_duration)
+        phase = int(progress * 8.0)
+        self.color = (255, 60, 60) if phase % 2 == 0 else arcade.color.WHITE
+        if self._damage_flash_remaining <= 0.0:
+            self.color = arcade.color.WHITE
 
     def apply_damage_boost(self, multiplier: float) -> None:
         """Apply or refresh the temporary projectile-damage multiplier."""

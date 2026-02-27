@@ -27,8 +27,6 @@ class StateMachine:
 
     def push_state(self, state: GameState) -> None:
         """Push an overlay state on top of the active state."""
-        if self._stack:
-            self._stack[-1].on_exit()
         self._stack.append(state)
         state.on_enter()
 
@@ -38,8 +36,6 @@ class StateMachine:
             return
         popped_state = self._stack.pop()
         popped_state.on_exit()
-        if self._stack:
-            self._stack[-1].on_enter()
 
     def update(self, delta_time: float) -> None:
         """Update only the active top-most state."""

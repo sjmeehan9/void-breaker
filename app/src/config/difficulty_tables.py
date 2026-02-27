@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from enum import StrEnum
+
 from asterax.app.src.config.game_config import DifficultyParams
 
 
@@ -99,6 +102,50 @@ DIFFICULTY_TIERS: dict[int, DifficultyParams] = {
 }
 
 TIER_LEVELS = tuple(sorted(DIFFICULTY_TIERS.keys()))
+
+
+class DifficultyPreset(StrEnum):
+    """Supported difficulty presets."""
+
+    CASUAL = "casual"
+    CLASSIC = "classic"
+    HARD = "hard"
+
+
+@dataclass(slots=True, frozen=True)
+class DifficultyMultipliers:
+    """Multipliers applied over tier-derived base difficulty parameters."""
+
+    asteroid_count: float
+    enemy_aggression: float
+    currency_drop_chance: float
+    damage_received: float
+    enemy_spawn_interval: float
+
+
+DIFFICULTY_PRESET_MULTIPLIERS: dict[DifficultyPreset, DifficultyMultipliers] = {
+    DifficultyPreset.CASUAL: DifficultyMultipliers(
+        asteroid_count=0.7,
+        enemy_aggression=0.6,
+        currency_drop_chance=1.5,
+        damage_received=0.7,
+        enemy_spawn_interval=1.4,
+    ),
+    DifficultyPreset.CLASSIC: DifficultyMultipliers(
+        asteroid_count=1.0,
+        enemy_aggression=1.0,
+        currency_drop_chance=1.0,
+        damage_received=1.0,
+        enemy_spawn_interval=1.0,
+    ),
+    DifficultyPreset.HARD: DifficultyMultipliers(
+        asteroid_count=1.4,
+        enemy_aggression=1.3,
+        currency_drop_chance=0.7,
+        damage_received=1.3,
+        enemy_spawn_interval=0.7,
+    ),
+}
 
 
 def _interpolate(
@@ -242,41 +289,67 @@ def get_difficulty_params(level: int) -> DifficultyParams:
     return _clone_params(DIFFICULTY_TIERS[TIER_LEVELS[-1]])
 
 
-def get_difficulty(level: int, base: str = "classic") -> DifficultyParams:
-    """Compute procedural difficulty parameters for a level and base mode."""
+def parse_difficulty_preset(value: str | DifficultyPreset | None) -> DifficultyPreset:
+    """Return a normalized preset value with classic fallback."""
 
-    base_params = get_difficulty_params(level)
+    if isinstance(value, DifficultyPreset):
+        return value
+    if isinstance(value, str):
+        try:
+            return DifficultyPreset(value.lower())
+        except ValueError:
+            return DifficultyPreset.CLASSIC
+    return DifficultyPreset.CLASSIC
 
-    if base == "classic":
-        asteroid_multiplier = 1.0
-        currency_multiplier = 1.0
-    elif base == "casual":
-        asteroid_multiplier = 0.7
-        currency_multiplier = 1.3
-    elif base == "hard":
-        asteroid_multiplier = 1.3
-        currency_multiplier = 0.7
-    else:
-        raise ValueError(f"Unknown difficulty base '{base}'")
 
-    adjusted_asteroid_count = int(
-        round(_clamp(base_params.asteroid_count * asteroid_multiplier, 1.0, 30.0))
+def apply_difficulty_preset(
+    base_params: DifficultyParams,
+    preset: str | DifficultyPreset,
+) -> DifficultyParams:
+    """Apply preset multipliers to level-scaled base difficulty parameters."""
+
+    normalized = parse_difficulty_preset(preset)
+    multipliers = DIFFICULTY_PRESET_MULTIPLIERS[normalized]
+
+    asteroid_count = max(
+        1, int(round(base_params.asteroid_count * multipliers.asteroid_count))
     )
-    adjusted_currency_drop_chance = _clamp(
-        base_params.currency_drop_chance * currency_multiplier,
+    enemy_aggression = _clamp(
+        base_params.enemy_aggression * multipliers.enemy_aggression,
+        0.0,
+        1.0,
+    )
+    aggressive_ratio = _clamp(
+        base_params.aggressive_ratio * multipliers.enemy_aggression,
+        0.0,
+        1.0,
+    )
+    currency_drop_chance = _clamp(
+        base_params.currency_drop_chance * multipliers.currency_drop_chance,
         0.05,
         1.0,
     )
+    enemy_spawn_interval = max(
+        0.1,
+        base_params.enemy_spawn_interval * multipliers.enemy_spawn_interval,
+    )
 
     return DifficultyParams(
-        asteroid_count=adjusted_asteroid_count,
+        asteroid_count=asteroid_count,
         asteroid_speed_min=base_params.asteroid_speed_min,
         asteroid_speed_max=base_params.asteroid_speed_max,
         enemy_spawn_enabled=base_params.enemy_spawn_enabled,
         enemy_count_max=base_params.enemy_count_max,
-        enemy_spawn_interval=base_params.enemy_spawn_interval,
-        enemy_aggression=base_params.enemy_aggression,
-        aggressive_ratio=base_params.aggressive_ratio,
-        currency_drop_chance=adjusted_currency_drop_chance,
+        enemy_spawn_interval=enemy_spawn_interval,
+        enemy_aggression=enemy_aggression,
+        aggressive_ratio=aggressive_ratio,
+        currency_drop_chance=currency_drop_chance,
         currency_value_base=base_params.currency_value_base,
     )
+
+
+def get_difficulty(level: int, base: str = "classic") -> DifficultyParams:
+    """Compute procedural difficulty parameters for a level and base mode."""
+
+    preset = parse_difficulty_preset(base)
+    return apply_difficulty_preset(get_difficulty_params(level), preset)

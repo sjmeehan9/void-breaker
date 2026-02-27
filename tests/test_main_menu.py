@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import arcade
+from asterax.app.src.config.difficulty_tables import DifficultyPreset
 from asterax.app.src.input.input_manager import InputManager
 from asterax.app.src.persistence.schemas import GameSettings
 from asterax.app.src.states.main_menu import MainMenuState
@@ -29,6 +30,8 @@ class FakeWindow:
         self.height = 960
         self.audio_manager = FakeAudioManager()
         self.input_manager = InputManager(GameSettings())
+        self.persistence = _PersistenceStub(GameSettings())
+        self.runtime_settings = self.persistence.load_settings()
         self.closed = False
 
     def close(self) -> None:
@@ -48,14 +51,31 @@ class RecordingStateMachine:
         self.switched_to.append(type(state).__name__)
 
 
-def test_main_menu_initializes_with_five_options(monkeypatch) -> None:
-    """Main menu should initialize exactly five required options."""
+class _PersistenceStub:
+    """Persistence test double for menu difficulty selection tests."""
+
+    def __init__(self, settings: GameSettings) -> None:
+        """Store initial settings."""
+        self._settings = settings
+
+    def load_settings(self) -> GameSettings:
+        """Return persisted settings."""
+        return self._settings
+
+    def save_settings(self, settings: GameSettings) -> None:
+        """Persist updated settings."""
+        self._settings = settings
+
+
+def test_main_menu_initializes_with_six_options(monkeypatch) -> None:
+    """Main menu should initialize required options including Practice."""
     monkeypatch.setattr(arcade, "get_window", lambda: FakeWindow())
     state = MainMenuState(RecordingStateMachine())
 
-    assert len(state._menu_options) == 5
+    assert len(state._menu_options) == 6
     assert [label for label, _ in state._menu_options] == [
         "New Game",
+        "Practice",
         "How to Play",
         "Settings",
         "High Scores",
@@ -88,6 +108,7 @@ def test_select_transitions_to_correct_states(monkeypatch) -> None:
 
     expected_targets = {
         "new_game": "GameInitState",
+        "practice": "PracticeConfigState",
         "how_to_play": "HowToPlayState",
         "settings": "SettingsScreenState",
         "high_scores": "HighScoresState",
@@ -98,8 +119,33 @@ def test_select_transitions_to_correct_states(monkeypatch) -> None:
             continue
         state._selected_index = option_index
         state.on_key_press(arcade.key.ENTER, 0)
+        if target == "new_game":
+            state.on_key_press(arcade.key.ENTER, 0)
         state.on_update(1.0)
         assert machine.switched_to[-1] == expected_targets[target]
+
+
+def test_new_game_persists_selected_difficulty(monkeypatch) -> None:
+    """Selecting a difficulty before New Game should persist it in settings."""
+    window = FakeWindow()
+    machine = RecordingStateMachine()
+    monkeypatch.setattr(arcade, "get_window", lambda: window)
+
+    state = MainMenuState(machine)
+    state.on_enter()
+    state._selected_index = 0
+    state.on_key_press(arcade.key.ENTER, 0)
+
+    assert state._showing_difficulty_selection is True
+
+    state.on_key_press(arcade.key.UP, 0)
+    state.on_key_press(arcade.key.ENTER, 0)
+    state.on_update(1.0)
+
+    assert machine.switched_to[-1] == "GameInitState"
+    assert (
+        window.persistence.load_settings().difficulty == DifficultyPreset.CASUAL.value
+    )
 
 
 def test_quit_option_closes_window(monkeypatch) -> None:
