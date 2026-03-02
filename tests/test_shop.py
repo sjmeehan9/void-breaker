@@ -18,7 +18,7 @@ from asterax.app.src.config.game_config import (
     ShipState,
 )
 from asterax.app.src.config.upgrade_definitions import ALL_UPGRADES, get_upgrade_by_id
-from asterax.app.src.entities.shop_node import ContinueNode, ShopNode
+from asterax.app.src.entities.shop_node import ShopNode
 from asterax.app.src.managers.currency_manager import CurrencyManager
 from asterax.app.src.managers.insurance_manager import InsuranceManager
 from asterax.app.src.managers.upgrade_manager import UpgradeManager
@@ -187,16 +187,6 @@ class TestShopNodeAffordability:
         )
         assert node.can_purchase(currency=99999, current_level=defn.max_level) is False
 
-    def test_continue_node_always_purchasable(self) -> None:
-        """Continue node should always report purchasable."""
-        node = ContinueNode(
-            texture_path=_shop_texture("node_continue.png"),
-            center_x=0.0,
-            center_y=0.0,
-            upgrade_definition=None,
-        )
-        assert node.can_purchase(currency=0, current_level=0) is True
-
 
 # ---------------------------------------------------------------------------
 # TestShopLayout
@@ -206,13 +196,10 @@ class TestShopNodeAffordability:
 class TestShopLayout:
     """Verify _generate_node_layout produces correct circular positions."""
 
-    def test_six_regular_nodes_plus_continue(self, monkeypatch) -> None:
-        """Layout should produce 6 regular nodes and 1 continue node."""
+    def test_six_regular_nodes(self, monkeypatch) -> None:
+        """Layout should produce exactly 6 regular nodes."""
         shop, _, _ = _make_shop_state(monkeypatch)
-        regular = [v for v in shop._node_views if not v.is_continue]
-        continues = [v for v in shop._node_views if v.is_continue]
-        assert len(regular) == 6
-        assert len(continues) == 1
+        assert len(shop._node_views) == 6
 
     def test_regular_nodes_on_circle(self, monkeypatch) -> None:
         """Regular nodes should all be at the configured radius from center."""
@@ -221,24 +208,19 @@ class TestShopLayout:
         radius = (
             min(1280.0, 960.0) * SHOP_LAYOUT_CONFIG.radius_fraction_of_min_dimension
         )
-        regular = [v for v in shop._node_views if not v.is_continue]
-        for view in regular:
+        for view in shop._node_views:
             dist = math.hypot(
                 view.sprite.center_x - cx,
                 view.sprite.center_y - cy,
             )
             assert dist == pytest.approx(radius, abs=1.0)
 
-    def test_continue_below_ring(self, monkeypatch) -> None:
-        """Continue node should be below the circle center."""
-        shop, _, _ = _make_shop_state(monkeypatch)
-        cx, cy = 640.0, 480.0
-        radius = (
-            min(1280.0, 960.0) * SHOP_LAYOUT_CONFIG.radius_fraction_of_min_dimension
-        )
-        cont = next(v for v in shop._node_views if v.is_continue)
-        assert cont.sprite.center_x == pytest.approx(cx)
-        assert cont.sprite.center_y < cy - radius
+    def test_continue_button_triggers_via_enter(self, monkeypatch) -> None:
+        """Enter key should trigger continue transition."""
+        shop, machine, audio = _make_shop_state(monkeypatch, currency=100)
+        shop.on_key_press(arcade.key.ENTER, 0)
+        assert isinstance(machine.switched_to, CombatPhaseState)
+        assert "level_clear" in audio.played
 
 
 # ---------------------------------------------------------------------------
@@ -310,7 +292,7 @@ class TestPurchaseFlow:
         upgrade_node = next(
             v.sprite
             for v in shop._node_views
-            if not v.is_continue and not v.sprite.is_insurance_node
+            if not v.sprite.is_insurance_node
         )
         assert shop.player_ship is not None
         shop.player_ship.center_x = upgrade_node.center_x
@@ -327,7 +309,7 @@ class TestPurchaseFlow:
         upgrade_node = next(
             v.sprite
             for v in shop._node_views
-            if not v.is_continue and not v.sprite.is_insurance_node
+            if not v.sprite.is_insurance_node
         )
         assert shop.player_ship is not None
         shop.player_ship.center_x = upgrade_node.center_x
@@ -341,7 +323,7 @@ class TestPurchaseFlow:
         upgrade_node = next(
             v.sprite
             for v in shop._node_views
-            if not v.is_continue and not v.sprite.is_insurance_node
+            if not v.sprite.is_insurance_node
         )
         assert shop.player_ship is not None
         shop.player_ship.center_x = upgrade_node.center_x
@@ -383,7 +365,7 @@ class TestDeniedFlow:
         upgrade_node = next(
             v.sprite
             for v in shop._node_views
-            if not v.is_continue and not v.sprite.is_insurance_node
+            if not v.sprite.is_insurance_node
         )
         assert shop.player_ship is not None
         shop.player_ship.center_x = upgrade_node.center_x
@@ -401,7 +383,7 @@ class TestDeniedFlow:
         upgrade_node = next(
             v.sprite
             for v in shop._node_views
-            if not v.is_continue and not v.sprite.is_insurance_node
+            if not v.sprite.is_insurance_node
         )
         assert shop.player_ship is not None
         shop.player_ship.center_x = upgrade_node.center_x
@@ -441,7 +423,7 @@ class TestCombatShopCombatLoop:
         upgrade_node = next(
             v.sprite
             for v in shop._node_views
-            if not v.is_continue and not v.sprite.is_insurance_node
+            if not v.sprite.is_insurance_node
         )
         assert shop.player_ship is not None
         shop.player_ship.center_x = upgrade_node.center_x
@@ -516,7 +498,7 @@ class TestInsufficientCurrencyDenial:
         upgrade_node = next(
             v.sprite
             for v in shop._node_views
-            if not v.is_continue and not v.sprite.is_insurance_node
+            if not v.sprite.is_insurance_node
         )
         assert shop.player_ship is not None
         shop.player_ship.center_x = upgrade_node.center_x
@@ -570,7 +552,7 @@ class TestMultiLevelRunE2E:
         upgrade_node = next(
             v.sprite
             for v in shop._node_views
-            if not v.is_continue and not v.sprite.is_insurance_node
+            if not v.sprite.is_insurance_node
         )
         assert shop.player_ship is not None
         shop.player_ship.center_x = upgrade_node.center_x

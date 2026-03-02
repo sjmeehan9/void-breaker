@@ -7,6 +7,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Final, Protocol
 
+from asterax.app.src.utils.paths import get_asset_path
+
 
 class GamePhase(str, Enum):
     """Top-level game phase identifiers."""
@@ -99,22 +101,13 @@ class AsteroidConfig:
     """Configuration values used by the asteroid entity system."""
 
     large_sprite: Path = field(
-        default_factory=lambda: Path(__file__).resolve().parents[3]
-        / "assets"
-        / "sprites"
-        / "asteroid_large.png"
+        default_factory=lambda: get_asset_path("sprites", "asteroid_large.png")
     )
     medium_sprite: Path = field(
-        default_factory=lambda: Path(__file__).resolve().parents[3]
-        / "assets"
-        / "sprites"
-        / "asteroid_medium.png"
+        default_factory=lambda: get_asset_path("sprites", "asteroid_medium.png")
     )
     small_sprite: Path = field(
-        default_factory=lambda: Path(__file__).resolve().parents[3]
-        / "assets"
-        / "sprites"
-        / "asteroid_small.png"
+        default_factory=lambda: get_asset_path("sprites", "asteroid_small.png")
     )
     large_scale: float = 1.0
     medium_scale: float = 1.0
@@ -158,7 +151,6 @@ class ShopLayoutConfig:
     """Configuration values used to generate shop node layouts."""
 
     radius_fraction_of_min_dimension: float = 0.36
-    continue_node_extra_offset: float = 48.0
 
 
 class UpgradeEffectDefinition(Protocol):

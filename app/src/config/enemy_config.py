@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
+from asterax.app.src.utils.paths import get_asset_path
+
 
 class EnemyArchetype(str, Enum):
     """Supported enemy archetypes for Phase 3 combat."""
@@ -32,10 +34,7 @@ class EnemyConfig:
     currency_drop_chance: float
     buff_drop_chance: float
     projectile_sprite_path: Path = field(
-        default_factory=lambda: Path(__file__).resolve().parents[3]
-        / "assets"
-        / "sprites"
-        / "projectile_enemy.png"
+        default_factory=lambda: get_asset_path("sprites", "projectile_enemy.png")
     )
 
     @property
@@ -47,10 +46,7 @@ class EnemyConfig:
 def get_basic_config() -> EnemyConfig:
     """Return default configuration values for the Basic enemy archetype."""
     return EnemyConfig(
-        sprite_path=Path(__file__).resolve().parents[3]
-        / "assets"
-        / "sprites"
-        / "enemy_basic.png",
+        sprite_path=get_asset_path("sprites", "enemy_basic.png"),
         speed=60.0,
         turn_rate=45.0,
         fire_rate=0.4,
@@ -69,10 +65,7 @@ def get_basic_config() -> EnemyConfig:
 def get_aggressive_config() -> EnemyConfig:
     """Return default configuration values for the Aggressive archetype."""
     return EnemyConfig(
-        sprite_path=Path(__file__).resolve().parents[3]
-        / "assets"
-        / "sprites"
-        / "enemy_aggressive.png",
+        sprite_path=get_asset_path("sprites", "enemy_aggressive.png"),
         speed=120.0,
         turn_rate=90.0,
         fire_rate=0.8,

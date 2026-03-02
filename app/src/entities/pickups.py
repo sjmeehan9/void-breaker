@@ -4,14 +4,12 @@ from __future__ import annotations
 
 import math
 import random
-from pathlib import Path
 
 import arcade
 from asterax.app.src.config.game_config import CURRENCY_CONFIG
+from asterax.app.src.utils.paths import get_asset_path
 
-PICKUP_SPRITE_PATH = (
-    Path(__file__).resolve().parents[3] / "assets" / "sprites" / "currency_pickup.png"
-)
+PICKUP_SPRITE_PATH = get_asset_path("sprites", "currency_pickup.png")
 
 
 class CurrencyPickup(arcade.Sprite):

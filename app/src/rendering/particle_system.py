@@ -5,10 +5,10 @@ from __future__ import annotations
 import math
 import random
 from dataclasses import dataclass
-from pathlib import Path
 
 import arcade
 from asterax.app.src.config.game_config import AsteroidSize
+from asterax.app.src.utils.paths import get_asset_path
 
 
 @dataclass(slots=True)
@@ -38,12 +38,7 @@ class ParticleSystem:
         self._rng = rng if rng is not None else random.Random()
         self._max_particles = max(1, max_particles)
         self._activation_tick = 0
-        particle_texture_path = (
-            Path(__file__).resolve().parents[3]
-            / "assets"
-            / "sprites"
-            / "particle_dot.png"
-        )
+        particle_texture_path = get_asset_path("sprites", "particle_dot.png")
         self._pool: list[_PooledParticle] = []
         self._pooled_sprite_ids: set[int] = set()
         for _ in range(self._max_particles):

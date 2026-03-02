@@ -86,7 +86,6 @@ def test_colorblind_palette_contains_required_entity_mappings() -> None:
         "shop_economy",
         "shop_repair",
         "shop_insurance",
-        "shop_continue",
     }
     assert required_keys.issubset(COLORBLIND_PALETTE.keys())
     assert palette_is_distinguishable()

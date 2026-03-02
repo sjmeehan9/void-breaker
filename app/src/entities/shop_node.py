@@ -62,11 +62,6 @@ class ShopNode(arcade.Sprite):
         """Return whether this node represents insurance-tier cycling."""
         return self._is_insurance_node
 
-    @property
-    def is_continue_node(self) -> bool:
-        """Return whether this node is the continue action node."""
-        return False
-
     def calculate_cost(self, current_level: int) -> int:
         """Calculate next-level cost from base cost and geometric scaling."""
         if self.upgrade_definition is None:
@@ -155,48 +150,4 @@ class ShopNode(arcade.Sprite):
             multiline=True,
             align="center",
             width=220,
-        )
-
-
-class ContinueNode(ShopNode):
-    """Shop node variant that exits the shop and starts the next level."""
-
-    def can_purchase(self, currency: int, current_level: int) -> bool:
-        """Continue action is always available and has no cost."""
-        del currency, current_level
-        return True
-
-    @property
-    def is_continue_node(self) -> bool:
-        """Return whether this node exits the shop."""
-        return True
-
-    def update_visual_state(
-        self,
-        *,
-        currency: int,
-        current_level: int,
-        delta_time: float,
-    ) -> None:
-        """Pulse continuously to highlight the continue action."""
-        del currency, current_level
-        self._pulse_time_seconds = (
-            self._pulse_time_seconds + max(0.0, delta_time)
-        ) % _PULSE_PERIOD_SECONDS
-        pulse = (math.sin((2.0 * math.pi * self._pulse_time_seconds)) + 1.0) / 2.0
-        self.alpha = int(
-            _PULSE_MIN_ALPHA + (_PULSE_MAX_ALPHA - _PULSE_MIN_ALPHA) * pulse
-        )
-        self.scale = _BASE_SCALE + (0.08 * pulse)
-
-    def draw_label(self, current_level: int) -> None:
-        """Draw only a simple continue label for this node."""
-        del current_level
-        arcade.draw_text(
-            "Continue",
-            self.center_x,
-            self.center_y + 54,
-            arcade.color.WHITE,
-            12,
-            anchor_x="center",
         )

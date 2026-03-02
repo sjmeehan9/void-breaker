@@ -73,8 +73,8 @@ class EnemyShip(arcade.Sprite):
             self.fire_cooldown_remaining = max(0.0, self.fire_cooldown_remaining - dt)
 
         if self.velocity_x != 0.0 or self.velocity_y != 0.0:
-            self.angle = (
-                90.0 - math.degrees(math.atan2(self.velocity_y, self.velocity_x))
+            self.angle = 90.0 - math.degrees(
+                math.atan2(self.velocity_y, self.velocity_x)
             )
 
     def try_fire(

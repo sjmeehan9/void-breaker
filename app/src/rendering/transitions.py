@@ -39,7 +39,6 @@ COLORBLIND_PALETTE: dict[str, tuple[int, int, int]] = {
     "shop_economy": (220, 180, 40),
     "shop_repair": (245, 245, 245),
     "shop_insurance": (120, 40, 160),
-    "shop_continue": (40, 140, 200),
 }
 
 
@@ -218,9 +217,6 @@ def apply_colorblind_palette_to_shop_nodes(
             node.color = arcade.color.WHITE
             continue
 
-        if getattr(node, "is_continue_node", False):
-            node.color = COLORBLIND_PALETTE["shop_continue"]
-            continue
         if getattr(node, "is_insurance_node", False):
             node.color = COLORBLIND_PALETTE["shop_insurance"]
             continue

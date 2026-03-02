@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import arcade
 from asterax.app.src.config.game_config import GameState, InsuranceTier
 from asterax.app.src.config.upgrade_definitions import get_upgrade_by_id
-from asterax.app.src.entities.shop_node import ContinueNode, ShopNode
+from asterax.app.src.entities.shop_node import ShopNode
 from asterax.app.src.states.shop import ShopPhaseState
 
 
@@ -66,19 +66,6 @@ def test_shop_node_calculate_cost_and_can_purchase() -> None:
     assert not node.can_purchase(currency=999, current_level=definition.max_level)
 
 
-def test_continue_node_is_always_purchasable() -> None:
-    """Continue node should always report as available."""
-    node = ContinueNode(
-        texture_path=_shop_texture("node_continue.png"),
-        center_x=0.0,
-        center_y=0.0,
-        upgrade_definition=None,
-    )
-
-    assert node.can_purchase(currency=0, current_level=0)
-    assert node.can_purchase(currency=9999, current_level=99)
-
-
 def test_shop_node_update_visual_state_sets_expected_alpha() -> None:
     """Visual alpha should reflect affordable, unaffordable, and maxed states."""
     definition = get_upgrade_by_id("weapon_fire_rate")
@@ -124,7 +111,7 @@ def test_shop_phase_collision_purchases_upgrade(monkeypatch) -> None:
     state = ShopPhaseState(_MachineStub(), game_state=GameState(currency=200))
     state.on_enter()
     target_node = next(
-        view.sprite for view in state._node_views if not view.is_continue
+        view.sprite for view in state._node_views if not view.sprite.is_insurance_node
     )  # noqa: SLF001
     state.player_ship.center_x = target_node.center_x  # type: ignore[union-attr]
     state.player_ship.center_y = target_node.center_y  # type: ignore[union-attr]
@@ -159,10 +146,8 @@ def test_shop_node_properties_expose_node_type_metadata() -> None:
 
     assert upgrade_node.upgrade_id == "weapon_fire_rate"
     assert not upgrade_node.is_insurance_node
-    assert not upgrade_node.is_continue_node
     assert insurance_node.upgrade_id is None
     assert insurance_node.is_insurance_node
-    assert not insurance_node.is_continue_node
 
 
 def test_shop_phase_insurance_node_cycles_tier_and_spends(monkeypatch) -> None:

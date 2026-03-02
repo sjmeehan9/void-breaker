@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import arcade
@@ -23,13 +22,14 @@ from asterax.app.src.config.upgrade_definitions import (
     get_upgrade_by_id,
 )
 from asterax.app.src.entities.player_ship import PlayerShip
-from asterax.app.src.entities.shop_node import ContinueNode, ShopNode
+from asterax.app.src.entities.shop_node import ShopNode
 from asterax.app.src.managers.currency_manager import CurrencyManager
 from asterax.app.src.managers.insurance_manager import InsuranceManager
 from asterax.app.src.managers.upgrade_manager import UpgradeManager
 from asterax.app.src.rendering.particle_system import ParticleSystem
 from asterax.app.src.rendering.transitions import apply_colorblind_palette_to_shop_nodes
 from asterax.app.src.states.base_state import BaseState
+from asterax.app.src.utils.paths import get_asset_path
 
 if TYPE_CHECKING:
     from asterax.app.src.states.state_machine import StateMachine
@@ -41,7 +41,6 @@ class _ShopNodeView:
 
     sprite: ShopNode
     label: str
-    is_continue: bool = False
 
 
 class ShopPhaseState(BaseState):
@@ -67,8 +66,8 @@ class ShopPhaseState(BaseState):
         )
         self.shop_nodes = arcade.SpriteList(use_spatial_hash=True)
         self._node_views: list[_ShopNodeView] = []
-        self._continue_node: ContinueNode | None = None
         self._interaction_cooldown_seconds = 0.0
+        self._continue_btn_pulse_time = 0.0
         self._transitioning_out = False
         self._recentre_active = False
         self._recentre_elapsed = 0.0
@@ -80,9 +79,7 @@ class ShopPhaseState(BaseState):
     def on_enter(self) -> None:
         """Initialize shop ship placement and generate circular node layout."""
         window = arcade.get_window()
-        ship_sprite_path = (
-            Path(__file__).resolve().parents[3] / "assets/sprites/ship.png"
-        )
+        ship_sprite_path = get_asset_path("sprites", "ship.png")
         self.player_ship = PlayerShip(
             sprite_path=ship_sprite_path,
             center_x=window.width / 2,
@@ -102,8 +99,8 @@ class ShopPhaseState(BaseState):
         """Clear node data prior to transitioning back to combat."""
         self.shop_nodes.clear()
         self._node_views.clear()
-        self._continue_node = None
         self._interaction_cooldown_seconds = 0.0
+        self._continue_btn_pulse_time = 0.0
         self._recentre_active = False
         self._recentre_elapsed = 0.0
 
@@ -136,6 +133,9 @@ class ShopPhaseState(BaseState):
             self.player_ship.update_position(delta_time)
             self.player_ship.update_cooldown(delta_time)
             self._clamp_ship_to_bounds(window.width, window.height)
+        self._continue_btn_pulse_time = (
+            self._continue_btn_pulse_time + max(0.0, delta_time)
+        ) % 1.0
         self._update_node_visual_states(delta_time)
         self._apply_visual_settings()
         self._handle_node_collisions()
@@ -148,9 +148,7 @@ class ShopPhaseState(BaseState):
         if self.player_ship is not None:
             arcade.draw_sprite(self.player_ship)
         for node_view in self._node_views:
-            node_level = (
-                0 if node_view.is_continue else self._get_node_level(node_view.sprite)
-            )
+            node_level = self._get_node_level(node_view.sprite)
             node_view.sprite.draw_label(node_level)
         arcade.draw_text(
             f"Credits: {self.game_state.currency}",
@@ -159,6 +157,7 @@ class ShopPhaseState(BaseState):
             arcade.color.WHITE,
             18,
         )
+        self._draw_continue_button()
 
     def on_key_press(self, key: int, modifiers: int) -> None:
         """Handle pause and continue key shortcuts for the shop phase."""
@@ -169,6 +168,43 @@ class ShopPhaseState(BaseState):
             self.state_machine.push_state(PauseState(self.state_machine))
         elif key == arcade.key.ENTER:
             self._handle_continue()
+
+    def _draw_continue_button(self) -> None:
+        """Draw a pulsing continue button at the bottom of the screen."""
+        window = arcade.get_window()
+        btn_width = 220.0
+        btn_height = 48.0
+        btn_x = window.width / 2
+        btn_y = 50.0
+
+        pulse = (math.sin(2.0 * math.pi * self._continue_btn_pulse_time) + 1.0) / 2.0
+        bg_alpha = int(120 + 60 * pulse)
+        border_alpha = int(180 + 75 * pulse)
+
+        arcade.draw_lrbt_rectangle_filled(
+            btn_x - btn_width / 2,
+            btn_x + btn_width / 2,
+            btn_y - btn_height / 2,
+            btn_y + btn_height / 2,
+            (40, 120, 80, bg_alpha),
+        )
+        arcade.draw_lrbt_rectangle_outline(
+            btn_x - btn_width / 2,
+            btn_x + btn_width / 2,
+            btn_y - btn_height / 2,
+            btn_y + btn_height / 2,
+            (100, 255, 160, border_alpha),
+            border_width=2,
+        )
+        arcade.draw_text(
+            "Continue  [Enter]",
+            btn_x,
+            btn_y,
+            arcade.color.WHITE,
+            16,
+            anchor_x="center",
+            anchor_y="center",
+        )
 
     def _pause_key(self) -> int:
         """Return current configured pause key binding.
@@ -190,7 +226,7 @@ class ShopPhaseState(BaseState):
         radius = (
             min(width, height) * SHOP_LAYOUT_CONFIG.radius_fraction_of_min_dimension
         )
-        shop_dir = Path(__file__).resolve().parents[3] / "assets/sprites/shop"
+        shop_dir = get_asset_path("sprites", "shop")
         node_definitions = [
             ("weapon_fire_rate", shop_dir / "orb_weapon.png", None),
             ("defense_shields", shop_dir / "orb_defense.png", None),
@@ -225,23 +261,6 @@ class ShopPhaseState(BaseState):
                 )
             )
 
-        continue_sprite = ContinueNode(
-            texture_path=shop_dir / "node_continue.png",
-            center_x=center_x,
-            center_y=center_y - radius - SHOP_LAYOUT_CONFIG.continue_node_extra_offset,
-            upgrade_definition=None,
-            label_override="Continue",
-        )
-        self.shop_nodes.append(continue_sprite)
-        self._continue_node = continue_sprite
-        self._node_views.append(
-            _ShopNodeView(
-                sprite=continue_sprite,
-                label="Continue",
-                is_continue=True,
-            )
-        )
-
     def _clamp_ship_to_bounds(self, width: float, height: float) -> None:
         """Clamp ship position to screen bounds (shop disables wrap-around)."""
         if self.player_ship is None:
@@ -268,9 +287,7 @@ class ShopPhaseState(BaseState):
                     can_afford_override=can_afford,
                 )
                 continue
-            level = (
-                0 if node_view.is_continue else self._get_node_level(node_view.sprite)
-            )
+            level = self._get_node_level(node_view.sprite)
             node.update_visual_state(
                 currency=current_currency,
                 current_level=level,
@@ -278,7 +295,7 @@ class ShopPhaseState(BaseState):
             )
 
     def _handle_node_collisions(self) -> None:
-        """Handle continue, purchase, and denied collisions."""
+        """Handle purchase and denied collisions with shop nodes."""
         if (
             self.player_ship is None
             or self._interaction_cooldown_seconds > 0.0
@@ -292,10 +309,7 @@ class ShopPhaseState(BaseState):
             return
 
     def _handle_node_collision(self, node: ShopNode) -> None:
-        """Route node interactions to continue, insurance, or upgrade purchase."""
-        if node.is_continue_node:
-            self._handle_continue()
-            return
+        """Route node interactions to insurance or upgrade purchase."""
         if node.is_insurance_node:
             self._attempt_insurance_change()
             return

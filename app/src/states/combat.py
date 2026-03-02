@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import math
+import os
 import random
+import statistics
+import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
@@ -15,10 +19,16 @@ from asterax.app.src.config.difficulty_tables import (
     get_difficulty_params,
     parse_difficulty_preset,
 )
+from asterax.app.src.config.enemy_config import EnemyArchetype as EnemyKind
+from asterax.app.src.config.enemy_config import (
+    get_aggressive_config,
+    get_basic_config,
+)
 from asterax.app.src.config.game_config import (
     COLLISION_CONFIG,
     GAME_CONFIG,
     PHYSICS_CONFIG,
+    AsteroidSize,
     DifficultyParams,
 )
 from asterax.app.src.config.game_config import GameState as RunGameState
@@ -26,9 +36,12 @@ from asterax.app.src.config.game_config import (
     RunStats,
     ShipState,
 )
+from asterax.app.src.entities.asteroid import Asteroid
 from asterax.app.src.entities.buff_pickup import BuffPickup, BuffType
 from asterax.app.src.entities.enemy_ship import EnemyShip
+from asterax.app.src.entities.pickups import CurrencyPickup
 from asterax.app.src.entities.player_ship import PlayerShip
+from asterax.app.src.entities.projectile import Projectile, ProjectileOwner
 from asterax.app.src.managers.buff_manager import BuffManager
 from asterax.app.src.managers.currency_manager import CurrencyManager
 from asterax.app.src.managers.difficulty_scaler import DifficultyScaler
@@ -46,6 +59,7 @@ from asterax.app.src.rendering.transitions import (
     apply_colorblind_palette_to_combat,
 )
 from asterax.app.src.states.base_state import BaseState
+from asterax.app.src.utils.paths import get_asset_path
 
 if TYPE_CHECKING:
     from asterax.app.src.persistence.persistence_manager import PersistenceManager
@@ -55,11 +69,17 @@ PHYSICS_DT: Final[float] = GAME_CONFIG.physics_dt
 MAX_FRAME_TIME: Final[float] = GAME_CONFIG.max_frame_time
 BUFF_PICKUP_SOUND_NAME: Final[str] = (
     "pickup_buff"
-    if (
-        Path(__file__).resolve().parents[3] / "assets" / "sounds" / "pickup_buff.wav"
-    ).exists()
+    if get_asset_path("sounds", "pickup_buff.wav").exists()
     else "pickup_currency"
 )
+PERF_TARGET_COUNTS: Final[dict[str, int]] = {
+    "asteroids": 100,
+    "enemies": 10,
+    "player_projectiles": 15,
+    "enemy_projectiles": 20,
+    "pickups": 40,
+    "particles": 300,
+}
 
 
 class CombatPhaseState(BaseState):
@@ -77,6 +97,10 @@ class CombatPhaseState(BaseState):
         practice_infinite_shields: bool = False,
         practice_reduced_count: bool = False,
         practice_params_override: DifficultyParams | None = None,
+        perf_stress_mode: bool = False,
+        perf_duration_seconds: float = 60.0,
+        perf_output_path: str | None = None,
+        perf_seed: int = 1337,
     ) -> None:
         """Initialize combat-phase manager references and run state."""
         super().__init__(state_machine)
@@ -111,6 +135,14 @@ class CombatPhaseState(BaseState):
         self._practice_infinite_shields = bool(practice_infinite_shields)
         self._practice_reduced_count = bool(practice_reduced_count)
         self._practice_params_override = practice_params_override
+        self._perf_stress_mode = bool(perf_stress_mode)
+        self._perf_duration_seconds = max(1.0, float(perf_duration_seconds))
+        self._perf_output_path = perf_output_path
+        self._perf_seed = int(perf_seed)
+        self._perf_elapsed_seconds = 0.0
+        self._perf_frame_times_ms: list[float] = []
+        self._perf_finished = False
+        self._perf_started_at_monotonic = 0.0
 
     @property
     def player_ship(self) -> PlayerShip:
@@ -123,9 +155,7 @@ class CombatPhaseState(BaseState):
     def on_enter(self) -> None:
         """Initialize combat entities, managers, HUD, and first level asteroids."""
         window = arcade.get_window()
-        ship_sprite_path = (
-            Path(__file__).resolve().parents[3] / "assets" / "sprites" / "ship.png"
-        )
+        ship_sprite_path = get_asset_path("sprites", "ship.png")
         ship = PlayerShip(
             sprite_path=ship_sprite_path,
             center_x=window.width / 2,
@@ -176,10 +206,16 @@ class CombatPhaseState(BaseState):
         if self.current_level > 1:
             self._transition_effect.start_level_transition(self.current_level)
         self._apply_visual_settings()
+        if self._perf_stress_mode:
+            self._setup_performance_stress_scene(window.width, window.height)
+            self._transition_effect = None
+            self._perf_started_at_monotonic = time.monotonic()
         self._sync_state_for_hud()
 
     def on_update(self, delta_time: float) -> None:
         """Advance combat simulation with a fixed-timestep accumulator."""
+        if self._perf_stress_mode and self._perf_finished:
+            return
         if self.physics_engine is None:
             return
 
@@ -189,14 +225,26 @@ class CombatPhaseState(BaseState):
             return
 
         frame_time = min(delta_time, MAX_FRAME_TIME)
+        if self._perf_stress_mode:
+            self._perf_frame_times_ms.append(max(0.0, frame_time) * 1000.0)
+            self._perf_elapsed_seconds += frame_time
         self.accumulator += frame_time
         while self.accumulator >= PHYSICS_DT:
             self._physics_step(PHYSICS_DT)
             self.accumulator -= PHYSICS_DT
+        if (
+            self._perf_stress_mode
+            and self._perf_elapsed_seconds >= self._perf_duration_seconds
+        ):
+            self._finish_performance_run()
 
     def _physics_step(self, dt: float) -> None:
         """Run one deterministic combat simulation step."""
         if self.physics_engine is None:
+            return
+        if self._perf_stress_mode:
+            self._physics_step_performance(dt)
+            self._sync_state_for_hud()
             return
 
         window = arcade.get_window()
@@ -783,3 +831,213 @@ class CombatPhaseState(BaseState):
     def _difficulty_scaler_for_current_preset(self) -> DifficultyMultipliers:
         """Return multiplier object for the currently selected difficulty preset."""
         return DIFFICULTY_PRESET_MULTIPLIERS[self._difficulty_preset]
+
+    def _physics_step_performance(self, dt: float) -> None:
+        """Advance stress-scene entities while keeping target counts stable."""
+        window = arcade.get_window()
+        screen_width = float(window.width)
+        screen_height = float(window.height)
+
+        player = self.player_ship
+        player.center_x += player.velocity_x * dt
+        player.center_y += player.velocity_y * dt
+        wrap_entity(player, screen_width, screen_height)
+
+        for asteroid in self.entity_manager.asteroids:
+            asteroid.update(dt)
+            wrap_entity(asteroid, screen_width, screen_height)
+
+        for enemy in self.entity_manager.enemies:
+            enemy.center_x += enemy.velocity_x * dt
+            enemy.center_y += enemy.velocity_y * dt
+            wrap_entity(enemy, screen_width, screen_height)
+
+        for projectile in self.entity_manager.player_projectiles:
+            projectile.center_x += projectile.velocity_x * dt
+            projectile.center_y += projectile.velocity_y * dt
+            wrap_entity(projectile, screen_width, screen_height)
+
+        for projectile in self.entity_manager.enemy_projectiles:
+            projectile.center_x += projectile.velocity_x * dt
+            projectile.center_y += projectile.velocity_y * dt
+            wrap_entity(projectile, screen_width, screen_height)
+
+        for pickup in self.entity_manager.currency_pickups:
+            pickup.center_x += pickup.velocity_x * dt
+            pickup.center_y += pickup.velocity_y * dt
+            wrap_entity(pickup, screen_width, screen_height)
+
+        self.particle_system.update(dt)
+        self._apply_visual_settings()
+
+    def _setup_performance_stress_scene(
+        self,
+        screen_width: int,
+        screen_height: int,
+    ) -> None:
+        """Populate a deterministic peak-load scene for performance profiling."""
+        rng = random.Random(self._perf_seed)
+        self.entity_manager.clear_projectiles()
+        self.entity_manager.clear_enemies()
+        self.entity_manager.asteroids.clear()
+        self.entity_manager.currency_pickups.clear()
+        self.entity_manager.buff_pickups.clear()
+        self.entity_manager.particles.clear()
+        self.particle_system = ParticleSystem(
+            self.entity_manager.particles,
+            rng=random.Random(self._perf_seed + 1),
+            max_particles=PERF_TARGET_COUNTS["particles"],
+        )
+
+        player = self.player_ship
+        player.center_x = screen_width / 2
+        player.center_y = screen_height / 2
+        player.velocity_x = 35.0
+        player.velocity_y = 28.0
+        player.angle = 0.0
+        player.shields = player.max_shields
+
+        asteroid_sizes = [AsteroidSize.LARGE, AsteroidSize.MEDIUM, AsteroidSize.SMALL]
+        for index in range(PERF_TARGET_COUNTS["asteroids"]):
+            size = asteroid_sizes[index % len(asteroid_sizes)]
+            speed = rng.uniform(70.0, 220.0)
+            angle = rng.uniform(0.0, math.tau)
+            self.entity_manager.asteroids.append(
+                Asteroid(
+                    size=size,
+                    center_x=rng.uniform(0.0, float(screen_width)),
+                    center_y=rng.uniform(0.0, float(screen_height)),
+                    velocity=(math.cos(angle) * speed, math.sin(angle) * speed),
+                    rotation_speed=rng.uniform(20.0, 120.0),
+                    rng=rng,
+                )
+            )
+
+        basic_config = get_basic_config()
+        aggressive_config = get_aggressive_config()
+        for index in range(PERF_TARGET_COUNTS["enemies"]):
+            archetype = EnemyKind.BASIC if index % 2 == 0 else EnemyKind.AGGRESSIVE
+            config = basic_config if archetype is EnemyKind.BASIC else aggressive_config
+            enemy = EnemyShip(
+                archetype=archetype,
+                config=config,
+                center_x=rng.uniform(0.0, float(screen_width)),
+                center_y=rng.uniform(0.0, float(screen_height)),
+                rng=rng,
+            )
+            theta = rng.uniform(0.0, math.tau)
+            enemy.velocity_x = math.cos(theta) * config.speed
+            enemy.velocity_y = math.sin(theta) * config.speed
+            self.entity_manager.enemies.append(enemy)
+
+        for _ in range(PERF_TARGET_COUNTS["player_projectiles"]):
+            speed = rng.uniform(600.0, 900.0)
+            projectile = Projectile(
+                center_x=rng.uniform(0.0, float(screen_width)),
+                center_y=rng.uniform(0.0, float(screen_height)),
+                angle=rng.uniform(0.0, 360.0),
+                speed=speed,
+                max_range=max(float(screen_width), float(screen_height)) * 2.0,
+                damage=1.0,
+                owner=ProjectileOwner.PLAYER,
+            )
+            self.entity_manager.player_projectiles.append(projectile)
+
+        enemy_projectile_texture = arcade.load_texture(
+            str(get_asset_path("sprites", "projectile_enemy.png"))
+        )
+        for _ in range(PERF_TARGET_COUNTS["enemy_projectiles"]):
+            speed = rng.uniform(300.0, 550.0)
+            projectile = Projectile(
+                center_x=rng.uniform(0.0, float(screen_width)),
+                center_y=rng.uniform(0.0, float(screen_height)),
+                angle=rng.uniform(0.0, 360.0),
+                speed=speed,
+                max_range=max(float(screen_width), float(screen_height)) * 2.0,
+                damage=1.0,
+                owner=ProjectileOwner.ENEMY,
+            )
+            projectile.texture = enemy_projectile_texture
+            self.entity_manager.enemy_projectiles.append(projectile)
+
+        for _ in range(PERF_TARGET_COUNTS["pickups"]):
+            pickup = CurrencyPickup(
+                center_x=rng.uniform(0.0, float(screen_width)),
+                center_y=rng.uniform(0.0, float(screen_height)),
+                value=10,
+                lifetime=60.0 * 60.0,
+                rng=rng,
+            )
+            self.entity_manager.currency_pickups.append(pickup)
+
+        while (
+            self.particle_system.active_particle_count < PERF_TARGET_COUNTS["particles"]
+        ):
+            self.particle_system.emit_purchase_burst(
+                rng.uniform(0.0, float(screen_width)),
+                rng.uniform(0.0, float(screen_height)),
+            )
+
+        self.game_state.current_level = 99
+        self.game_state.score = 999_999
+        self.game_state.currency = 99_999
+
+    def _finish_performance_run(self) -> None:
+        """Persist stress-run metrics and close the window."""
+        if self._perf_finished:
+            return
+        self._perf_finished = True
+        fps_samples = [1000.0 / ms for ms in self._perf_frame_times_ms if ms > 0.0]
+        frame_times = self._perf_frame_times_ms
+        metrics = {
+            "mode": "stress",
+            "target_counts": PERF_TARGET_COUNTS,
+            "duration_seconds": self._perf_elapsed_seconds,
+            "wall_clock_seconds": max(
+                0.0,
+                time.monotonic() - self._perf_started_at_monotonic,
+            ),
+            "frame_count": len(frame_times),
+            "frame_time_ms": {
+                "min": min(frame_times) if frame_times else 0.0,
+                "max": max(frame_times) if frame_times else 0.0,
+                "mean": statistics.fmean(frame_times) if frame_times else 0.0,
+                "median": statistics.median(frame_times) if frame_times else 0.0,
+                "p95": _percentile(frame_times, 95.0),
+                "p99": _percentile(frame_times, 99.0),
+            },
+            "fps": {
+                "min": min(fps_samples) if fps_samples else 0.0,
+                "max": max(fps_samples) if fps_samples else 0.0,
+                "mean": statistics.fmean(fps_samples) if fps_samples else 0.0,
+            },
+            "thresholds": {
+                "mean_under_16_67_ms": bool(
+                    frame_times and statistics.fmean(frame_times) < 16.67
+                ),
+                "max_under_33_ms": bool(frame_times and max(frame_times) <= 33.0),
+            },
+        }
+
+        output_path = self._perf_output_path or os.environ.get(
+            "VOIDBREAKER_PERF_OUTPUT"
+        )
+        if output_path:
+            path = Path(output_path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+            print(f"PERF_METRICS_PATH={path}")
+        print("PERF_METRICS_JSON_START")
+        print(json.dumps(metrics))
+        print("PERF_METRICS_JSON_END")
+        arcade.get_window().close()
+
+
+def _percentile(values: list[float], percentile: float) -> float:
+    """Return percentile value using nearest-rank interpolation."""
+    if not values:
+        return 0.0
+    sorted_values = sorted(values)
+    rank = int(round((percentile / 100.0) * (len(sorted_values) - 1)))
+    rank = max(0, min(len(sorted_values) - 1, rank))
+    return sorted_values[rank]

@@ -1,0 +1,54 @@
+{
+  "source": {
+    "frame_metrics": {
+      "duration_seconds": 120.01666666666114,
+      "frame_count": 7201,
+      "frame_time_mean_ms": 16.666666666666668,
+      "frame_time_max_ms": 16.666666666666668,
+      "frame_time_p95_ms": 16.666666666666668,
+      "frame_time_p99_ms": 16.666666666666668,
+      "fps_mean": 59.99999999999999,
+      "fps_min": 59.99999999999999,
+      "fps_max": 59.99999999999999
+    },
+    "memory_metrics": {
+      "sample_count": 120,
+      "initial_rss_mb": 0.671875,
+      "peak_rss_mb": 126.828125,
+      "final_rss_mb": 54.953125,
+      "growth_rss_mb": 54.28125,
+      "slope_mb_per_min": -6.949481002737196,
+      "leak_detected": false
+    },
+    "artifacts": {
+      "frame_metrics_path": "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/docs/performance-data/source-frame-metrics.json",
+      "memory_csv_path": "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/docs/performance-data/source-memory.csv"
+    }
+  },
+  "packaged": {
+    "frame_metrics": {
+      "duration_seconds": 1800.0166666653583,
+      "frame_count": 108001,
+      "frame_time_mean_ms": 16.666666666666668,
+      "frame_time_max_ms": 16.666666666666668,
+      "frame_time_p95_ms": 16.666666666666668,
+      "frame_time_p99_ms": 16.666666666666668,
+      "fps_mean": 59.99999999999999,
+      "fps_min": 59.99999999999999,
+      "fps_max": 59.99999999999999
+    },
+    "memory_metrics": {
+      "sample_count": 1799,
+      "initial_rss_mb": 0.578125,
+      "peak_rss_mb": 127.84375,
+      "final_rss_mb": 44.28125,
+      "growth_rss_mb": 43.703125,
+      "slope_mb_per_min": -0.17480280964842283,
+      "leak_detected": false
+    },
+    "artifacts": {
+      "frame_metrics_path": "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/docs/performance-data/packaged-frame-metrics.json",
+      "memory_csv_path": "/Users/seanmeehan/Projects/testing/asterax-tribute/void-breaker/docs/performance-data/packaged-memory.csv"
+    }
+  }
+}

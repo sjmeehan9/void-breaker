@@ -4,13 +4,11 @@ from __future__ import annotations
 
 import math
 from enum import Enum
-from pathlib import Path
 
 import arcade
+from asterax.app.src.utils.paths import get_asset_path
 
-PROJECTILE_SPRITE_PATH = (
-    Path(__file__).resolve().parents[3] / "assets" / "sprites" / "projectile_player.png"
-)
+PROJECTILE_SPRITE_PATH = get_asset_path("sprites", "projectile_player.png")
 
 
 class ProjectileOwner(str, Enum):

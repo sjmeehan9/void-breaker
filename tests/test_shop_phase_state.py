@@ -69,7 +69,7 @@ def test_shop_on_enter_centers_ship_and_sets_phase(monkeypatch) -> None:
 
 
 def test_shop_generate_node_layout_uses_circular_positions(monkeypatch) -> None:
-    """Shop layout should place core nodes on a radius with continue below ring."""
+    """Shop layout should place core nodes on a radius (no continue node)."""
     machine = _MachineStub()
     shop = ShopPhaseState(machine, game_state=GameState())
     monkeypatch.setattr(
@@ -82,21 +82,15 @@ def test_shop_generate_node_layout_uses_circular_positions(monkeypatch) -> None:
     center_x = 640.0
     center_y = 480.0
     radius = min(1280.0, 960.0) * SHOP_LAYOUT_CONFIG.radius_fraction_of_min_dimension
-    regular_nodes = [
-        view for view in shop._node_views if not view.is_continue
-    ]  # noqa: SLF001
-    continue_node = next(
-        view for view in shop._node_views if view.is_continue  # noqa: SLF001
-    )
     distances = [
-        math.hypot(node.sprite.center_x - center_x, node.sprite.center_y - center_y)
-        for node in regular_nodes
+        math.hypot(
+            view.sprite.center_x - center_x, view.sprite.center_y - center_y
+        )
+        for view in shop._node_views
     ]
 
-    assert len(regular_nodes) == 6
+    assert len(shop._node_views) == 6
     assert all(distance == pytest.approx(radius, abs=0.6) for distance in distances)
-    assert continue_node.sprite.center_x == pytest.approx(center_x)
-    assert continue_node.sprite.center_y < center_y - radius
 
 
 def test_shop_clamp_ship_to_bounds() -> None:
@@ -189,7 +183,7 @@ def test_shop_recentre_blocks_collision_purchases(monkeypatch) -> None:
     purchasable_node = next(
         view.sprite
         for view in shop._node_views  # noqa: SLF001
-        if not view.is_continue and not view.sprite.is_insurance_node
+        if not view.sprite.is_insurance_node
     )
     shop.player_ship.center_x = purchasable_node.center_x
     shop.player_ship.center_y = purchasable_node.center_y

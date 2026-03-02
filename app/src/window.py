@@ -1,6 +1,5 @@
 """Arcade window implementation for VoidBreaker."""
 
-from pathlib import Path
 from typing import Final
 
 import arcade
@@ -13,6 +12,7 @@ from asterax.app.src.rendering.starfield import StarfieldRenderer
 from asterax.app.src.rendering.transitions import ScreenShake
 from asterax.app.src.states.main_menu import MainMenuState
 from asterax.app.src.states.state_machine import StateMachine
+from asterax.app.src.utils.paths import get_asset_path
 
 PHYSICS_DT: Final[float] = 1.0 / 60.0
 MAX_FRAME_TIME: Final[float] = 0.25
@@ -35,7 +35,7 @@ class VoidBreakerWindow(arcade.Window):
         settings = self.persistence.load_settings()
         self.runtime_settings = settings
         self.input_manager = InputManager(settings)
-        sound_dir = Path(__file__).resolve().parents[2] / "assets" / "sounds"
+        sound_dir = get_asset_path("sounds")
         self.audio_manager = AudioManager(settings, sound_dir)
         self.starfield = StarfieldRenderer(width=width, height=height)
         self.hud_renderer = HUDRenderer(window_width=width, window_height=height)
