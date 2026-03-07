@@ -186,3 +186,40 @@
 ### Deviations from spec
 
 - Cross-platform smoke testing (Windows/Linux) was skipped as optional for v1.0 — no cross-platform build environment was available.
+
+## Component 6.6 — Release Documentation & E2E Verification
+
+### What was built
+
+- Replaced minimal placeholder `README.md` with comprehensive user-facing documentation covering installation, system requirements, controls, gameplay overview, building from source, known issues, and credits.
+- Created `docs/phase-6-summary.md` with phase deliverables, key decisions, release metrics, known issues, and future recommendations.
+- Created `docs/components/phase-6-component-6-6-overview.md` — the final component overview document.
+- Updated this file (`docs/implementation-context-phase-6.md`) with the component 6.6 summary.
+- Created `v1.0.0` annotated git tag (local, not pushed without human approval).
+
+### Key files created/modified
+
+- Modified: `README.md` (full rewrite — user-facing release documentation)
+- Created: `docs/phase-6-summary.md`
+- Created: `docs/components/phase-6-component-6-6-overview.md`
+- Modified: `docs/implementation-context-phase-6.md` (this file — appended 6.6 entry)
+
+### Design decisions
+
+- Structured the README as user-first documentation: installation and gameplay sections use plain language, while the "Building from Source" section is separated for developers.
+- Referenced the 3 known issues from `docs/qa-checklist.md` with user-friendly workaround descriptions.
+- Kept the README concise (~150 lines) to avoid overwhelming non-technical users.
+- Created the git tag locally per spec guidance — pushing requires human approval due to potential branch protection.
+
+### Validation executed
+
+- `python scripts/evals.py` → passed (no TODO/FIXME, all docstrings present)
+- `pytest -q --cov=app/src --cov-report=term-missing` → 341 passed, 77% coverage
+- `black --check app/src/` → passed (58 files unchanged)
+- `isort --check-only app/src/` → passed
+- Manual review: all 6 component overview documents confirmed present in `docs/components/`
+- Manual review: `README.md` content verified accurate against game features and known issues
+
+### Deviations from spec
+
+- None. All acceptance criteria implemented as specified.
