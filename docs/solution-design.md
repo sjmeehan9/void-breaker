@@ -1,8 +1,8 @@
 # Solution Design: Retro Space Shooter (Asterax Tribute)
 
-Version: 1.1
-Date: 2026-02-18
-Status: Final
+Version: 1.2
+Date: 2026-03-09
+Status: Final (v1.0.0 Released)
 Owner: Solutions Architect
 
 ---
@@ -809,27 +809,57 @@ VoidBreaker.app/
     Info.plist              # macOS application metadata
 ```
 
+### Asset Path Resolution
+
+All asset loading uses a centralised path resolution utility (`app/src/utils/paths.py`):
+
+```python
+from app.src.utils.paths import get_asset_path
+
+sprite_path = get_asset_path("sprites", "player_ship.png")
+sound_path = get_asset_path("sounds", "fire.wav")
+```
+
+`get_asset_path()` detects the execution context:
+- **Source execution**: Resolves relative to the project root directory.
+- **PyInstaller bundle**: Resolves relative to `sys._MEIPASS` (the temporary extraction directory).
+
+This eliminates scattered `Path(__file__).parents[...]` references and ensures all 8 asset-loading modules share a single, tested path strategy.
+
 ### Build Process
 
 ```bash
-# Build command (from project root)
-pyinstaller \
-  --name VoidBreaker \
-  --windowed \
-  --onedir \
-  --icon assets/icon.icns \
-  --add-data "assets:assets" \
-  VoidBreaker.spec
+# Automated build (from project root, with venv active)
+./scripts/build_app.sh
 ```
 
+The build script (`scripts/build_app.sh`) automates the full pipeline:
+1. Activates the virtual environment and verifies PyInstaller is installed.
+2. Cleans previous build artifacts (`build/`, `dist/`).
+3. Runs `pyinstaller VoidBreaker.spec` in `--onedir` mode.
+4. Applies post-build fixes (Arcade `VERSION` artifact normalisation).
+5. Verifies the output `.app` bundle exists and is structurally valid.
+
 A `VoidBreaker.spec` file is maintained in the repository with all PyInstaller configuration, including:
-- Hidden imports for Arcade/pyglet modules.
-- Data file mappings for all assets.
-- macOS-specific `Info.plist` entries (bundle identifier, version, minimum OS version).
+- Hidden imports for Arcade/pyglet modules, filtered to installed modules at build time to prevent environment-specific `ModuleNotFoundError` failures.
+- Data file mappings for all asset directories (sprites, sounds, fonts, icon).
+- macOS-specific `Info.plist` entries (bundle identifier `com.voidbreaker.game`, version `1.0.0`, minimum OS version `13.0`).
+- Windowed mode (`console=False`) for GUI application behaviour.
 
 ### Distribution
 
-For v1.0, distribution is via a **DMG disk image** containing `VoidBreaker.app` and an alias to `/Applications`. No code signing or notarisation is required for initial local distribution, but the README documents the steps for future App Store or notarised distribution.
+For v1.0, distribution is via a **DMG disk image** created by `scripts/create_dmg.sh`:
+
+```bash
+# Create DMG (from project root, with venv active)
+./scripts/create_dmg.sh
+```
+
+The script uses a dual-path strategy:
+- **`create-dmg`** (when available): Produces a polished DMG with custom Finder window layout.
+- **`hdiutil` fallback**: Produces a functional DMG on any macOS without additional dependencies.
+
+The DMG contains `VoidBreaker.app` and an `Applications` symlink for standard drag-to-install UX. The `UDZO` compression format ensures broad macOS version compatibility. No code signing or notarisation is applied for v1.0 — the `README.md` documents the Gatekeeper workaround (right-click → Open → confirm), and `docs/code-signing-guide.md` documents the full signing and notarisation workflow for future releases.
 
 ### Development Environment
 
@@ -894,6 +924,9 @@ asterax-tribute/
           game_config.py      # All tuning parameters
           upgrade_definitions.py
           difficulty_tables.py
+        utils/                # Runtime utilities
+          __init__.py
+          paths.py            # Asset path resolution (source vs. PyInstaller)
       config/
         settings_defaults.yaml
       docs/
@@ -901,8 +934,14 @@ asterax-tribute/
       sprites/
       sounds/
       fonts/
+      icon.icns               # macOS application icon
+      VoidBreaker.iconset/    # Icon PNG variants (all sizes)
     scripts/
       evals.py
+      build_app.sh            # PyInstaller build automation
+      create_dmg.sh           # DMG packaging automation
+      profile_performance.py  # Performance profiling
+      generate_app_icon.py    # Icon generation
     tests/
       __init__.py
       test_physics.py
@@ -913,6 +952,7 @@ asterax-tribute/
       test_difficulty.py
       test_scoring.py
       test_insurance.py
+  VoidBreaker.spec            # PyInstaller configuration
   pyproject.toml
 ```
 
@@ -926,7 +966,7 @@ As an offline, single-player game with no network access, the attack surface is 
 
 2. **No network access**: The application makes zero network calls. No sockets, no HTTP, no DNS. This is enforced by simply not importing any networking libraries.
 
-3. **Asset loading**: All assets are loaded from the bundled application directory. File paths are constructed using `pathlib` with no user-supplied path components, preventing path traversal.
+3. **Asset loading**: All assets are loaded from the bundled application directory via a centralised path resolution utility (`app/src/utils/paths.py`). File paths are constructed using `pathlib` with no user-supplied path components, preventing path traversal. The utility handles both source execution and PyInstaller bundle execution transparently.
 
 4. **No code execution**: The application does not evaluate user-supplied code, scripts, or expressions. Settings and high scores are deserialised from JSON using `json.load()` (safe by default — no `eval()` or `pickle`).
 
@@ -1026,15 +1066,15 @@ Per copilot.instructions.md, the project targets **30% code coverage minimum** u
 
 ## Open Questions
 
-1. **Product name**: "VoidBreaker" is used as a placeholder throughout this document (matching one of the candidates in the brief). Final name selection should be confirmed before asset creation (splash screen, icon, window title).
+1. **Product name**: ~~"VoidBreaker" is used as a placeholder throughout this document (matching one of the candidates in the brief). Final name selection should be confirmed before asset creation (splash screen, icon, window title).~~ **Resolved (Phase 6.1):** "VoidBreaker" confirmed as the final product name. Used consistently across window title, main menu, persistence directory, macOS bundle identifier (`com.voidbreaker.game`), application icon, and all user-facing documentation.
 
-2. **Ship classes**: The brief lists ship classes as "recommended, optional". This design supports them architecturally (base stats in `ShipState` can vary per class) but defers implementation to a later phase if scope needs trimming. The architecture does not change either way.
+2. **Ship classes**: The brief lists ship classes as "recommended, optional". This design supports them architecturally (base stats in `ShipState` can vary per class) but defers implementation to a later phase if scope needs trimming. The architecture does not change either way. **Status:** Deferred to post-v1.0.
 
-3. **Background music**: Marked as optional in the brief. The `AudioManager` supports it, but actual music asset creation may be deferred. The system is designed to work with or without music.
+3. **Background music**: ~~Marked as optional in the brief. The `AudioManager` supports it, but actual music asset creation may be deferred. The system is designed to work with or without music.~~ **Resolved (Phase 5/6):** `AudioManager.play_music()` implemented as a documented no-op stub. All 17 sound effects are fully functional. Background music deferred to post-v1.0 as a known limitation (documented in README and QA checklist as K3).
 
-4. **Challenge variants**: "No shop", "double enemies", etc. are architecturally trivial (they modify `DifficultyParams` and disable the shop state transition) but add testing and UI scope. Recommend deferring to post-v1.0.
+4. **Challenge variants**: "No shop", "double enemies", etc. are architecturally trivial (they modify `DifficultyParams` and disable the shop state transition) but add testing and UI scope. Recommend deferring to post-v1.0. **Status:** Deferred to post-v1.0. Practice/Training mode (Phase 5.10) provides a partial alternative.
 
-5. **Autofire**: Listed as both a setting and a potential purchasable upgrade. Recommend implementing as a setting only (simpler) for v1.0, with the upgrade variant as a future enhancement.
+5. **Autofire**: ~~Listed as both a setting and a potential purchasable upgrade. Recommend implementing as a setting only (simpler) for v1.0, with the upgrade variant as a future enhancement.~~ **Resolved (Phase 5.4):** Implemented as a settings toggle in the Settings screen. Not available as a purchasable upgrade.
 
 ---
 
@@ -1044,3 +1084,4 @@ Per copilot.instructions.md, the project targets **30% code coverage minimum** u
 |---------|------|--------|---------|
 | 1.0 | 2026-02-18 | Solutions Architect | Initial solution design |
 | 1.1 | 2026-02-18 | Solutions Architect | Competitive analysis confirmed fly-through shop and insurance system are unique market differentiators with no equivalent in any competitor (Nova Drift, Asteroids But Roguelite, Void Miner, et al.). Design preserves both as first-class systems: InsuranceManager as a dedicated subsystem with tiered retention model, and Shop Phase with spatial node interaction and piloting-based purchasing. No architectural changes required. |
+| 1.2 | 2026-03-09 | Solutions Architect | Updated for v1.0.0 release (Phase 6 complete). Added asset path resolution utility (`app/src/utils/paths.py`) documentation. Updated build process to reflect automated `scripts/build_app.sh` pipeline and `VoidBreaker.spec` configuration. Added DMG distribution details with `scripts/create_dmg.sh` dual-path strategy. Updated development environment directory tree with Phase 6 additions (utils/, build scripts, icon assets, spec file). Updated security design to reference centralised path resolution. Resolved open questions: product name confirmed as VoidBreaker, background music deferred by design, autofire implemented as settings toggle. |

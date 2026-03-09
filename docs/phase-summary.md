@@ -396,3 +396,72 @@ Phase 5 completed the UI and polish layer atop the Phase 4 economy loop. `MainMe
 ## Phase Readiness
 
 All eleven components passed formatting checks (`black`, `isort`), 343 focused unit tests (`pytest`), quality evals (`scripts/evals.py`), and 79% overall code coverage. Phase 5 is complete and provides the polished, release-quality game for Phase 6 (Packaging & Release).
+
+---
+
+## Phase 6 Overview
+
+Phase 6 transformed VoidBreaker from a development project into a distributable macOS application. It produced a standalone `.app` bundle via PyInstaller, wrapped it in a DMG disk image, validated performance and memory stability under stress conditions, executed comprehensive QA across all game systems, and created all release documentation. After this phase, a non-developer user can download the DMG, drag the app to Applications, and play without installing Python or any dependencies.
+
+## Components Delivered
+
+### Component 6.1 — Human Setup & Release Preparation
+- **What was built:** Production-ready macOS icon generation pipeline using Pillow and `iconutil`. Complete iconset with all required PNG sizes (16×16 through 512×512 plus @2x retina variants). Verified product name "VoidBreaker" consistency across all user-facing surfaces (window title, main menu, persistence directory).
+- **Key files:** `scripts/generate_app_icon.py`, `assets/icon.icns`, `assets/VoidBreaker.iconset/`
+- **Design decisions:** Introduced a reproducible script rather than manual icon export for deterministic, automatable future updates. Preserved existing `asterax` internal package namespace while validating only player-visible naming.
+
+### Component 6.2 — PyInstaller Configuration & Build
+- **What was built:** Full PyInstaller packaging configuration via `VoidBreaker.spec` for macOS `.app` output with hidden import management, asset bundling (sprites, sounds, fonts, icon), macOS `Info.plist` metadata (bundle identifier, version 1.0.0, minimum OS 13.0), and windowed mode. Automated build pipeline script `scripts/build_app.sh`. Runtime-aware asset path resolution utility `app/src/utils/paths.py` with `get_asset_path()` function handling both source execution and PyInstaller bundle execution (`sys._MEIPASS`). Refactored all asset loaders (8 files) to use centralised path resolution.
+- **Key files:** `VoidBreaker.spec`, `scripts/build_app.sh`, `app/src/utils/paths.py`, `app/src/utils/__init__.py`; modified: `app/src/config/game_config.py`, `app/src/config/enemy_config.py`, `app/src/entities/projectile.py`, `app/src/entities/pickups.py`, `app/src/rendering/particle_system.py`, `app/src/states/combat.py`, `app/src/states/shop.py`, `app/src/window.py`
+- **Design decisions:** Used a dedicated `get_asset_path()` utility instead of scattered `Path(__file__).parents[...]` references. Hidden import filtering at build time avoids environment-specific `ModuleNotFoundError`. `--onedir` bundle format for easier debugging and inspection. Post-build normalisation step for Arcade `VERSION` artifact packaging.
+
+### Component 6.3 — DMG Creation & Distribution Packaging
+- **What was built:** Automated DMG packaging via `scripts/create_dmg.sh` with dual-path strategy: `create-dmg` when available for polished Finder layout, automatic `hdiutil` fallback for dependency-free builds. DMG contains `VoidBreaker.app` and `Applications` symlink for drag-to-install UX. `UDZO` compression format for broad macOS compatibility. Artifact verification (`hdiutil verify`) and size reporting. Documented future macOS code signing and notarisation workflow.
+- **Key files:** `scripts/create_dmg.sh`, `docs/code-signing-guide.md`
+- **Design decisions:** Capability-detection packaging keeps builds reproducible on clean macOS environments without Homebrew dependencies. `UDZO` format chosen over `ULFO` for wider OS version support. Code signing deferred to post-v1.0 with documented workflow for future releases.
+
+### Component 6.4 — Performance Validation
+- **What was built:** Automated profiling workflow `scripts/profile_performance.py` for source-mode and packaged-mode performance validation. Environment-gated stress-mode launch wiring in `app/src/main.py`. Deterministic stress-scene in `CombatPhaseState` with peak entity counts (100 asteroids, 10 enemies, 15 player projectiles, 20 enemy projectiles, 40 pickups, 300 particles). Frame-time metric capture in-process and memory sampling out-of-process via `psutil`. Linear RSS slope leak detection with 1 MB/min threshold.
+- **Key files:** `scripts/profile_performance.py`, `docs/performance-report.md`, `docs/performance-data/`; modified: `app/src/main.py`, `app/src/states/combat.py`
+- **Design decisions:** Profiling as an env-gated runtime mode keeps measurement code out of normal gameplay paths. Deterministic scene generation (`perf_seed`) ensures comparable entity layouts across runs. Out-of-process memory sampling via `psutil` minimises intrusion on frame timing measurements.
+
+### Component 6.5 — Final QA & Cross-Platform Smoke Test
+- **What was built:** Comprehensive QA checklist with 13 categories, 100+ individual test cases, and severity ratings (P0–P4). Full automated validation suite execution (evals, pytest, black, isort). Human playthrough verification of all game systems in packaged app. Catalogued 3 known issues with severity ratings and workarounds. Fixed black formatting drift in 3 source files.
+- **Key files:** `docs/qa-checklist.md`; reformatted: `app/src/entities/enemy_ship.py`, `app/src/states/shop.py`
+- **Design decisions:** Checklist organised by game subsystem with standard QA severity ratings for actionable triage. Included both granular per-system tests and a consolidated end-to-end game loop smoke test. Cross-platform testing (Windows/Linux) skipped as optional for v1.0.
+
+### Component 6.6 — Release Documentation & E2E Verification
+- **What was built:** Complete user-facing `README.md` rewrite covering installation (with Gatekeeper workaround), system requirements (macOS 13+, Apple Silicon or Intel, 512 MB disk, OpenGL 3.3+), controls reference, gameplay overview (combat, shop, upgrades, insurance, scoring), game modes, building from source, known issues, and credits. Phase 6 summary document. All 6 component overview documents. Final E2E verification of all quality gates. Local `v1.0.0` annotated git tag.
+- **Key files:** `README.md` (full rewrite), `docs/phase-6-summary.md`, `docs/components/phase-6-component-6-6-overview.md`; updated: `docs/implementation-context-phase-6.md`
+- **Design decisions:** README structured as user-first documentation with plain language for installation and gameplay, developer-targeted "Building from Source" section separated. Referenced known issues from QA checklist with user-friendly workarounds. Git tag created locally — pushing requires human approval.
+
+## Architecture & Integration
+
+Phase 6 added a packaging and distribution layer atop the complete Phase 5 game. The key architectural addition is `app/src/utils/paths.py`, which provides a centralised `get_asset_path()` function that detects whether the application is running from source (`Path(__file__).parents[...]` resolution) or from a PyInstaller bundle (`sys._MEIPASS` base path). All 8 asset-loading modules were refactored to use this single utility, eliminating scattered path construction. `VoidBreaker.spec` defines the complete PyInstaller configuration including hidden imports (filtered to installed modules at build time), data file mappings for all asset directories, and macOS `Info.plist` metadata. The build pipeline (`scripts/build_app.sh`) handles venv activation, clean builds, post-build Arcade `VERSION` artifact normalisation, and output verification. Distribution packaging (`scripts/create_dmg.sh`) wraps the `.app` bundle in a DMG with Applications symlink. Performance validation uses environment-gated stress-mode activation (`VOIDBREAKER_PERF_MODE`) to inject a deterministic peak-load scene into `CombatPhaseState` without affecting normal gameplay paths.
+
+## Deviations from Spec
+
+- Cross-platform smoke testing (Windows/Linux) was skipped — no cross-platform build environment was available. Documented as optional for v1.0.
+- DMG packaging used `hdiutil` fallback rather than `create-dmg` due to the tool not being installed. Result is fully functional but without custom icon-positioned Finder layout polish.
+- The 30-minute memory leak validation was executed on packaged-mode only. Source-mode memory validation used a shorter 120-second representative run.
+- Hidden imports in `VoidBreaker.spec` are filtered to installed modules at build time rather than using an unconditional static list, preventing environment-specific `ModuleNotFoundError` failures.
+
+## Dependencies & Configuration
+
+- **New dev dependencies:** `pyinstaller>=6.0` and `psutil>=6.0` added to `project.optional-dependencies.dev` in `pyproject.toml`.
+- **New modules:** `app/src/utils/paths.py` (runtime-aware asset path resolution), `app/src/utils/__init__.py`.
+- **New scripts:** `scripts/build_app.sh`, `scripts/create_dmg.sh`, `scripts/profile_performance.py`, `scripts/generate_app_icon.py`.
+- **New config files:** `VoidBreaker.spec` (PyInstaller configuration).
+- **New asset files:** `assets/icon.icns`, `assets/VoidBreaker.iconset/` (icon PNG variants).
+- **New documentation:** `docs/qa-checklist.md`, `docs/performance-report.md`, `docs/code-signing-guide.md`, `docs/phase-6-summary.md`, 6 component overview files.
+
+## Known Limitations
+
+- Unsigned app triggers macOS Gatekeeper warning — users must right-click → Open → confirm on first launch. Code signing workflow documented in `docs/code-signing-guide.md` for future releases.
+- DMG uses plain `hdiutil` layout without custom Finder window positioning. Installing `create-dmg` enables polished layout.
+- Background music remains a documented no-op (`AudioManager.play_music()` stub). All 17 sound effects are fully functional.
+- Cross-platform builds (Windows/Linux) not tested or packaged for v1.0.
+
+## Phase Readiness
+
+All six components passed their acceptance criteria. Quality gates confirmed: `scripts/evals.py` — pass (no TODO/FIXME, all docstrings present), `pytest` — 341 tests (77% coverage), `black --check` — pass (58 files clean), `isort --check-only` — pass. Build artifacts verified: `dist/VoidBreaker.app` (~108 MB), `dist/VoidBreaker.dmg` (~50 MB). Performance validated: stable 60 FPS at peak entity count, no memory leaks over 30-minute session. Phase 6 is complete. VoidBreaker v1.0.0 is ready for distribution.
