@@ -1,9 +1,11 @@
 # AI
-# .claude/
-# .github/
+.claude/
+.github/
 
 # Other
 .DS_Store
+docs/
+settings.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

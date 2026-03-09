@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "WebSearch",
-      "WebFetch(domain:store.steampowered.com)",
-      "WebFetch(domain:macintoshgarden.org)"
-    ]
-  }
-}
