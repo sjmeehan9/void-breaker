@@ -13,7 +13,8 @@ _TITLE_TOP_OFFSET: Final[float] = 80.0
 _CONTENT_TOP_OFFSET: Final[float] = 170.0
 _CONTENT_BOTTOM_MARGIN: Final[float] = 80.0
 _LINE_HEIGHT: Final[float] = 34.0
-_SECTION_GAP: Final[float] = 22.0
+_HEADING_BODY_GAP: Final[float] = 48.0
+_SECTION_GAP: Final[float] = 36.0
 _CONTROL_COLUMN_LEFT: Final[float] = 0.24
 _CONTROL_COLUMN_RIGHT: Final[float] = 0.66
 _ACTION_KEY_SEPARATOR: Final[str] = "::"
@@ -194,7 +195,7 @@ class HowToPlayState(BaseState):
                 28,
                 anchor_x="left",
             )
-            y -= _LINE_HEIGHT
+            y -= _HEADING_BODY_GAP
 
             text_measure = arcade.Text(
                 text=body,
@@ -236,7 +237,7 @@ class HowToPlayState(BaseState):
         )
         sections_height = 0.0
         for heading, body in self._gameplay_sections:
-            sections_height += _LINE_HEIGHT
+            sections_height += _HEADING_BODY_GAP
             text_measure = arcade.Text(
                 text=body,
                 x=0,

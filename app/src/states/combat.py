@@ -8,6 +8,7 @@ import os
 import random
 import statistics
 import time
+from dataclasses import replace as dataclass_replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
@@ -33,6 +34,7 @@ from asterax.app.src.config.game_config import (
 )
 from asterax.app.src.config.game_config import GameState as RunGameState
 from asterax.app.src.config.game_config import (
+    InsuranceState,
     RunStats,
     ShipState,
 )
@@ -92,6 +94,8 @@ class CombatPhaseState(BaseState):
         initial_score: int = 0,
         initial_currency: int = 0,
         initial_run_stats: RunStats | None = None,
+        initial_upgrade_levels: dict[str, int] | None = None,
+        initial_insurance: InsuranceState | None = None,
         is_practice: bool = False,
         practice_asteroids_only: bool = False,
         practice_infinite_shields: bool = False,
@@ -122,6 +126,11 @@ class CombatPhaseState(BaseState):
         self._initial_score = max(0, initial_score)
         self._initial_currency = max(0, initial_currency)
         self._initial_run_stats = initial_run_stats
+        self._initial_upgrade_levels = (
+            dict(initial_upgrade_levels) if initial_upgrade_levels else None
+        )
+        self._initial_insurance = initial_insurance
+        self._upgrade_levels: dict[str, int] = {}
         self.accumulator = 0.0
         self._game_over_triggered = False
         self._game_over_delay_remaining = 0.0
@@ -184,6 +193,10 @@ class CombatPhaseState(BaseState):
         self.entity_manager.buff_pickups.clear()
         self.entity_manager.asteroids.clear()
         self.buff_manager.clear_all(ship)
+        if self._initial_insurance is not None:
+            self.game_state.insurance = self._initial_insurance
+        if self._initial_upgrade_levels:
+            self._apply_upgrade_levels(ship, self._initial_upgrade_levels)
         if self._practice_infinite_shields:
             ship.shields = ship.max_shields
         self._difficulty_preset = self._resolve_difficulty_preset()
@@ -342,6 +355,40 @@ class CombatPhaseState(BaseState):
                 return
             self._transition_to_shop()
 
+    def _apply_upgrade_levels(self, ship: PlayerShip, levels: dict[str, int]) -> None:
+        """Restore upgrade levels and apply effective stats to the player ship.
+
+        Args:
+            ship: The active player ship to receive upgraded physics.
+            levels: Mapping of upgrade IDs to their purchased levels.
+        """
+        from asterax.app.src.managers.upgrade_manager import UpgradeManager
+
+        temp_ship_state = ShipState()
+        temp_game_state = RunGameState(
+            shields=self.game_state.shields,
+            max_shields=self.game_state.max_shields,
+        )
+        upgrade_mgr = UpgradeManager(temp_ship_state, temp_game_state)
+        upgrade_mgr.set_levels(levels)
+        self._upgrade_levels = upgrade_mgr.get_all_levels()
+
+        upgraded_config = dataclass_replace(
+            PHYSICS_CONFIG,
+            base_thrust=temp_ship_state.effective_thrust,
+            base_turn_rate=temp_ship_state.effective_turn_rate,
+            base_fire_rate=temp_ship_state.effective_fire_rate,
+            base_projectile_speed=temp_ship_state.effective_projectile_speed,
+            base_projectile_range=temp_ship_state.effective_projectile_range,
+            base_damage=temp_ship_state.effective_damage,
+            max_shields=temp_ship_state.effective_max_shields,
+        )
+        ship.physics_config = upgraded_config
+        ship.max_shields = temp_ship_state.effective_max_shields
+        ship.shields = temp_ship_state.effective_max_shields
+        self.game_state.max_shields = temp_ship_state.effective_max_shields
+        self.game_state.shields = temp_ship_state.effective_max_shields
+
     def _transition_to_shop(self) -> None:
         """Switch into ShopPhase with snapshots of current run and ship state."""
         ship = self.player_ship
@@ -349,15 +396,21 @@ class CombatPhaseState(BaseState):
         self._play_level_clear_sound()
         from asterax.app.src.states.shop import ShopPhaseState
 
+        ship_state = ShipState(
+            position=(ship.center_x, ship.center_y),
+            velocity=(ship.velocity_x, ship.velocity_y),
+            angle=ship.angle,
+        )
+        for attr_name, level_value in self._upgrade_levels.items():
+            level_attr = f"{attr_name}_level"
+            if hasattr(ship_state, level_attr):
+                setattr(ship_state, level_attr, level_value)
+
         self.state_machine.switch_state(
             ShopPhaseState(
                 self.state_machine,
                 game_state=self.game_state,
-                ship_state=ShipState(
-                    position=(ship.center_x, ship.center_y),
-                    velocity=(ship.velocity_x, ship.velocity_y),
-                    angle=ship.angle,
-                ),
+                ship_state=ship_state,
             )
         )
 
