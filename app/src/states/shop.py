@@ -452,6 +452,8 @@ class ShopPhaseState(BaseState):
                 initial_score=self.game_state.score,
                 initial_currency=self.game_state.currency,
                 initial_run_stats=self.game_state.run_stats,
+                initial_upgrade_levels=self.upgrade_manager.get_all_levels(),
+                initial_insurance=self.game_state.insurance,
             )
         )
 
